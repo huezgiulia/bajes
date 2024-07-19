@@ -149,7 +149,7 @@ def __get_waveform_generator__(approx, seglen, srate):
     else:
         # if enters here LALSimTD or LALSimFD is in approx name
         lal_approx  = approx.split('-')
-        if (lal_approx[0]!='LALSimTD') or (lal_approx[0]!='LALSimFD'):
+        if lal_approx[0]!='LALSimFD' and lal_approx[0]!='LALSimTD':
             logger.error("Wrong syntax for LAL approximant, please use: [ LALSimTD or LALSimFD ]-[ LAL approx name ].\nThe full list of LAL approximants can be found at https://lscsoft.docs.ligo.org/lalsuite/")
             raise AttributeError("Wrong syntax for LAL approximant, please use: [ LALSimTD or LALSimFD ]-[ LAL approx name ].\nThe full list of LAL approximants can be found at https://lscsoft.docs.ligo.org/lalsuite/")
 
@@ -267,7 +267,7 @@ class Waveform(object):
         self.wave_func, self.domain = __get_waveform_generator__(self.approx, self.seglen, self.srate)
 
 
-    def compute_hphc(self, params, roq=None):
+    def compute_hphc(self, params, roq=None, freqs=None):
         """ Compute waveform for compact binary coalescences
             --------
             params : dictionary
@@ -377,8 +377,11 @@ class Waveform(object):
             params['cos_iota'] = np.cos(params['iota'])
 
         # compute hplus and hcross according with approx
-        hp , hc = self.wave_func(self.freqs, params)
 
+        if freqs is not None:    hp , hc = self.wave_func(freqs, params)
+        else:           hp , hc = self.wave_func(self.freqs, params)
+
+        
         # if hp,hc is None, return Nones
         if not any(hp):
             return PolarizationTuple()
@@ -389,7 +392,11 @@ class Waveform(object):
 
         elif((self.domain == 'freq') and (roq==None)):
             # Time-shifting the amplitude peak to the center of the data segment (seglen/2). In the ROQ case, this is done separately.
-            hp = hp * np.exp(1j*np.pi*self.freqs*self.seglen)
-            hc = hc * np.exp(1j*np.pi*self.freqs*self.seglen)
+            if freqs is not None:    
+                hp = hp * np.exp(1j*np.pi*freqs*self.seglen)
+                hc = hc * np.exp(1j*np.pi*freqs*self.seglen)
+            else:
+                hp = hp * np.exp(1j*np.pi*self.freqs*self.seglen)
+                hc = hc * np.exp(1j*np.pi*self.freqs*self.seglen)
 
         return PolarizationTuple(plus=hp, cross=hc)

@@ -8,7 +8,7 @@ from ..utils import compute_lambda_tilde, compute_delta_lambda
 
 __url__ = 'https://pypi.org/project/mlgw/'
 try:
-    import mlgw.GW_generator as generator
+    import mlgw as generator
 except ImportError:
     warnings.warn("Unable to import MLGW package. Please see related documentation at: {}".format(__url__))
     logger.warning("Unable to import MLGW package. Please see related documentation at: {}".format(__url__))

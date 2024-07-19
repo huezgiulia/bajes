@@ -63,7 +63,7 @@ def make_spectrogram_plot(ifo, time, inj_strain, noise, f_min, outdir):
         pass
 
 
-def make_injection_plot(ifo, time, inj_strain, wave_strain, noise, f_min, outdir):
+def make_injection_plot(ifo, time, inj_strain, wave_strain, noise, f_min, outdir, alpha=0.4):
 
     try:
         fig = plt.figure(figsize=(12,9))
@@ -93,7 +93,7 @@ def make_injection_plot(ifo, time, inj_strain, wave_strain, noise, f_min, outdir
     dt                   = np.median(np.diff(time))
     seglen               = time[-1]-time[0]
     freq_proj, hfft_proj = fft(wave_strain, dt)
-    freq_inj, hfft_inj   = fft(inj_strain*tukey(len(inj_strain),alpha=self.tukey), dt)
+    freq_inj, hfft_inj   = fft(inj_strain*tukey(len(inj_strain),alpha=alpha), dt)
 
     try:
         fig = plt.figure(figsize=(12,9))
@@ -358,12 +358,13 @@ class Injection(object):
                     self.dets[ifo].store_measurement(series, noises[ifo])
                     # compute the data
                     if fdinj_flag:
+                        self.freqs[ifo] = np.linspace(0,self.srate/2.,int(self.srate*self.seglen//2)+1)
                         _wave   = self.dets[ifo].project_fdwave(signal_template, params, wave.domain)
                         _amp    = np.abs(_wave)
                         _phi    = np.unwrap(np.angle(_wave))
                         _amp    = np.interp(self.freqs[ifo], self.dets[ifo].freqs, _amp, right=0., left=0.)
                         _phi    = np.interp(self.freqs[ifo], self.dets[ifo].freqs, _phi, right=0., left=0.)
-                        self.wave_strains[ifo] = _amp*np.exp(1j*phi)
+                        self.wave_strains[ifo] = _amp*np.exp(1j*_phi)
                     else:
                         self.wave_strains[ifo]  = self.dets[ifo].project_tdwave(signal_template, params, wave.domain)
 
@@ -445,7 +446,7 @@ class Injection(object):
                                self.times[ifo], self.inj_strains[ifo])
 
                 # plots
-                make_injection_plot(ifo, self.times[ifo] , self.inj_strains[ifo], self.wave_strains[ifo], self.noises[ifo], self.f_min, outdir )
+                make_injection_plot(ifo, self.times[ifo] , self.inj_strains[ifo], self.wave_strains[ifo], self.noises[ifo], self.f_min, outdir, alpha=self.tukey)
                 make_spectrogram_plot(ifo, self.times[ifo], self.inj_strains[ifo], self.noises[ifo], self.f_min, outdir)
 
 def bajes_inject_parser():

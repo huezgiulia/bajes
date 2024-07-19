@@ -27,6 +27,10 @@ def initialize_gwlikelihood_kwargs(opts):
         logger.error("f-min, f-max, srate and seglen cannot be None. Please provide a value for all these parameters.")
         raise ValueError("f-min, f-max, srate and seglen cannot be None. Please provide a value for all these parameters.")
 
+    if opts.f_mrg > opts.f_max:
+        logger.error("Requested f_mrg greater than f_max.")
+        raise ValueError("Requested f_mrg greater than f_max.")
+    
     if opts.f_max > opts.srate/2.:
         logger.error("Requested f_max greater than f_Nyquist=sampling_rate/2, which will induce information loss, see https://en.wikipedia.org/wiki/Nyquist–Shannon_sampling_theorem. Please use f_max <= f_Nyquist.")
         raise ValueError("Requested f_max greater than f_Nyquist=sampling_rate/2, which will induce information loss, see https://en.wikipedia.org/wiki/Nyquist–Shannon_sampling_theorem. Please use f_max <= f_Nyquist.")
@@ -228,6 +232,8 @@ def initialize_gwlikelihood_kwargs(opts):
 
     # set fiducial waveform params for binning
     if opts.binning :
+        l_kwargs['eps'] = opts.eps
+        l_kwargs['f_mrg'] = opts.f_mrg
 
         if opts.fiducial == None:
             opts.fiducial = opts.outdir + '/../params.ini'

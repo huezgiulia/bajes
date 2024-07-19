@@ -416,6 +416,8 @@ def parse_setup_options():
     # GWBinning options
     parser.add_argument('--use-binning',       dest='binning',         default=False,                     action="store_true",  help='Frequency binning flag')
     parser.add_argument('--fiducial',          dest='fiducial',        default=None,      type=str,                             help='Path to parameters file for gwbinning')
+    parser.add_argument('--eps',               dest='eps',             default=0.5,       type=float,                           help='Epsilon parameter for relative binning')
+    parser.add_argument('--f-mrg',             dest='f_mrg',           default=0,         type=float,                           help='Cut frequency for IM+PM')
 
     #
     # KN OPTIONS

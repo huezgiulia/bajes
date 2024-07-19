@@ -13,6 +13,8 @@ except ImportError:
     logger.warning("Unable to import LALSimulation package. Please see related documentation at: {}".format(__url__))
     pass
 
+from lal import REAL8Vector, CreateREAL8Vector  
+
 class lal_wrapper(object):
 
     def __init__(self, approx, domain, **kwargs):
@@ -27,7 +29,7 @@ class lal_wrapper(object):
         if self.domain == 'time' :
             return generate_timedomain_waveform(self.approx, params)
         elif self.domain == 'freq' :
-            fr, hp, hc  = generate_freqdomain_waveform(self.approx, params)
+            fr, hp, hc  = generate_freqdomain_waveform(self.approx, params, freqs)
             indxs       = np.where((fr>=params['f_min'])&(fr<=params['f_max']))
             return hp[indxs], hc[indxs]
         else:
@@ -82,7 +84,7 @@ def generate_timedomain_waveform(approx, params):
     hc = hc.data.data
     return np.array(hp) , np.array(hc)
 
-def generate_freqdomain_waveform(approx, params):
+def generate_freqdomain_waveform(approx, params, freqs):
     """
         SimInspiralChooseFDWaveform:
         COMPLEX16FrequencySeries **hptilde,     /**< FD plus polarization */
@@ -115,22 +117,41 @@ def generate_freqdomain_waveform(approx, params):
     if params['lambda2'] != 0. :
         lalsim.SimInspiralWaveformParamsInsertTidalLambda2(LALDict, params['lambda2'])
 
+    if not isinstance(freqs, REAL8Vector):
+        old_frequency_array = freqs.copy()
+        freqs = CreateREAL8Vector(len(old_frequency_array))
+        freqs.data = old_frequency_array
+
+    hp, hc = lalsim.SimInspiralChooseFDWaveformSequence(params['phi_ref'], 
+                                                        lalsim.lal.MSUN_SI*params['mtot']*params['q']/(1.+params['q']), 
+                                                        lalsim.lal.MSUN_SI*params['mtot']/(1.+params['q']), 
+                                                        params['s1x'],params['s1y'],params['s1z'], 
+                                                        params['s2x'],params['s2y'],params['s2z'],
+                                                        params['f_min'], params['distance']*1e6*lalsim.lal.PC_SI, params['iota'],
+                                                        LALDict, approx, freqs)
+    hp      = hp.data.data
+    hc      = hc.data.data
+    freqs   = old_frequency_array
+
+    '''
     hp,hc = lalsim.SimInspiralChooseFDWaveform(lalsim.lal.MSUN_SI*params['mtot']*params['q']/(1.+params['q']),
-                                               lalsim.lal.MSUN_SI*params['mtot']/(1.+params['q']),
-                                               params['s1x'],params['s1y'],params['s1z'],
-                                               params['s2x'],params['s2y'],params['s2z'],
-                                               params['distance']*1e6*lalsim.lal.PC_SI,
-                                               params['iota'],
-                                               params['phi_ref'],
-                                               0.0, params['eccentricity'], 0.0,
-                                               1./params['seglen'],
-                                               params['f_min'],
-                                               params['f_max'],
-                                               params['f_min'],
-                                               LALDict,
-                                               approx)
+                                            lalsim.lal.MSUN_SI*params['mtot']/(1.+params['q']),
+                                            params['s1x'],params['s1y'],params['s1z'],
+                                            params['s2x'],params['s2y'],params['s2z'],
+                                            params['distance']*1e6*lalsim.lal.PC_SI,
+                                            params['iota'],
+                                            params['phi_ref'],
+                                            0.0, params['eccentricity'], 0.0,
+                                            1./params['seglen'],
+                                            params['f_min'],
+                                            params['f_max'],
+                                            params['f_min'],
+                                            LALDict,
+                                            approx)
     hp      = hp.data.data
     hc      = hc.data.data
     L       = len(hp)
-    freq    = np.arange(L)/params['seglen']
-    return freq, np.array(hp, dtype=complex) , np.array(hc, dtype=complex)
+    freqs    = np.arange(L)/params['seglen']
+    '''
+
+    return freqs, np.array(hp, dtype=complex) , np.array(hc, dtype=complex)

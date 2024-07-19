@@ -205,7 +205,6 @@ def read_gwosc(ifo, GPSstart, GPSend, srate=4096, version=None):
                                          sample_rate=srate,
                                          version=version,
                                          verbose=True,
-                                         tag='CLN',
                                          format='hdf5',
                                          host='https://www.gw-openscience.org')
 
