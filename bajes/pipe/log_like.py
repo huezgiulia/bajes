@@ -232,8 +232,9 @@ class KNLikelihood(Likelihood):
 
         # initialize lightcurve model
         from ..obs.kn.lightcurve import Lightcurve
-        light_kwargs    = {'v_min': v_min, 'n_v': n_v, 't_start': t_start}
-        self.light      = Lightcurve(times=t_axis, lambdas=filters.lambdas, approx=approx, **light_kwargs)
+        light_kwargs    = {'v_min': v_min, 'n_v': n_v, 't_start': t_start , 'xkn_config' : kwargs['xkn_config'], 'mkn_config' : kwargs['mkn_config']}
+        #print( 'qua', light_kwargs)
+        self.light      = Lightcurve(times=t_axis, lambdas=filters.lambdas, approx=approx, **light_kwargs)  #qua dentro **light_kwargs ho classe 
 
         # calib_sigma flag
         self.use_calib_sigma = use_calib_sigma_lc
@@ -241,13 +242,29 @@ class KNLikelihood(Likelihood):
     def log_like(self, params):
 
         # compute lightcurve
+
+        #print('time array inside light', self.light.times)
+        #print('self.light.times+params[t_gps]', (self.light.times+params['t_gps']))
         mags    = self.light.compute_mag(params)
+        #print('mags key da compute megnitude (xkn)', mags)  #  -->  questo dizionario ha come chiavi le lambda!
         logL    = 0.
 
         if self.use_calib_sigma:
+            for bi in self.filters.bands:  #  -->  questo invece usa i nomi delle bande!
+                lambda_bi = int(self.filters.lambdas[bi]*1e9)
+                #print('lambda_bi',lambda_bi)
+                #print('self.filters.times[bi]', (self.filters.times[bi]))  # sono quelli dei dati!! VANNO BENE QUESTI
+                #print('self.light.times+params[t_gps]', (self.light.times))
+                #print('mags[lambda_bi]', (mags[lambda_bi])) 
 
-            for bi in self.filters.bands:
-                interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[bi])
+            ### DEVO INTERPOLARE SU ARRAY TEMPI DEI DATI PER FARE LA LIKELIHOOD !!!  
+
+                ## MEMO: se non metti nel comando bajes_setup --ntime = t_num (di xkn), qui la riga con np.interp da errore perche' 
+                #        l'array dei tempi di light e' mooolto piu' lungo (defaul value e' 400) rispetto all'array delle magnitudini (mags[lambda_bi])
+                #        che invece e' calcolato rispetto all'array dei dati!
+
+                #interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
+                interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
                 sigma2      = self.filters.mag_stdev[bi]**2. + np.exp(params['log_sigma_mag_{}'.format(bi)])**2.
                 residuals   = (((self.filters.magnitudes[bi]-interp_mag))**2.)/sigma2
                 logL       += -0.5*(residuals + np.log(2*np.pi*sigma2)).sum()
@@ -255,7 +272,9 @@ class KNLikelihood(Likelihood):
         else:
 
             for bi in self.filters.bands:
-                interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[bi])
+                lambda_bi = int(self.filters.lambdas[bi]*1e9)
+                #interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
+                interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
                 residuals   = ((self.filters.magnitudes[bi]-interp_mag)/self.filters.mag_stdev[bi])**2.
                 logL       += -0.5*residuals.sum() + self.logNorm
 

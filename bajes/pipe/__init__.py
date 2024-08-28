@@ -462,6 +462,9 @@ def parse_setup_options():
     parser.add_argument('--t-start-grid', dest='init_t',      type=float,   default=1.,         help='Initial value of time axis for model evaluation, default 1s')
     parser.add_argument('--t-scale',      dest='t_scale',     type=str,  default='linear',   help='Scale of time axis: linear, log or mixed')
 
+    # Xkn
+    parser.add_argument('--xkn',       dest='xkn',    type=str,  default='',     help='path to config.ini file for defining the kn model')
+
     return parser.parse_args()
 
 # initialization functions for run
@@ -572,6 +575,7 @@ def init_model(opts):
         # look for inf.pkl in outdir
         if os.path.exists(opts.outdir+'/inf.pkl'):
             pr, lk  = read_model_from_pickle(opts.outdir+'/inf.pkl')
+            
         # else error
         else:
             logger.error("Unable to initialize model. None is given.")
@@ -596,7 +600,6 @@ def init_model(opts):
         pr, lk      = read_model_from_paths(opts.prior, opts.like, opts.priorgrid)
 
     else:
-
         # get inference pickle
         pr, lk      = read_model_from_pickle(opts.inf)
 
@@ -795,7 +798,7 @@ def get_likelihood_and_prior(opts):
             from .log_like import KNLikelihood
 
             # read arguments for likelihood
-            l_kwas, pr = initialize_knlikelihood_kwargs(opts)
+            l_kwas, pr = initialize_knlikelihood_kwargs(opts)  
             l_kwas['priors'] = pr
             logger.info("Initializing KN likelihood ...")
             likes.append(KNLikelihood(**l_kwas))
