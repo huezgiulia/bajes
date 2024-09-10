@@ -1,7 +1,6 @@
 from __future__ import division, unicode_literals
 import numpy as np
 
-print('blaaa')
 
 def dereddening_CCM(wave, EBV=0.105, R_V=3.1):
     '''

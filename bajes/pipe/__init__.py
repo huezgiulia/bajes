@@ -430,7 +430,7 @@ def parse_setup_options():
 
     # Photometric bands information
     parser.add_argument('--band',         dest='bands',       type=str,  action="append",    default=[], help='Name of photometric bands used in the data')
-    parser.add_argument('--lambda',       dest='lambdas',     type=float,   action="append",    default=[], help='Wave-length of photometric bands used in the data [nm]')
+    parser.add_argument('--lambda',       dest='lambdas',     type=float,   action="append",    default=[], help='Wave-length of photometric bands used in the data [m]')
     parser.add_argument('--use-dereddening',  dest='dered',   default=True,  action="store_true",    help='Apply deredding to given data filters')
 
     # Prior bounds

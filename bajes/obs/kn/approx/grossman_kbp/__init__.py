@@ -18,7 +18,7 @@ from .model import KorobkinBarnesGrossmanPeregoEtAl, Shell, Heating, initialize_
 class korobkin_barnes_grossman_perego_et_al_isotropic_wrapper(KorobkinBarnesGrossmanPeregoEtAl):
 
     def __init__(self, times, lambdas, v_min=1.e-7, n_v=400, t_start=1., **kwargs):
-
+        
         # initialize angular axis
         # obs. the inclinations angle is divided in 12 slices
         n_rays = 12

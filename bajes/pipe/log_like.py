@@ -251,20 +251,16 @@ class KNLikelihood(Likelihood):
 
         if self.use_calib_sigma:
             for bi in self.filters.bands:  #  -->  questo invece usa i nomi delle bande!
-                lambda_bi = int(self.filters.lambdas[bi]*1e9)
-                #print('lambda_bi',lambda_bi)
-                #print('self.filters.times[bi]', (self.filters.times[bi]))  # sono quelli dei dati!! VANNO BENE QUESTI
-                #print('self.light.times+params[t_gps]', (self.light.times))
-                #print('mags[lambda_bi]', (mags[lambda_bi])) 
-
-            ### DEVO INTERPOLARE SU ARRAY TEMPI DEI DATI PER FARE LA LIKELIHOOD !!!  
-
-                ## MEMO: se non metti nel comando bajes_setup --ntime = t_num (di xkn), qui la riga con np.interp da errore perche' 
-                #        l'array dei tempi di light e' mooolto piu' lungo (defaul value e' 400) rispetto all'array delle magnitudini (mags[lambda_bi])
-                #        che invece e' calcolato rispetto all'array dei dati!
-
-                #interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
-                interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
+                
+                if params['xkn_config'] == None:  # modello di bajes
+                    lambda_bi = bi
+                    interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
+                
+                else: # modello xkn
+                    # trasformo keys da nomi bande (bajes) a lambda [nm] (xkn)  DA FARE SOLO QUANDO USO MODELLI DI XKN!!!
+                    lambda_bi = int(self.filters.lambdas[bi]*1e9)
+                    interp_mag = mags[lambda_bi]
+                
                 sigma2      = self.filters.mag_stdev[bi]**2. + np.exp(params['log_sigma_mag_{}'.format(bi)])**2.
                 residuals   = (((self.filters.magnitudes[bi]-interp_mag))**2.)/sigma2
                 logL       += -0.5*(residuals + np.log(2*np.pi*sigma2)).sum()
@@ -272,9 +268,17 @@ class KNLikelihood(Likelihood):
         else:
 
             for bi in self.filters.bands:
-                lambda_bi = int(self.filters.lambdas[bi]*1e9)
-                #interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
-                interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
+
+                if params['xkn_config'] == None:  # modello di bajes
+                    print('no interp')
+                    lambda_bi = bi
+                    interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
+                
+                else: # modello xkn
+                    # trasformo keys da nomi bande (bajes) a lambda [nm] (xkn)  DA FARE SOLO QUANDO USO MODELLI DI XKN!!!
+                    lambda_bi = int(self.filters.lambdas[bi]*1e9)
+                    interp_mag = mags[lambda_bi]
+                
                 residuals   = ((self.filters.magnitudes[bi]-interp_mag)/self.filters.mag_stdev[bi])**2.
                 logL       += -0.5*residuals.sum() + self.logNorm
 

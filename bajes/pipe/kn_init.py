@@ -68,11 +68,12 @@ def initialize_knlikelihood_kwargs(opts):
     
 
     # vedi se devi inizializzare la classe MKN di xkn con config.ini file (AGGIUNTO IOOOO!) MEGLIO FARE DOPO!!!
-    from bajes.obs.kn.approx.xkn import MKN, MKNConfig
+    from xkn import MKN, MKNConfig
     if not opts.xkn:
             
             logger.info("No config file was passed for MKN inizialization.")
-
+            l_kwargs['mkn_config']          = None                                                                 
+            l_kwargs['xkn_config']          = None
     else:
 
         config_path  = os.path.abspath(opts.xkn)
@@ -86,7 +87,6 @@ def initialize_knlikelihood_kwargs(opts):
 
             logger.info("Initialize MKN object from the read config-parameters")
             mkn = MKN(*mkn_config.get_params(), log_level="WARNING") 
-            #print("mkn param all'inizializzazione", *mkn_config.get_params())
             l_kwargs['xkn_config']          = mkn          # messo tu per portare parametri dentro config file!
         
         else: 
@@ -106,7 +106,6 @@ def initialize_knlikelihood_kwargs(opts):
     # define priors
     priors = initialize_knprior(approx=opts.kn_approx, bands=opts.bands,
                                 mej_bounds=mej_bounds, vel_bounds=vel_bounds, opac_bounds=opac_bounds, t_gps=opts.t_gps,
-                                #xkn_class=l_kwargs['xkn_config'], mkn_config=l_kwargs['mkn_config'],            # aggiunta io questa riga (FORSE NON SERVE !)
                                 dist_max=opts.dist_max, dist_min=opts.dist_min,
                                 eps0_max=opts.eps_max,  eps0_min=opts.eps_min,
                                 dist_flag=opts.dist_flag, log_eps0_flag=opts.log_eps_flag,
@@ -129,8 +128,6 @@ def initialize_knprior(approx,
                        vel_bounds,
                        opac_bounds,
                        t_gps,
-                       #xkn_class,                                  # aggiunta io questa riga
-                       #mkn_config,                                 # aggiunta io questa riga
                        dist_max             = None,
                        dist_min             = None,
                        eps0_max             = None,
@@ -162,15 +159,13 @@ def initialize_knprior(approx,
     elif 'GrossmanKBP-2-NRfits' in approx:      comps = ['dyn', 'wind']
     elif approx=='GrossmanKBP-3-isotropic':     comps = ['isotropic1', 'isotropic2', 'isotropic3']
     elif approx=='GrossmanKBP-3-anisotropic':   comps = ['isotropic', 'equatorial', 'polar']
-    elif approx=='Xkn-1':                       comps = ['isotropic']    # aggiunta io questa riga!
+    elif approx=='Xkn-1':                       comps = ['1']
+    elif approx=='Xkn-2':                       comps = ['1','2']
+    elif approx=='Xkn-3':                       comps = ['1','2','3']
 
     ### qua devi modificare e inserire anche gli altri parametri!
     # initializing disctionary for wrap up all information
     dict = {}
-
-    # aggiungo classe mkn inizializzata prima e MKNConfig oblect  
-    #dict['xkn_class'] = xkn_class                                          # aggiunta io questa riga! (FORSE NON SERVE !)
-    #dict['mkn_config'] = mkn_config                                        # aggiunta io questa riga! (FORSE NON SERVE !)
 
     # setting ejecta properties for every component
     for i,ci in enumerate(comps):
@@ -313,11 +308,6 @@ def initialize_knprior(approx,
     dict['t_gps']  = Constant('t_gps', t_gps)
 
     params, variab, const = fill_params_from_dict(dict)
-    #print('param prima', params)
-    #print('variab', variab)
-    #print('const', const)
-    #params=params.append(dict['xkn_class'])
-    #print('param dopo', params)
 
     logger.info("Setting parameters for sampling ...")
     for pi in params:
