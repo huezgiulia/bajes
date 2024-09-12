@@ -233,7 +233,6 @@ class KNLikelihood(Likelihood):
         # initialize lightcurve model
         from ..obs.kn.lightcurve import Lightcurve
         light_kwargs    = {'v_min': v_min, 'n_v': n_v, 't_start': t_start , 'xkn_config' : kwargs['xkn_config'], 'mkn_config' : kwargs['mkn_config']}
-        #print( 'qua', light_kwargs)
         self.light      = Lightcurve(times=t_axis, lambdas=filters.lambdas, approx=approx, **light_kwargs)  #qua dentro **light_kwargs ho classe 
 
         # calib_sigma flag
@@ -241,23 +240,22 @@ class KNLikelihood(Likelihood):
 
     def log_like(self, params):
 
-        # compute lightcurve
-
-        #print('time array inside light', self.light.times)
-        #print('self.light.times+params[t_gps]', (self.light.times+params['t_gps']))
+        # compute lightcurve:
+        # NB: If we use a model inside bajes, this mag is a dictionary with keys=bands and values the computed magnitudes.
+        #     If we use xkn model, this mag is a dictionary with keys=lambdas[nm] and values a dictionaries with keys 'mag' and 'time'.
         mags    = self.light.compute_mag(params)
-        #print('mags key da compute megnitude (xkn)', mags)  #  -->  questo dizionario ha come chiavi le lambda!
+
         logL    = 0.
 
         if self.use_calib_sigma:
-            for bi in self.filters.bands:  #  -->  questo invece usa i nomi delle bande!
+            for bi in self.filters.bands:
                 
-                if params['xkn_config'] == None:  # modello di bajes
+                if params['xkn_config'] == None:  # bajes model
                     lambda_bi = bi
                     interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
                 
-                else: # modello xkn
-                    # trasformo keys da nomi bande (bajes) a lambda [nm] (xkn)  DA FARE SOLO QUANDO USO MODELLI DI XKN!!!
+                else: # xkn model
+                    # tranform band name (bajes) into lambda[nm] (xkn)-> to only for xkn models
                     lambda_bi = int(self.filters.lambdas[bi]*1e9)
                     interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
                 
@@ -268,12 +266,12 @@ class KNLikelihood(Likelihood):
         else:
             for bi in self.filters.bands:
 
-                if params['xkn_config'] == None:  # modello di bajes
+                if params['xkn_config'] == None:  # bajes model
                     lambda_bi = bi
                     interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
                 
-                else: # modello xkn
-                    # trasformo keys da nomi bande (bajes) a lambda [nm] (xkn)  DA FARE SOLO QUANDO USO MODELLI DI XKN!!!
+                else: # xkn model
+                    # tranform band name (bajes) into lambda[nm] (xkn)-> to only for xkn models
                     lambda_bi = int(self.filters.lambdas[bi]*1e9)
                     interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
                 
