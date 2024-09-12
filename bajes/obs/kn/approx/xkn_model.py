@@ -3,20 +3,13 @@ import numpy as np
 
 
 
-# funzione che mi chiama calc_magnitudes di mkn e modifica output finale per renderlo compatibile a bajes!
+# funzione che mi chiama calc_magnitudes di mkn e modifica output finale per renderlo compatibile con bajes!
 def xkn(params_xkn, mkn):
     
     #print('glob param dentro xkn def model', mkn.glob_params)
     mag = mkn.calc_magnitudes(params_xkn)
-    
-    #print('mag inside xkn function', mag)
-    mag_compatibile = {}
-    # deve restituire solo dizionario con keys=bande e item=array di magnitudini! (FORSE DA FARE MEGLIO LA TRASFORMAZIONE DEL DIZIONARIO!)
-    for key in mag.keys():
-        mag_compatibile[key] = mag[key]['mag']
 
-    #print('mag_compatibile inside xkn function', mag_compatibile)
-    return mag_compatibile
+    return mag
 
 def xkn_wrapper_1comp(time, params):
 
