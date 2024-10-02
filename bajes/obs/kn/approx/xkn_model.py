@@ -3,24 +3,12 @@ import numpy as np
 
 
 
-# funzione che mi chiama calc_magnitudes di mkn e modifica output finale per renderlo compatibile con bajes!
 def xkn(params_xkn, mkn):
-    
-    #print('times in mkn', mkn.times)
-    #print('glob param dentro xkn def model', mkn.glob_params)
-    mag = mkn.calc_magnitudes(params_xkn)
-    #print('mkn time array in xkn', mkn.times)
-    #print('mkn time array in xkn len', len(mkn.times))
-    
-    #print('mag inside xkn function', mag)
-    #mag_compatibile = {}
-    # deve restituire solo dizionario con keys=bande e item=array di magnitudini! (FORSE DA FARE MEGLIO LA TRASFORMAZIONE DEL DIZIONARIO!)
-    #for key in mag.keys():
-    #    #print('TIME SU CUI XKN COMPUTE MAGNITUDES',mag[key]['time'])
-    #    mag_compatibile[key] = mag[key]['mag']
 
-    #print('mag_compatibile inside xkn function', mag_compatibile)
-    return mag #mag_compatibile
+    # compute magnitudes
+    mag = mkn.calc_magnitudes(params_xkn)
+    return mag
+
 
 def xkn_wrapper_1comp(time, params):
     '''
@@ -51,8 +39,6 @@ def xkn_wrapper_1comp(time, params):
     return xkn(variabili_xkn, params['xkn_config'])
 
 
-
-### nome parametri deve essere in accordo con congig.ini file!
 def xkn_wrapper_2comp(time, params):
     '''
     Wrapper for two component model. Fixed names of the components: "dynamics" "secular"
@@ -83,7 +69,6 @@ def xkn_wrapper_2comp(time, params):
     return xkn(variabili_xkn, params['xkn_config'])
 
 
-### nome parametri deve essere in accordo con congig.ini file!
 def xkn_wrapper_3comp(time, params):
     '''
     Wrapper for three components model. Fixed names of the components: "dynamics" "secular" "winnd
