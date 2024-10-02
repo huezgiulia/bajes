@@ -6,53 +6,78 @@ import numpy as np
 # funzione che mi chiama calc_magnitudes di mkn e modifica output finale per renderlo compatibile con bajes!
 def xkn(params_xkn, mkn):
     
+    #print('times in mkn', mkn.times)
     #print('glob param dentro xkn def model', mkn.glob_params)
     mag = mkn.calc_magnitudes(params_xkn)
+    #print('mkn time array in xkn', mkn.times)
+    #print('mkn time array in xkn len', len(mkn.times))
+    
+    #print('mag inside xkn function', mag)
+    #mag_compatibile = {}
+    # deve restituire solo dizionario con keys=bande e item=array di magnitudini! (FORSE DA FARE MEGLIO LA TRASFORMAZIONE DEL DIZIONARIO!)
+    #for key in mag.keys():
+    #    #print('TIME SU CUI XKN COMPUTE MAGNITUDES',mag[key]['time'])
+    #    mag_compatibile[key] = mag[key]['mag']
 
-    return mag
+    #print('mag_compatibile inside xkn function', mag_compatibile)
+    return mag #mag_compatibile
 
 def xkn_wrapper_1comp(time, params):
+    '''
+    Wrapper for one component model. Fixed name of the component: "dynamics"
+    '''
+    input_xkn = params
+    '''
+    input_xkn = {}
+    input_xkn['distance'] = params['distance']
+    input_xkn['view_angle'] = params['iota']
 
-    #print('param passati a wrapper xkn', params)
-    #  param passati a wrapper xkn {'mej_isotropic': 0.04740583369906999, 'vel_isotropic': 0.003539260122094731, 'opac_isotropic': 0.6929262194369953,
-    #  'distance': 51.01561176215043, 'time_shift': 24.099454664148883, 'cos_iota': -0.609651415778415, 'log_sigma_mag_B': -6.8905296702290615, 
-    # 'log_sigma_mag_g': -7.526032131831177, 'log_sigma_mag_I': 0.678184379020788, 'log_sigma_mag_R': -9.51899990229635, 'log_sigma_mag_K': -7.039455721796221,
-    #  'log_sigma_mag_z': 4.468354330877071, 'eps0': 1e+18, 'eps_alpha': 1.3, 'eps_time': 1.3, 'eps_sigma': 0.11, 't_gps': 1187008857.0, 'iota': 2.22641708353551, 
-    # 'photometric-lambdas': {'B': 4.45e-07, 'g': 4.75e-07, 'I': 7.75e-07, 'R': 6.58e-07, 'K': 2.19e-06, 'z': 8.5e-07},
-    #  'xkn_config': <bajes.obs.kn.approx.xkn.mkn.MKN object at 0x7f5164ca0220>, 'variabili_xkn': <bajes.obs.kn.approx.xkn.config.MKNConfig object at 0x7f26aecadfd0> } 
+    for i,ci in enumerate(['dynamics']):
+        input_xkn[f'm_ej_{ci:s}'] = params[f'mej_{i+1}'] 
+        input_xkn[f'vel_{ci:s}'] = params[f'vel_{i+1}']
 
-    
-    # variabili su cui voglio fare inferenza!
-    input_xkn = {
-                'distance':             params['distance'],
-                'm_ej_dynamics':        params['mej_1'],
-                'vel_dynamics':         params['vel_1'],
-                'op_dynamics':          params['opac_1'],
-                'view_angle':           params['iota']
-                }
-    
+        if f"opac_high_{i+1}" in params:
+            input_xkn[f'high_lat_op_{ci:s}'] = params[f'opac_high_{i+1}']
+            input_xkn[f'low_lat_op_{ci:s}'] = params[f'opac_{i+1}']
+        else:
+            input_xkn[f'op_{ci:s}'] = params[f'opac_{i+1}']
+
+        if f"step_angle_op_{i+1}" in params:
+            input_xkn[f'step_angle_op_{ci:s}'] = params[f'step_angle_op_{i+1}']
+    '''
+    # inference variables
     variabili_xkn = params['mkn_config'].get_vars(input_xkn)
-    #print('variabili_xkn', variabili_xkn)
 
     return xkn(variabili_xkn, params['xkn_config'])
 
 
-###   --->  DA FARE: AGGIUNGERE ALTRI WRAPPER A SECONDA DELLE COMPONENTI DEL MODELLO  <---
 
 ### nome parametri deve essere in accordo con congig.ini file!
 def xkn_wrapper_2comp(time, params):
+    '''
+    Wrapper for two component model. Fixed names of the components: "dynamics" "secular"
+    '''
+    #print('param passati a wrapper xkn 2c', params)
+    input_xkn = params
+    '''
+    input_xkn = {}
+    input_xkn['distance'] = params['distance']
+    input_xkn['view_angle'] = params['iota']
 
-    input_xkn = {
-                'distance':             params['distance'],
-                'm_ej_dynamics':        params['mej_1'],
-                'vel_dynamics':         params['vel_1'],
-                'op_dynamics':          params['opac_1'],
-                'm_ej_secular':         params['mej_2'],
-                'vel_secular':          params['vel_2'],
-                'op_secular':           params['opac_2'],
-                'view_angle':           params['iota']
-                }
-    
+    for i,ci in enumerate(['dynamics', 'secular']):
+        input_xkn[f'm_ej_{ci:s}'] = params[f'mej_{i+1}'] 
+        input_xkn[f'vel_{ci:s}'] = params[f'vel_{i+1}']
+
+        if f"opac_high_{i+1}" in params:
+            input_xkn[f'high_lat_op_{ci:s}'] = params[f'opac_high_{i+1}']
+            input_xkn[f'low_lat_op_{ci:s}'] = params[f'opac_{i+1}']
+        else:
+            input_xkn[f'op_{ci:s}'] = params[f'opac_{i+1}']
+
+        if f"step_angle_op_{i+1}" in params:
+            input_xkn[f'step_angle_op_{ci:s}'] = params[f'step_angle_op_{i+1}']
+    '''
+    # inference variables
     variabili_xkn = params['mkn_config'].get_vars(input_xkn)
 
     return xkn(variabili_xkn, params['xkn_config'])
@@ -60,21 +85,30 @@ def xkn_wrapper_2comp(time, params):
 
 ### nome parametri deve essere in accordo con congig.ini file!
 def xkn_wrapper_3comp(time, params):
+    '''
+    Wrapper for three components model. Fixed names of the components: "dynamics" "secular" "winnd
+    '''
+    #print('param passati a wrapper xkn 3c', params)
+    input_xkn = params
+    '''
+    input_xkn = {}
+    input_xkn['distance'] = params['distance']
+    input_xkn['view_angle'] = params['iota']
 
-    input_xkn = {
-                'distance':             params['distance'],
-                'm_ej_dynamics':        params['mej_1'],
-                'vel_dynamics':         params['vel_1'],
-                'op_dynamics':          params['opac_1'],
-                'm_ej_secular':         params['mej_2'],
-                'vel_secular':          params['vel_2'],
-                'op_secular':           params['opac_2'],
-                'm_ej_wind':            params['mej_3'],
-                'vel_wind':             params['vel_3'],
-                'op_wind':              params['opac_3'],
-                'view_angle':           params['iota']
-                }
-    
+    for i,ci in enumerate(['dynamics', 'secular', 'wind']):
+        input_xkn[f'm_ej_{ci:s}'] = params[f'mej_{i+1}'] 
+        input_xkn[f'vel_{ci:s}'] = params[f'vel_{i+1}']
+
+        if f"opac_high_{i+1}" in params:
+            input_xkn[f'high_lat_op_{ci:s}'] = params[f'opac_high_{i+1}']
+            input_xkn[f'low_lat_op_{ci:s}'] = params[f'opac_{i+1}']
+        else:
+            input_xkn[f'op_{ci:s}'] = params[f'opac_{i+1}']
+
+        if f"step_angle_op_{i+1}" in params:
+            input_xkn[f'step_angle_op_{ci:s}'] = params[f'step_angle_op_{i+1}']
+    '''
+    # inference variables
     variabili_xkn = params['mkn_config'].get_vars(input_xkn)
 
     return xkn(variabili_xkn, params['xkn_config'])
