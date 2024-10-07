@@ -2,8 +2,6 @@
 from __future__ import absolute_import, unicode_literals
 __import__("pkg_resources").declare_namespace(__name__)
 
-print('MODIFICA FATTA!')
-
 def _get_git_hast():
 
     import os

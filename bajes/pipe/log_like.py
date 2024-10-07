@@ -233,7 +233,6 @@ class KNLikelihood(Likelihood):
         # initialize lightcurve model
         from ..obs.kn.lightcurve import Lightcurve
         light_kwargs    = {'v_min': v_min, 'n_v': n_v, 't_start': t_start , 'xkn_config' : kwargs['xkn_config'], 'mkn_config' : kwargs['mkn_config']}
-        #print( 'qua', light_kwargs)
         self.light      = Lightcurve(times=t_axis, lambdas=filters.lambdas, approx=approx, **light_kwargs)  #qua dentro **light_kwargs ho classe 
 
         # calib_sigma flag
@@ -243,71 +242,38 @@ class KNLikelihood(Likelihood):
 
         # compute lightcurve
 
-        # Se modello e' interno a bajes, mags e' un dizionario di magnitudini!!!
-        # Se uso un modello di xkn mags e' un dizionario di magnitudini e tempi su cui ho calcolato le magnitudini!!!
+        # If the used model is one inside bajes, 'mags' is a magnitudes dictionary
+        # If the used model is one inside xkn, 'mags' is a magnitudes AND times dictionary
         mags    = self.light.compute_mag(params)
-        #   print('mags key da compute megnitude (xkn)', mags.keys())  #  -->  questo dizionario ha come chiavi le lambda!
         logL    = 0.
 
         if self.use_calib_sigma:
-            for bi in self.filters.bands:  #  -->  questo invece usa i nomi delle bande!
+            for bi in self.filters.bands:
 
-                #dentro params ho anche 'xkn_config' e 'mkn_config', quindi divido in due casi a seconda che io stia usando modelli di xkn o di bajes
-                if params['xkn_config'] == None:  # modello di bajes
+                if params['xkn_config'] == None:  # bajes model
                     lambda_bi = bi
                     interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
-                    #print('interp_mag normale',interp_mag)
                 
-                else: # modello xkn
-                    # trasformo keys da nomi bande (bajes) a lambda [nm] (xkn)  DA FARE SOLO QUANDO USO MODELLI DI XKN!!!
+                else: # xkn model
+                    # tranform keys from band names into lambdas[nm] (ONLY FOR XKN MODELS)
                     lambda_bi = int(self.filters.lambdas[bi]*1e9)
-                    #print('self.filters.times[bi]', (self.filters.times[bi]))
-                    #print('self.filters.times[bi] len', len(self.filters.times[bi]))
-                    #print("mags[lambda_bi]['time'] in log_like",mags[lambda_bi]['time'])
-                    #print("mags[lambda_bi]['time']+params['t_gps'] in log_like",mags[lambda_bi]['time']+params['t_gps'])
-                    #print("mags[lambda_bi]['mag']", len(mags[lambda_bi]['mag'])) 
                     interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
-                    #interp_mag = mags[lambda_bi] veccia soluzione quando usi 'all_magnitudes' in xkn
 
-
-                ##print('lambda_bi',lambda_bi)
-                #print('self.filters.times[bi]', (self.filters.times[bi]))  # sono quelli dei dati!! VANNO BENE QUESTI
-                #print('self.filters.times[bi] len', len(self.filters.times[bi]))
-                #print('self.light.times', (self.light.times))
-                #print('self.light.times + t_gps ', len(self.light.times+params['t_gps']))
-                #print('mags[lambda_bi]', len(mags[lambda_bi]))
-                
-
-            ### DEVO INTERPOLARE SU ARRAY TEMPI DEI DATI PER FARE LA LIKELIHOOD !!!  
-
-                # Quello che viene fatto ora e' dividere il calcolo della log_likelihood in due casi:
-                # 1) caso in cui uso modello interno a bajes: tutto funziona come era prima (interpolazione ecc):
-                # 2) caso in cui uso modello interno a xkn: faccio ancora interpolazione tra array dei tempi dei dati 
-                # e array su cui ho calcolato le magnitudini, ma questa volta questo secondo array lo prendo direttamente 
-                # dalla classe xkn invece che da self.light.times! Questo perche' internamente xkn si calcola questo array
-                # dei tempi usando una certa t_toll che fa si che il modello non calcoli le megnitudini su punti temporali troppo
-                # vicini tra loro (sotto la t_toll) --> questo accelera performance di xkn soprattutto nel caso dei dati AT2017gfo!
-
-
-
-                #interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
                 sigma2      = self.filters.mag_stdev[bi]**2. + np.exp(params['log_sigma_mag_{}'.format(bi)])**2.
                 residuals   = (((self.filters.magnitudes[bi]-interp_mag))**2.)/sigma2
                 logL       += -0.5*(residuals + np.log(2*np.pi*sigma2)).sum()
 
         else:
-            for bi in self.filters.bands:  #  -->  questo invece usa i nomi delle bande!
+            for bi in self.filters.bands:
 
-                #dentro params ho anche 'xkn_config' e 'mkn_config', quindi divido in due casi a seconda che io stia usando modelli di xkn o di bajes
-                if params['xkn_config'] == None:  # modello di bajes
+                if params['xkn_config'] == None:  # bajes model
                     lambda_bi = bi
                     interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
                 
-                else: # modello xkn
-                    # trasformo keys da nomi bande (bajes) a lambda [nm] (xkn)  DA FARE SOLO QUANDO USO MODELLI DI XKN!!!
+                else: # xkn model
+                    # tranform keys from band names into lambdas[nm] (ONLY FOR XKN MODELS)
                     lambda_bi = int(self.filters.lambdas[bi]*1e9)
                     interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
-                    #interp_mag = mags[lambda_bi] veccia soluzione quando usi 'all_magnitudes' in xkn
 
                 residuals   = ((self.filters.magnitudes[bi]-interp_mag)/self.filters.mag_stdev[bi])**2.
                 logL       += -0.5*residuals.sum() + self.logNorm

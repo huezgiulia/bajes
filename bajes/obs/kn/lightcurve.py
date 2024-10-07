@@ -41,11 +41,11 @@ __approx_dict__ = { ### TIME-DOMAIN
                                                              'type': 'cls'},
                     'GrossmanKBP-3-anisotropic':            {'path': 'bajes.obs.kn.approx.grossman_kbp.korobkin_barnes_grossman_perego_et_al_three_anisotropic_wrapper',
                                                              'type': 'cls'},
-                    'Xkn-1':                                {'path': 'bajes.obs.kn.approx.xkn_model.xkn_wrapper_1comp',     # modello 1 componente
+                    'Xkn-1':                                {'path': 'bajes.obs.kn.approx.xkn_model.xkn_wrapper_1comp',
                                                              'type': 'fnc'},
-                    'Xkn-2':                                {'path': 'bajes.obs.kn.approx.xkn_model.xkn_wrapper_2comp',     # modello 2 componenti
+                    'Xkn-2':                                {'path': 'bajes.obs.kn.approx.xkn_model.xkn_wrapper_2comp',
                                                              'type': 'fnc'},
-                    'Xkn-3':                                {'path': 'bajes.obs.kn.approx.xkn_model.xkn_wrapper_3comp',     # modello 3 componenti
+                    'Xkn-3':                                {'path': 'bajes.obs.kn.approx.xkn_model.xkn_wrapper_3comp',
                                                              'type': 'fnc'},
                   }
 
@@ -105,13 +105,12 @@ class Lightcurve(object):
         self.times      = times
         self.lambdas    = lambdas
         self.approx     = approx
-        self.xkn_config = kwargs['xkn_config']              # aggiunto io questa riga!
-        self.mkn_config = kwargs['mkn_config']              # aggiunto io questa riga!
+        self.xkn_config = kwargs['xkn_config']
+        self.mkn_config = kwargs['mkn_config']
         logger.info("Setting {} lightcurve ...".format(self.approx))
 
         # get waveform generator from string
         self.light_func = __get_lightcurve_generator__(self.approx, self.times, self.lambdas, **kwargs)
-        #print('LIGHT FUNC MODEL', self.light_func)
 
     def compute_mag(self, params):
 
@@ -124,7 +123,6 @@ class Lightcurve(object):
 
         # include band information in params
         params['photometric-lambdas'] = self.lambdas
-        params['xkn_config'] = self.xkn_config              # aggiunto io questa riga!
-        params['mkn_config'] = self.mkn_config              # aggiunto io questa riga!
-        #print('time array inside class lightcurve/compute_mag', self.times)
+        params['xkn_config'] = self.xkn_config
+        params['mkn_config'] = self.mkn_config
         return self.light_func(self.times, params)
