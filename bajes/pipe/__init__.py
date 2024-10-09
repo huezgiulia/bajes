@@ -462,8 +462,12 @@ def parse_setup_options():
     parser.add_argument('--heat-time',        dest='heating_time',     type=float,   default=1.3,           help='Time coefficient for heating rate (default 1.3)')
     parser.add_argument('--heat-sigma',       dest='heating_sigma',     type=float,   default=0.11,         help='Sigma coefficient for heating rate (default 0.11)')
 
-    # Flags
+    # Flags # aagiungi prior e modifca codice!
     parser.add_argument('--use-mag-dev',        dest='use_calib_sigma_lc',  default=False,  action="store_true",    help='Include systematic deviation parameter for each band')
+
+    # Prior bounds Sigma_b
+    parser.add_argument('--sigma-max',       dest='sigma_max',      default=None,     type=float,      help='Upper bounds for systematic deviation parameter for each band')
+    parser.add_argument('--sigma-min',       dest='sigma_min',      default=None,     type=float,      help='Lower bounds for systematic deviation parameter for each band')
 
     # Integrators properties
     parser.add_argument('--nvel',         dest='n_v',         type=int,     default=400,        help='Number of elements in velocity array, default 400')
