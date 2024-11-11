@@ -232,8 +232,8 @@ class KNLikelihood(Likelihood):
 
         # initialize lightcurve model
         from ..obs.kn.lightcurve import Lightcurve
-        light_kwargs    = {'v_min': v_min, 'n_v': n_v, 't_start': t_start}
-        self.light      = Lightcurve(times=t_axis, lambdas=filters.lambdas, approx=approx, **light_kwargs)
+        light_kwargs    = {'v_min': v_min, 'n_v': n_v, 't_start': t_start , 'xkn_config' : kwargs['xkn_config'], 'mkn_config' : kwargs['mkn_config']}
+        self.light      = Lightcurve(times=t_axis, lambdas=filters.lambdas, approx=approx, **light_kwargs) 
 
         # calib_sigma flag
         self.use_calib_sigma = use_calib_sigma_lc
@@ -241,21 +241,40 @@ class KNLikelihood(Likelihood):
     def log_like(self, params):
 
         # compute lightcurve
+
+        # If the used model is one inside bajes, 'mags' is a magnitudes dictionary
+        # If the used model is one inside xkn, 'mags' is a magnitudes AND times dictionary
         mags    = self.light.compute_mag(params)
         logL    = 0.
 
         if self.use_calib_sigma:
-
             for bi in self.filters.bands:
-                interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[bi])
+
+                if params['xkn_config'] == None:  # Grossman model
+                    lambda_bi = bi
+                    interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
+                
+                else: # xkn model
+                    # tranform keys from band names into lambdas[nm] (ONLY FOR XKN MODELS)
+                    lambda_bi = int(self.filters.lambdas[bi]*1e9)
+                    interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
+
                 sigma2      = self.filters.mag_stdev[bi]**2. + np.exp(params['log_sigma_mag_{}'.format(bi)])**2.
                 residuals   = (((self.filters.magnitudes[bi]-interp_mag))**2.)/sigma2
                 logL       += -0.5*(residuals + np.log(2*np.pi*sigma2)).sum()
 
         else:
-
             for bi in self.filters.bands:
-                interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[bi])
+
+                if params['xkn_config'] == None:  # Grossman model
+                    lambda_bi = bi
+                    interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
+                
+                else: # xkn model
+                    # tranform keys from band names into lambdas[nm] (ONLY FOR XKN MODELS)
+                    lambda_bi = int(self.filters.lambdas[bi]*1e9)
+                    interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
+
                 residuals   = ((self.filters.magnitudes[bi]-interp_mag)/self.filters.mag_stdev[bi])**2.
                 logL       += -0.5*residuals.sum() + self.logNorm
 

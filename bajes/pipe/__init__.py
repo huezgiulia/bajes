@@ -430,16 +430,26 @@ def parse_setup_options():
 
     # Photometric bands information
     parser.add_argument('--band',         dest='bands',       type=str,  action="append",    default=[], help='Name of photometric bands used in the data')
-    parser.add_argument('--lambda',       dest='lambdas',     type=float,   action="append",    default=[], help='Wave-length of photometric bands used in the data [nm]')
+    parser.add_argument('--lambda',       dest='lambdas',     type=float,   action="append",    default=[], help='Wave-length of photometric bands used in the data [m]')
     parser.add_argument('--use-dereddening',  dest='dered',   default=True,  action="store_true",    help='Apply deredding to given data filters')
 
     # Prior bounds
-    parser.add_argument('--mej-max',      dest='mej_max',     type=float,   action="append",    default=[], help='Upper bounds for ejected mass parameters')
-    parser.add_argument('--mej-min',      dest='mej_min',     type=float,   action="append",    default=[], help='Lower bounds for ejected mass parameters')
-    parser.add_argument('--vel-max',      dest='vel_max',     type=float,   action="append",    default=[], help='Upper bounds for velocity parameters')
-    parser.add_argument('--vel-min',      dest='vel_min',     type=float,   action="append",    default=[], help='Lower bounds for velocity parameters')
-    parser.add_argument('--opac-max',     dest='opac_max',    type=float,   action="append",    default=[], help='Upper bounds for opacity parameters')
-    parser.add_argument('--opac-min',     dest='opac_min',    type=float,   action="append",    default=[], help='Lower bounds for opacity parameters')
+    parser.add_argument('--mej-max',                dest='mej_max',             type=float,   action="append",    default=[],   help='Upper bounds for ejected mass parameters')
+    parser.add_argument('--mej-min',                dest='mej_min',             type=float,   action="append",    default=[],   help='Lower bounds for ejected mass parameters')
+    parser.add_argument('--step-angle-mej-max',     dest='step_angle_mej_max',  type=str,     action="append",    default=[],   help='Upper bounds for the mass step-angle parameters - number of the component (to use only with xkn models)')
+    parser.add_argument('--step-angle-mej-min',     dest='step_angle_mej_min',  type=str,     action="append",    default=[],   help='Lower bounds for the mass step-angle parameters - number of the component (to use only with xkn models)')
+    parser.add_argument('--vel-max',                dest='vel_max',             type=float,   action="append",    default=[],   help='Upper bounds for velocity parameters')
+    parser.add_argument('--vel-min',                dest='vel_min',             type=float,   action="append",    default=[],   help='Lower bounds for velocity parameters')
+    parser.add_argument('--vel-high-max',           dest='vel_high_max',        type=str,     action="append",    default=[],   help='Upper bounds for high latitude velocity parameters - number of the component (to use only with xkn models)')
+    parser.add_argument('--vel-high-min',           dest='vel_high_min',        type=str,     action="append",    default=[],   help='Lower bounds for high latitude velocity parameters - number of the component (to use only with xkn models)')
+    parser.add_argument('--step-angle-vel-max',     dest='step_angle_vel_max',  type=str,     action="append",    default=[],   help='Upper bounds for the velocity step-angle parameters - number of the component (to use only with xkn models)')
+    parser.add_argument('--step-angle-vel-min',     dest='step_angle_vel_min',  type=str,     action="append",    default=[],   help='Lower bounds for the velocity step-angle parameters - number of the component (to use only with xkn models)')
+    parser.add_argument('--opac-max',               dest='opac_max',            type=float,   action="append",    default=[],   help='Upper bounds for opacity parameters/low latitude opacity parameters')
+    parser.add_argument('--opac-min',               dest='opac_min',            type=float,   action="append",    default=[],   help='Lower bounds for opacity parameters/low latitude opacity parameters')
+    parser.add_argument('--opac-high-max',          dest='opac_high_max',       type=str,     action="append",    default=[],   help='Upper bounds for high latitude opacity parameters - number of the component (to use only with xkn models)')
+    parser.add_argument('--opac-high-min',          dest='opac_high_min',       type=str,     action="append",    default=[],   help='Lower bounds for high latitude opacity parameters - number of the component (to use only with xkn models)')
+    parser.add_argument('--step-angle-op-max',      dest='step_angle_op_max',   type=str,     action="append",    default=[],   help='Upper bounds for the opacity step-angle parameters - number of the component (to use only with xkn models)')
+    parser.add_argument('--step-angle-op-min',      dest='step_angle_op_min',   type=str,     action="append",    default=[],   help='Lower bounds for the opacity step-angle parameters - number of the component (to use only with xkn models)')
 
     # Heating factor information
     parser.add_argument('--log-eps0',     dest='log_eps_flag',    default=False,  action="store_true",   help='Uniform prior in log-epsilon0 flag')
@@ -452,8 +462,12 @@ def parse_setup_options():
     parser.add_argument('--heat-time',        dest='heating_time',     type=float,   default=1.3,           help='Time coefficient for heating rate (default 1.3)')
     parser.add_argument('--heat-sigma',       dest='heating_sigma',     type=float,   default=0.11,         help='Sigma coefficient for heating rate (default 0.11)')
 
-    # Flags
+    # Flags 
     parser.add_argument('--use-mag-dev',        dest='use_calib_sigma_lc',  default=False,  action="store_true",    help='Include systematic deviation parameter for each band')
+
+    # Prior bounds Sigma_b
+    parser.add_argument('--sigma-max',       dest='sigma_max',      default=None,     type=float,      help='Upper bounds for systematic deviation parameter for each band')
+    parser.add_argument('--sigma-min',       dest='sigma_min',      default=None,     type=float,      help='Lower bounds for systematic deviation parameter for each band')
 
     # Integrators properties
     parser.add_argument('--nvel',         dest='n_v',         type=int,     default=400,        help='Number of elements in velocity array, default 400')
@@ -461,6 +475,9 @@ def parse_setup_options():
     parser.add_argument('--ntime',        dest='n_t',         type=int,     default=400,        help='Number of elements in time array, default 400')
     parser.add_argument('--t-start-grid', dest='init_t',      type=float,   default=1.,         help='Initial value of time axis for model evaluation, default 1s')
     parser.add_argument('--t-scale',      dest='t_scale',     type=str,  default='linear',   help='Scale of time axis: linear, log or mixed')
+
+    # Xkn
+    parser.add_argument('--xkn',       dest='xkn',    type=str,  default='',     help='path to config.ini file for defining the kn model')
 
     return parser.parse_args()
 
@@ -572,6 +589,7 @@ def init_model(opts):
         # look for inf.pkl in outdir
         if os.path.exists(opts.outdir+'/inf.pkl'):
             pr, lk  = read_model_from_pickle(opts.outdir+'/inf.pkl')
+            
         # else error
         else:
             logger.error("Unable to initialize model. None is given.")
@@ -596,7 +614,6 @@ def init_model(opts):
         pr, lk      = read_model_from_paths(opts.prior, opts.like, opts.priorgrid)
 
     else:
-
         # get inference pickle
         pr, lk      = read_model_from_pickle(opts.inf)
 
@@ -795,7 +812,7 @@ def get_likelihood_and_prior(opts):
             from .log_like import KNLikelihood
 
             # read arguments for likelihood
-            l_kwas, pr = initialize_knlikelihood_kwargs(opts)
+            l_kwas, pr = initialize_knlikelihood_kwargs(opts)  
             l_kwas['priors'] = pr
             logger.info("Initializing KN likelihood ...")
             likes.append(KNLikelihood(**l_kwas))

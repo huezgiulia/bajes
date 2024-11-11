@@ -24,11 +24,28 @@ def initialize_knlikelihood_kwargs(opts):
         raise ValueError("Number of components does not match the number of velocity bounds. Please give in input the same number of arguments in the respective order.")
     if (ncomps != len(opts.opac_min)) or (ncomps != len(opts.opac_max)):
         logger.error("Number of components does not match the number of opacity bounds. Please give in input the same number of arguments in the respective order.")
-        raise ValueError("Number of components does not match the number of opacity bounds. Please give in input the same number of arguments in the respective order.")
+        raise ValueError("Number of components does not match the number of opacity bounds. Please give in input the same number of arguments in the respective order.")  
+    if (len(opts.step_angle_mej_min) != len(opts.step_angle_mej_max)):
+        logger.error("Number of lower bounds does not match the number upper bounds for step_angle_mej. Please give in input the same number of arguments in the respective order.")
+        raise ValueError("Number of lower bounds does not match the number oupper bounds. Please give in input the same number of arguments in the respective order.")     
+    if (len(opts.vel_high_min) != len(opts.vel_high_max)):
+        logger.error("Number of lower bounds does not match the number upper bounds for vel_high. Please give in input the same number of arguments in the respective order.")
+        raise ValueError("Number of lower bounds does not match the number oupper bounds. Please give in input the same number of arguments in the respective order.")       
+    if (len(opts.step_angle_vel_min) != len(opts.step_angle_vel_max)):
+        logger.error("Number of lower bounds does not match the number upper bounds for step_angle_vel. Please give in input the same number of arguments in the respective order.")
+        raise ValueError("Number of lower bounds does not match the number oupper bounds. Please give in input the same number of arguments in the respective order.")       
+    if (len(opts.opac_high_min) != len(opts.opac_high_max)):
+        logger.error("Number of lower bounds does not match the number upper bounds for opac_high. Please give in input the same number of arguments in the respective order.")
+        raise ValueError("Number of lower bounds does not match the number oupper bounds. Please give in input the same number of arguments in the respective order.")       
+    if (len(opts.step_angle_op_min) != len(opts.step_angle_op_max)):
+        logger.error("Number of lower bounds does not match the number upper bounds for step_angle_op. Please give in input the same number of arguments in the respective order.")
+        raise ValueError("Number of lower bounds does not match the number oupper bounds. Please give in input the same number of arguments in the respective order.")       
+    
+
 
     if opts.time_shift_max == None:
         logger.warning("Upper bound for time shift is not provided. Setting default to 1 hr.")
-        opts.time_shift_max == 3600
+        opts.time_shift_max = 3600
 
     if opts.time_shift_min == None:
         opts.time_shift_min = -opts.time_shift_max
@@ -65,16 +82,104 @@ def initialize_knlikelihood_kwargs(opts):
     l_kwargs['t_start']             = opts.init_t
     l_kwargs['t_scale']             = opts.t_scale
     l_kwargs['use_calib_sigma_lc']  = opts.use_calib_sigma_lc
+    
+    # inizialize MKN class
+    from xkn import MKN, MKNConfig
+    if not opts.xkn:
+            logger.info("No config file was passed for MKN inizialization.")
+            l_kwargs['mkn_config']          = None
+            l_kwargs['xkn_config']          = None
+
+    else:
+        config_path  = os.path.abspath(opts.xkn)
+        tag             = config_path.split('.')[-1]
+
+        if tag == 'ini':
+            logger.info("Initialize MKNConfig object from the config file")
+            mkn_config = MKNConfig(config_path)
+            l_kwargs['mkn_config']          = mkn_config
+
+            logger.info("Initialize MKN object from the read config-parameters")
+            mkn = MKN(*mkn_config.get_params(), log_level="WARNING")
+            l_kwargs['xkn_config']          = mkn
+        
+        else: 
+            logger.error("Impossible to initialize MKN object from {} file. Use ini.".format(tag))
+            l_kwargs['mkn_config']          = None
+            l_kwargs['xkn_config']          = None
+
+
 
     # set intrinsic parameters bounds
     mej_bounds  = [[mmin, mmax] for mmin, mmax in zip(opts.mej_min, opts.mej_max)]
     vel_bounds  = [[vmin, vmax] for vmin, vmax in zip(opts.vel_min, opts.vel_max)]
-    opac_bounds = [[omin, omax] for omin, omax in zip(opts.opac_min, opts.opac_max)]
+    opac_bounds = [[omin, omax] for omin, omax in zip(opts.opac_min, opts.opac_max)] 
 
+    step_angle_mej_bounds = [None] * ncomps
+    if opts.step_angle_mej_min != [] and opts.step_angle_mej_max != []:
+        for min, max in zip(opts.step_angle_mej_min, opts.step_angle_mej_max):
+            where_min = int(min.split('-')[1])
+            where_max = int(max.split('-')[1])
+            if where_min == where_max:
+                step_angle_mej_bounds[where_max-1] = [float(min.split('-')[0]), float(max.split('-')[0])]
+            else:
+                logger.error("Different component assigned for step_angle_mej prior bounds.")
+                raise ValueError("Different component assigned for step_angle_mej prior bounds.")
 
+    # set additive high latitude parameters bounds for velocity and relative step angle
+    vel_high_bounds = [None] * ncomps
+    if opts.vel_high_min != [] and opts.vel_high_max != []:
+        for vmin, vmax in zip(opts.vel_high_min, opts.vel_high_max):
+            where_vmin = int(vmin.split('-')[1])
+            where_vmax = int(vmax.split('-')[1])
+            if where_vmin == where_vmax:
+                vel_high_bounds[where_vmax-1] = [float(vmin.split('-')[0]), float(vmax.split('-')[0])]
+            else:
+                logger.error("Different component assigned for vel_high prior bounds.")
+                raise ValueError("Different component assigned for vel_high prior bounds.")
+
+    step_angle_vel_bounds = [None] * ncomps
+    if opts.step_angle_vel_min != [] and opts.step_angle_vel_max != []:
+        for avmin, avmax in zip(opts.step_angle_vel_min, opts.step_angle_vel_max):
+            where_avmin = int(avmin.split('-')[1])
+            where_avmax = int(avmax.split('-')[1])
+            if where_avmin == where_avmax:
+                step_angle_vel_bounds[where_avmax-1] = [float(avmin.split('-')[0]), float(avmax.split('-')[0])]
+            else:
+                logger.error("Different component assigned for step_angle_vel prior bounds.")
+                raise ValueError("Different component assigned for step_angle_vel prior bounds.")
+
+    # set additive high latitude parameters bounds for opacity and relative step angle
+    opac_high_bounds = [None] * ncomps
+    if opts.opac_high_min != [] and opts.opac_high_max != []:
+        for omin, omax in zip(opts.opac_high_min, opts.opac_high_max):
+            where_omin = int(omin.split('-')[1])
+            where_omax = int(omax.split('-')[1])
+            if where_omin == where_omax:
+                opac_high_bounds[where_omax-1] = [float(omin.split('-')[0]), float(omax.split('-')[0])]
+            else:
+                logger.error("Different component assigned for opac_high prior bounds.")
+                raise ValueError("Different component assigned for opac_high prior bounds.")
+            
+    step_angle_op_bounds = [None] * ncomps
+    if opts.step_angle_op_min != [] and opts.step_angle_op_max != []:
+        for aomin, aomax in zip(opts.step_angle_op_min, opts.step_angle_op_max):
+            where_aomin = int(aomin.split('-')[1])
+            where_aomax = int(aomax.split('-')[1])
+            if where_aomin == where_aomax:
+                step_angle_op_bounds[where_aomax-1] = [float(aomin.split('-')[0]), float(aomax.split('-')[0])]
+            else:
+                logger.error("Different component assigned for step_angle_op prior bounds.")
+                raise ValueError("Different component assigned for step_angle_op prior bounds.")
+            
     # define priors
     priors = initialize_knprior(approx=opts.kn_approx, bands=opts.bands,
-                                mej_bounds=mej_bounds, vel_bounds=vel_bounds, opac_bounds=opac_bounds, t_gps=opts.t_gps,
+                                mej_bounds=mej_bounds, step_angle_mej_bounds=step_angle_mej_bounds,
+                                vel_bounds=vel_bounds,
+                                vel_high_bounds=vel_high_bounds, step_angle_vel_bounds=step_angle_vel_bounds,
+                                opac_bounds=opac_bounds,
+                                opac_high_bounds=opac_high_bounds, step_angle_op_bounds=step_angle_op_bounds,
+                                t_gps=opts.t_gps,
                                 dist_max=opts.dist_max, dist_min=opts.dist_min,
                                 eps0_max=opts.eps_max,  eps0_min=opts.eps_min,
                                 dist_flag=opts.dist_flag, log_eps0_flag=opts.log_eps_flag,
@@ -83,7 +188,9 @@ def initialize_knlikelihood_kwargs(opts):
                                 time_shift_bounds=[opts.time_shift_min, opts.time_shift_max],
                                 fixed_names=opts.fixed_names, fixed_values=opts.fixed_values,
                                 prior_grid=opts.priorgrid, kind='linear',
-                                use_calib_sigma=opts.use_calib_sigma_lc)
+                                use_calib_sigma=opts.use_calib_sigma_lc,
+                                sigma_max=opts.sigma_max, sigma_min=opts.sigma_min)
+    
 
     # save observations in pickle
     cont_kwargs = {'filters': l_kwargs['filters']}
@@ -93,8 +200,13 @@ def initialize_knlikelihood_kwargs(opts):
 def initialize_knprior(approx,
                        bands,
                        mej_bounds,
+                       step_angle_mej_bounds,
                        vel_bounds,
+                       vel_high_bounds,
+                       step_angle_vel_bounds,
                        opac_bounds,
+                       opac_high_bounds,
+                       step_angle_op_bounds,
                        t_gps,
                        dist_max             = None,
                        dist_min             = None,
@@ -111,7 +223,9 @@ def initialize_knprior(approx,
                        fixed_values         = [],
                        prior_grid           = 2000,
                        kind                 = 'linear',
-                       use_calib_sigma      = True):
+                       use_calib_sigma      = True,
+                       sigma_max            = None,
+                       sigma_min            = None,):
 
     from ..inf.prior import Prior, Parameter, Variable, Constant
 
@@ -126,15 +240,26 @@ def initialize_knprior(approx,
     elif 'GrossmanKBP-2-NRfits' in approx:      comps = ['dyn', 'wind']
     elif approx=='GrossmanKBP-3-isotropic':     comps = ['isotropic1', 'isotropic2', 'isotropic3']
     elif approx=='GrossmanKBP-3-anisotropic':   comps = ['isotropic', 'equatorial', 'polar']
+    elif approx=='Xkn-1':                       comps = ['dynamics']
+    elif approx=='Xkn-2':                       comps = ['dynamics', 'secular']
+    elif approx=='Xkn-3':                       comps = ['dynamics', 'secular', 'wind']
 
     # initializing disctionary for wrap up all information
     dict = {}
 
     # setting ejecta properties for every component
     for i,ci in enumerate(comps):
-        dict['mej_{}'.format(ci)]  = Parameter(name='mej_{}'.format(ci), min = mej_bounds[i][0], max = mej_bounds[i][1])
+        dict[f'mej_{ci:s}']  = Parameter(name='mej_{}'.format(ci), min = mej_bounds[i][0], max = mej_bounds[i][1])
+        if step_angle_mej_bounds[i] != None:
+            dict['step_angle_mej_{}'.format(ci)] = Parameter(name='step_angle_mej_{}'.format(ci), min = step_angle_mej_bounds[i][0], max = step_angle_mej_bounds[i][1])
         dict['vel_{}'.format(ci)]  = Parameter(name='vel_{}'.format(ci), min = vel_bounds[i][0], max = vel_bounds[i][1])
-        dict['opac_{}'.format(ci)] = Parameter(name='opac_{}'.format(ci), min = opac_bounds[i][0], max = opac_bounds[i][1])
+        if vel_high_bounds[i] != None and step_angle_vel_bounds[i] != None:
+            dict['vel_high_{}'.format(ci)] = Parameter(name='vel_high_{}'.format(ci), min = vel_high_bounds[i][0], max = vel_high_bounds[i][1])
+            dict['step_angle_vel_{}'.format(ci)] = Parameter(name='step_angle_vel_{}'.format(ci), min = step_angle_vel_bounds[i][0], max = step_angle_vel_bounds[i][1])
+        dict['opac_{}'.format(ci)] =  Parameter(name='opac_{}'.format(ci), min = opac_bounds[i][0], max = opac_bounds[i][1])
+        if opac_high_bounds[i] != None and step_angle_op_bounds[i] != None:
+            dict['opac_high_{}'.format(ci)] = Parameter(name='opac_high_{}'.format(ci), min = opac_high_bounds[i][0], max = opac_high_bounds[i][1])
+            dict['step_angle_op_{}'.format(ci)] = Parameter(name='step_angle_op_{}'.format(ci), min = step_angle_op_bounds[i][0], max = step_angle_op_bounds[i][1]) 
 
     # setting eps0
     if eps0_min == None and eps0_max == None:
@@ -226,6 +351,8 @@ def initialize_knprior(approx,
     # setting inclination
     dict['cos_iota']   =  Parameter(name='cos_iota', min=-1., max=+1.)
 
+    
+
     # use NR fits for dynamical ejecta and baryonic wind
     if 'GrossmanKBP-2-NRfits' in approx:
 
@@ -251,11 +378,21 @@ def initialize_knprior(approx,
 
     # include theoretical error
     if use_calib_sigma:
+        if sigma_min == None and sigma_max == None:
+            logger.warning("Requested bounds for systematic deviation parameter is empty. Setting standard bound [-10,5]")
+            sigma_min = -10.
+            sigma_max = 5.
+        elif sigma_min == None:
+            logger.warning("Requested lower bounds for systematic deviation parameter is empty. Setting standard bound -10")
+            sigma_min = -10.
+        elif sigma_max == None:
+            logger.warning("Requested bounds for systematic deviation parameter is empty. Setting standard bound 5")
+            sigma_max = 5.
         for bi in bands:
             # use uniform prior in log_calib_sigma since it is easier for the sampler
             # sigma ~ 1/sigma (log-uniform), then log(sigma) ~ 1
             dict['log_sigma_mag_{}'.format(bi)]   = Parameter(name='log_sigma_mag_{}'.format(bi),
-                                                              min = -10., max = 5., prior='uniform')
+                                                              min = sigma_min, max = sigma_max, prior='uniform')
 
     # set fixed parameters
     if len(fixed_names) != 0 :
