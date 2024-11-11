@@ -367,6 +367,6 @@ class GWBinningLikelihood(Likelihood):
         else:
             R      = np.real(dh)
 
-        logL = - 0.5*(hh + dd) + R - self.logZ_noise - 0.5*_psd_fact
+        logL  =  R - 0.5*hh
 
         return logL
