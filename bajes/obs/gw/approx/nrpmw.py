@@ -434,7 +434,7 @@ def NRPMw(freqs, params, recalib=False, attach=False, f2free=False):
     """
 
     freqs  = freqs*MTSUN_SI*params['mtot']
-    params = _nrpmw_fits(params, recalib=recalib, attach=False, f2free=f2free)
+    params = _nrpmw_fits(params, recalib=recalib, attach=attach, f2free=f2free)
 
     # initialize complex array
     h22 = np.zeros(len(freqs), dtype=complex)
@@ -454,7 +454,6 @@ def NRPMw(freqs, params, recalib=False, attach=False, f2free=False):
         return h22
 
     if params['NRPMw_t_coll'] > params['t_0'] :
-
         # h_recoil,
         # bounce-back of the remnant after the quasi-spherical node
         sin_fact    = np.sin(TWOPI*params['f_0']*(params['t_1']-params['t_0'])) #- np.sin(params['NRPMw_phi_fm'])
@@ -462,12 +461,26 @@ def NRPMw(freqs, params, recalib=False, attach=False, f2free=False):
             dphi_mod    = params['D_2']*sin_fact/(TWOPI*params['f_0']) + TWOPI*params['f_2']*(params['t_1']-params['t_0'])
         else:
             dphi_mod    = TWOPI*params['f_2']*(params['t_1']-params['t_0'])
-        phi_bounce  = params['NRPMw_phi_pm'] + TWOPI*params['f_m']*params['t_0'] + np.pi*params['df_m']*params['t_0']**2.
-        h22 = h22 - _fm_wavelet_func(freqs,
+        if not attach:
+            phi_bounce  = params['NRPMw_phi_pm'] + TWOPI*params['f_m']*params['t_0'] + np.pi*params['df_m']*params['t_0']**2.
+            h22 = h22 - _fm_wavelet_func(freqs,
                                      eta     = params['a_1']*np.exp(-1j*(phi_bounce+dphi_mod)),
                                      alpha   = np.log(params['a_0']/params['a_1'])/(params['t_1']-params['t_0'])**2 ,
                                      beta    = -1j*TWOPI*params['f_2'],
                                      tau     = params['t_0'] - params['t_1'],
+                                     tshift  = params['t_1'],
+                                     Omega   = TWOPI*params['f_0'],
+                                     Delta   = params['D_2'],
+                                     Gamma   = 0.,
+                                     Phi     = PIHALF)
+        else:
+            phi_bounce  = params['NRPMw_phi_pm']
+            _dt         = 0.005/MTSUN_SI/params['mtot']
+            h22 = h22 - _fm_wavelet_func(freqs,
+                                     eta     = params['a_1']*np.exp(-1j*(phi_bounce+dphi_mod)),
+                                     alpha   = np.log(params['a_0']/params['a_1'])/(params['t_1']-params['t_0'])**2 ,
+                                     beta    = -1j*TWOPI*params['f_2'],
+                                     tau     = params['t_0'] - params['t_1'] - _dt,
                                      tshift  = params['t_1'],
                                      Omega   = TWOPI*params['f_0'],
                                      Delta   = params['D_2'],
