@@ -1,0 +1,15 @@
+astropy
+corner
+cpnest
+dynesty=1.0.1
+emcee
+h5py
+lalsuite
+matplotlib
+mlgw
+mpi4py
+numpy>=1.23.5
+scipy<=1.9
+teobresums
+ultranest
+
