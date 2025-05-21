@@ -397,7 +397,9 @@ def parse_setup_options():
     parser.add_argument('--j-min',             dest='j_min',           default=None,      type=float,                           help='Lower angular momentum prior bound')
     parser.add_argument('--j-max',             dest='j_max',           default=None,      type=float,                           help='Upper angular momentum prior bound')
     parser.add_argument('--ecc-min',           dest='ecc_min',         default=None,      type=float,                           help='Lower eccentricity prior bound')
-    parser.add_argument('--ecc-max',           dest='ecc_max',         default=None,      type=float,                           help='Upper eccentricity prior bound')
+    parser.add_argument('--ecc-max',           dest='ecc_max',         default=None,      type=float,                           help='Upper anomaly prior bound')
+    parser.add_argument('--anomaly-max',       dest='anomaly_max',     default=None,      type=float,                           help='Upper eccentricity prior bound')
+    parser.add_argument('--anomaly-min',       dest='anomaly_min',     default=None,      type=float,                           help='Lower anomaly prior bound')
     parser.add_argument('--a6c-min',           dest='a6c_min',         default=None,      type=float,                           help='Lower a6c prior bound (TEOBResumS_a6cfree option)')
     parser.add_argument('--a6c-max',           dest='a6c_max',         default=None,      type=float,                           help='Upper a6c prior bound (TEOBResumS_a6cfree option)')
 
@@ -426,7 +428,7 @@ def parse_setup_options():
     # Data & Components information
     #parser.add_argument('--comp',         dest='comps',       type=str,  action="append", default=[],    help='Name of shell component(s) for lightcurve estimation')
     parser.add_argument('--mag-folder',   dest='mag_folder',  type=str,     default=None,   help='Path to magnitudes data folder')
-    parser.add_argument('--kn-approx',    dest='kn_approx',   type=str,     default=None,   help='Gravitational-wave approximant. Default: None')
+    parser.add_argument('--kn-approx',    dest='kn_approx',   type=str,     default=None,   help='Kilonova approximant. Default: None')
 
     # Photometric bands information
     parser.add_argument('--band',         dest='bands',       type=str,  action="append",    default=[], help='Name of photometric bands used in the data')

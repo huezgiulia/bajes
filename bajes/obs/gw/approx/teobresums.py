@@ -223,14 +223,15 @@ def teobresums_ecc_wrapper(freqs, params):
                     'inclination':          params['iota'],
                     'initial_frequency':    params['f_min'],
                     'coalescence_angle':    params['phi_ref'],
-                    'use_geometric_units':  0,
-                    'output_hpc':           0,
-                    'interp_uniform_grid':  1,
-                    'output_multipoles':    0,
+                    'use_geometric_units':  'no',
+                    'output_hpc':           'no',
+                    'interp_uniform_grid':  'yes',
+                    'output_multipoles':    'no',
                     'use_mode_lm':          modes,
                     'srate':                params['srate'],
                     'srate_interp':         params['srate'],
-                    'domain':               0
+                    'domain':               0,
+                    'anomaly':              params['anomaly']
                     }
 
     if params['eccentricity'] != 0:
@@ -244,9 +245,6 @@ def teobresums_ecc_wrapper(freqs, params):
         params_teob['chi2x'] = params['s2x']
     if params['s2y'] != 0:
         params_teob['chi2y'] = params['s2y']
-    check = params['s1x']**2+params['s1y']**2+params['s2x']**2+params['s2y']**2
-    if check > 1e-7:
-        params_teob['use_spins'] = 2
 
     # check for additional options
     additional_opts(params_teob, params)

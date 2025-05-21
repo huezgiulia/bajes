@@ -171,8 +171,13 @@ def initialize_gwlikelihood_kwargs(opts):
             ecc_bounds=[opts.ecc_min,opts.ecc_max]
         else:
             ecc_bounds = None
+        if opts.anomaly_min != None and opts.anomaly_max != None:
+            anomaly_bounds=[opts.anomaly_min,opts.anomaly_max]
+        else:
+            anomaly_bounds = None
     else:
         ecc_bounds=None
+        anomaly_bounds=None
 
     if opts.a6c_min != None and opts.a6c_max != None:
         a6c_bounds = [opts.a6c_min,opts.a6c_max]
@@ -218,6 +223,7 @@ def initialize_gwlikelihood_kwargs(opts):
                                                                                   energ_bounds=e_bounds,
                                                                                   angmom_bounds=j_bounds,
                                                                                   ecc_bounds=ecc_bounds,
+                                                                                  anomaly_bounds=anomaly_bounds,
                                                                                   a6c_bounds=a6c_bounds,
                                                                                   marg_phi_ref = opts.marg_phi_ref,
                                                                                   marg_time_shift = opts.marg_time_shift,
@@ -291,6 +297,7 @@ def initialize_gwprior(ifos,
                        energ_bounds      = None,
                        angmom_bounds     = None,
                        ecc_bounds        = None,
+                       anomaly_bounds    = None,
                        a6c_bounds        = None,
                        marg_phi_ref      = False,
                        marg_time_shift   = False,
@@ -781,8 +788,15 @@ def initialize_gwprior(ifos,
             logger.warning("Requested bounds for eccentricity parameter is empty. Setting standard bound [0,1]")
             ecc_bounds = [0., 1.]
         dict['eccentricity'] = Parameter(name='eccentricity', min=ecc_bounds[0], max=ecc_bounds[1])
+        if anomaly_bounds == None:
+            logger.warning("Requested bounds for anomaly parameter is empty. Setting standard bound [0,2pi]")
+            anomaly_bounds = [0., 2.*np.pi]
+            dict['anomaly'] = Parameter(name='anomaly', min=anomaly_bounds[0], max=anomaly_bounds[1], periodic=1, prior='uniform')
+        else:
+            dict['anomaly'] = Parameter(name='anomaly', min=anomaly_bounds[0], max=anomaly_bounds[1])
     else:
         dict['eccentricity'] = Constant('eccentricity', 0.)
+        dict['anomaly'] = Constant('anomaly', 0.)
 
     # include TEOB additional parameters
     if approx == 'TEOBResumS_a6cfree':

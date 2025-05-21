@@ -276,6 +276,7 @@ class KNLikelihood(Likelihood):
                     interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
 
                 residuals   = ((self.filters.magnitudes[bi]-interp_mag)/self.filters.mag_stdev[bi])**2.
-                logL       += -0.5*residuals.sum() + self.logNorm
+                logL       += -0.5*residuals.sum() 
+            logL += self.logNorm
 
         return logL

@@ -324,7 +324,6 @@ class GWBinningLikelihood(Likelihood):
         """
 
         #generate waveform
-        #print(params['mchirp'], params['q'], params['lambda1'], params['lambda2'], "\n")
         hphc    = np.array(self.wave.compute_hphc(params, freqs=self.fbin))
         hphcPT = PolarizationTuple(plus=hphc[0], cross=hphc[1])
 
