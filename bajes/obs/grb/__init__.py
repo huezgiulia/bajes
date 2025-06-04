@@ -7,7 +7,8 @@ from ... import CLIGHT_SI
 
 __known_approxs__   = list(__approx_dict__.keys())
 
-__photometric_bands__       = { 'Xray'      : 1.0e18,
+__photometric_bands__       = { 'Xray'      : 1.2e18,
+                                'Xray2'     : 1.0e18,
                                
                                 # optical bands
                                 'r'         : 4.82e14,
@@ -20,7 +21,7 @@ __photometric_bands__       = { 'Xray'      : 1.0e18,
                                 # 'K'         : 1.37e14,
 
                                 # radio bands
-                                'r'         : 3.0e9,
+                                'R'         : 6.0e9,
                                 'L'         : 1.39e9,
                                 'S'         : 3.5e9,
                                 'Ku'        : 17e9,
@@ -28,4 +29,5 @@ __photometric_bands__       = { 'Xray'      : 1.0e18,
                                 'Ka'        : 30e9,
                                 'ALMA'      : 105.5e9,
                                 'X'         : 11e9,
+                                'O'         : 5.1e14,
                             }

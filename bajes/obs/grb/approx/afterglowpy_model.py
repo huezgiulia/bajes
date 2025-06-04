@@ -12,5 +12,11 @@ def afterglowpy(t, nu, grb_params):
 def afterglow_wrapper(t, nu, params):
     ''' Wrapper for grb model from afterglowpy.'''
 
-    grb_params = params
+    grb_params = params.copy()
+    grb_params['E0']        = 10**params['E0']
+    grb_params['n0']        = 10**params['n0']
+    grb_params['epsilon_e'] = 10**params['epsilon_e']
+    grb_params['epsilon_B'] = 10**params['epsilon_B']
+    # grb_params['d_L']       = params['d_L'] * 3.0857e24
+
     return afterglowpy(t, nu, grb_params)

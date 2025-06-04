@@ -287,8 +287,7 @@ class KNLikelihood(Likelihood):
 # -0.5 (|d-L|/s)**2
 class GRBLikelihood(Likelihood):
 
-    def __init__(self, filters, approx, priors,
-                 n_time=400, t_start=1., t_scale='linear',
+    def __init__(self, filters, approx,
                  **kwargs):
 
         # run standard initialization
@@ -301,46 +300,11 @@ class GRBLikelihood(Likelihood):
         self.logZ_noise = -0.5*sum([np.power(self.filters.magnitudes[bi]/self.filters.mag_stdev[bi],2.).sum() for bi in self.filters.nu])
         self.logNorm    = -0.5*sum([np.log(2*np.pi*self.filters.mag_stdev[bi]**2).sum() for bi in self.filters.nu])
 
-        # initialize time axis for lightcurve model
-        if t_start > 86400:
-            logger.warning("Initial time for lightcurve evaluation is larger than a day (86400 s). Setting t_start to 1h")
-            t_start = 3600
-
-        # the time axis passed to the lightcurve goes from t_start (~0) to the size of the measurement times
-        # subsequently the time axis is rescaled such that t=0 goes to t_gps
-        t_size = np.max(filters.all_times)- np.min(filters.all_times)
-        if 'time_shift' in priors.names:
-            ip = priors.names.index('time_shift')
-            t_size += priors.bounds[ip][1]-priors.bounds[ip][0]
-
-        if t_scale=='linear':
-            t_axis  = np.linspace(t_start, t_size+t_start, n_time)
-        elif t_scale=='geom':
-            t_axis  = np.geomspace(t_start, t_size+t_start, n_time)
-        elif t_scale=='log':
-            t_axis  = np.logspace(np.log10(t_start), np.log10(t_size+t_start), num=n_time)
-        elif t_scale=='mixed':
-            t1      = np.logspace(np.log10(t_start), np.log10(t_size+t_start), num=n_time//2)
-            dt      = t_size/(2+n_time/2)
-            t2      = np.linspace(t_start+dt, t_size+t_start-dt, n_time//2)
-            t_axis  = np.sort(np.concatenate(t1,t2))
-        else:
-            raise ValueError("Unknown property {} for t_scale variable during KNLikelihood initialization.".format(t_scale))
-
         # initialize lightcurve model
         from ..obs.grb.lightcurve import GRB_Lightcurve
         self.light      = GRB_Lightcurve(times=filters.all_times, nu=filters.nu, approx=approx, **kwargs)
-        # print(priors.__dict__)
 
     def log_like(self, params):
-
-        # afterglowpy_params = ['jetType','specType','thetaObs','E0','thetaCore','n0','p','epsilon_e','epsilon_B',
-        #                       'xi_N','d_L','z','b','thetaWing']
-        # new_params = {}
-        # for k in params.keys():
-        #     if k in afterglowpy_params:
-        #         new_params[k] = params[k]
-        # print(params)
 
         # compute lightcurve
         mags    = self.light.compute_mag(params)
@@ -348,9 +312,8 @@ class GRBLikelihood(Likelihood):
 
         for bi in self.filters.nu:
             lambda_bi = bi
-            #interp_mag  = np.interp(self.filters.times[bi], self.light.times, mags[lambda_bi]) ## ADD T_GPS??
-            
-            residuals   = ((self.filters.magnitudes[bi]- mags[lambda_bi])/self.filters.mag_stdev[bi])**2.
+            interp_mag  = np.interp(self.filters.times[bi], self.light.times, mags[lambda_bi]) ## ADD T_GPS??
+            residuals   = ((self.filters.magnitudes[bi]- interp_mag)/self.filters.mag_stdev[bi])**2.
             logL       += -0.5*residuals.sum() 
         logL += self.logNorm
 

@@ -12,13 +12,6 @@ def initialize_grblikelihood_kwargs(opts):
 
     from ..obs.grb.filter import Filter
 
-    if opts.time_shift_max == None:
-        logger.warning("Upper bound for time shift is not provided. Setting default to 1 hr.")
-        opts.time_shift_max = 3600
-
-    if opts.time_shift_min == None:
-        opts.time_shift_min = -opts.time_shift_max
-
     # initialize wavelength dictionary for photometric bands
     nus = {}
     if len(opts.grb_nus) == 0:
@@ -69,7 +62,6 @@ def initialize_grblikelihood_kwargs(opts):
                                 dist_flag=opts.dist_flag,
                                 time_shift_bounds=[opts.time_shift_min, opts.time_shift_max],
                                 fixed_names=opts.fixed_names, fixed_values=opts.fixed_values,
-                                # prior_grid=opts.priorgrid, kind='linear',
                                 )
     
     # save observations in pickle
@@ -101,7 +93,7 @@ def initialize_grbprior(approx,
 
     from ..inf.prior import Prior, Parameter, Variable, Constant
 
-    # initializing disctionary for wrap up all information
+    # initializing dictionary for wrap up all information
     dict = {}
 
     # setting jetType
@@ -116,81 +108,107 @@ def initialize_grbprior(approx,
         raise RuntimeError("Unknown jet type. Please use 'TopHat', 'PowerLaw' or 'Gaussian'.")
 
     # setting parameters
-    dict['thetaObs']        = Parameter(name='thetaObs',
+    if theta_obs_bounds[0] == None and theta_obs_bounds[1] == None:
+        dict['thetaObs']   = Parameter(name='thetaObs',
+                                    min=0,
+                                    max=1.57)
+        logger.warning("Requested bounds for theta-obs parameter is empty. Setting standard bound [0, pi]")
+    else:
+        dict['thetaObs']        = Parameter(name='thetaObs',
                                     min=theta_obs_bounds[0], 
                                     max=theta_obs_bounds[1])
+
     if theta_core_bounds[0] == None and theta_core_bounds[1] == None:
         dict['thetaCore']   = Parameter(name='thetaCore',
                                     min=0, 
                                     max=1.57)
+        logger.warning("Requested bounds for theta-core parameter is empty. Setting standard bound [0, pi]")
     else:
         dict['thetaCore']   = Parameter(name='thetaCore',
                                     min=theta_core_bounds[0], 
                                     max=theta_core_bounds[1])
+
     if e0_bounds[0] == None and e0_bounds[1] == None:
         dict['E0']          = Parameter(name='E0',
-                                    min=0, ## value
-                                    max=1.57) ## value
+                                    min=45,
+                                    max=57)
+        logger.warning("Requested bounds for log E0 parameter is empty. Setting standard bound [45, 57]")
     else:   
         dict['E0']          = Parameter(name='E0',
                                     min=e0_bounds[0], 
                                     max=e0_bounds[1])
+
     if n0_bounds[0] == None and n0_bounds[1] == None:
         dict['n0']          = Parameter(name='n0',
-                                    min=0, 
-                                    max=1e10) ## value
+                                    min=-10,
+                                    max=10)
+        logger.warning("Requested bounds for log n0 parameter is empty. Setting standard bound [-10,10]")
     else:
         dict['n0']          = Parameter(name='n0',
                                     min=n0_bounds[0], 
                                     max=n0_bounds[1])   
+
     if p_bounds[0] == None and p_bounds[1] == None:
         dict['p']           = Parameter(name='p',
-                                    min=0, ## value
-                                    max=1e10) ## value
+                                    min=2,
+                                    max=3)
+        logger.warning("Requested bounds for p parameter is empty. Setting standard bound [2,3]")
     else:
         dict['p']           = Parameter(name='p',
                                     min=p_bounds[0], 
                                     max=p_bounds[1])
+
     if epsilone_bounds[0] == None and epsilone_bounds[1] == None:
         dict['epsilon_e']   = Parameter(name='epsilon_e',
-                                    min=0, 
-                                    max=1e10) ## value
+                                    min=-10,
+                                    max=0)
+        logger.warning("Requested bounds for log epsilon_e parameter is empty. Setting standard bound [-10,0]")
     else:
         dict['epsilon_e']   = Parameter(name='epsilon_e',
                                     min=epsilone_bounds[0], 
                                     max=epsilone_bounds[1])
+        
     if epsilonB_bounds[0] == None and epsilonB_bounds[1] == None:
         dict['epsilon_B']          = Parameter(name='epsilon_B',
-                                    min=0, 
-                                    max=1e10) ## value
+                                    min=-10,
+                                    max=0)
+        logger.warning("Requested bounds for log epsilon_B parameter is empty. Setting standard bound [-10,0]")
     else:
         dict['epsilon_B']   = Parameter(name='epsilon_B',
                                     min=epsilonB_bounds[0], 
                                     max=epsilonB_bounds[1])  
-    if b_bounds[0] == None and b_bounds[1] == None:
-        dict['b']           = Parameter(name='b',
-                                    min=0, 
-                                    max=10) ## value
-    else:      
-        dict['b']           = Parameter(name='b',
-                                    min=b_bounds[0], 
-                                    max=b_bounds[1])   
+ 
     if xin_bounds[0] == None and xin_bounds[1] == None:
         dict['xi_N']        = Parameter(name='xi_N',
-                                    min=0, 
-                                    max=1e10) ## value
+                                    min=0,
+                                    max=1)
+        logger.warning("Requested bounds for xi_N parameter is empty. Setting standard bound [0,1]")
     else: 
         dict['xi_N']        = Parameter(name='xi_N',
                                     min=xin_bounds[0], 
                                     max=xin_bounds[1])
-    if theta_wing_bounds[0] == None and theta_wing_bounds[1] == None:
-        dict['thetaWing']   = Parameter(name='thetaWing',
-                                    min=0, 
-                                    max=1.57) 
-    else:
-        dict['thetaWing']   = Parameter(name='thetaWing',
-                                    min=theta_wing_bounds[0], 
-                                    max=theta_wing_bounds[1])
+
+    if model == 'PowerLaw':
+        if b_bounds[0] == None and b_bounds[1] == None:
+            dict['b']           = Parameter(name='b',
+                                        min=0, 
+                                        max=10)
+            logger.warning("Requested bounds for b parameter is empty. Setting standard bound [0,10]")
+        else:
+            dict['b']           = Parameter(name='b',
+                                        min=b_bounds[0],
+                                    max=b_bounds[1])
+
+    if model == 'PowerLaw' or model == 'Gaussian':
+        if theta_wing_bounds[0] == None and theta_wing_bounds[1] == None:
+            dict['thetaWing']   = Parameter(name='thetaWing',
+                                        min=0,
+                                        max=1.57)
+        else:
+            dict['thetaWing']   = Parameter(name='thetaWing',
+                                        min=theta_wing_bounds[0], 
+                                        max=theta_wing_bounds[1])
+            logger.warning("Requested bounds for theta-wing parameter is empty. Setting standard bound [0, pi]")
 
     # setting distance
     if dist_min == None and dist_max == None:
@@ -214,34 +232,6 @@ def initialize_grbprior(approx,
                                        min=dist_min,
                                        max=dist_max,
                                        prior='quadratic')
-    elif dist_flag=='com':
-        from ..obs.utils.cosmo import Cosmology
-        from .utils import _get_astropy_version
-        _av = _get_astropy_version()
-        if int(_av[0])>=5:
-            cosmo = Cosmology(cosmo='Planck18')
-        else:
-            cosmo = Cosmology(cosmo='Planck18_arXiv_v2')
-        dict['d_L']   = Parameter(name='d_L',
-                                       min=dist_min,
-                                       max=dist_max,
-                                       func=log_prior_comoving_volume,
-                                       func_kwarg={'cosmo': cosmo},
-                                       interp_kwarg=interp_kwarg)
-    elif dist_flag=='src':
-        from ..obs.utils.cosmo import Cosmology
-        from .utils import _get_astropy_version
-        _av = _get_astropy_version()
-        if int(_av[0])>=5:
-            cosmo = Cosmology(cosmo='Planck18')
-        else:
-            cosmo = Cosmology(cosmo='Planck18_arXiv_v2')
-        dict['d_L']   = Parameter(name='d_L',
-                                       min=dist_min,
-                                       max=dist_max,
-                                       func=log_prior_sourceframe_volume,
-                                       func_kwarg={'cosmo': cosmo},
-                                       interp_kwarg=interp_kwarg)
     else:
         logger.error("Invalid distance flag for Prior initialization. Please use 'vol', 'com' or 'log'.")
         raise RuntimeError("Invalid distance flag for Prior initialization. Please use 'vol', 'com' or 'log'.")
@@ -251,8 +241,6 @@ def initialize_grbprior(approx,
         logger.warning("Requested bounds for time_shift parameter is empty. Setting standard bound [-1.0,+1.0] day")
         time_shift_bounds  = [-86400.,+86400.]
 
-    #dict['time_shift']  = Parameter(name='time_shift', min=time_shift_bounds[0], max=time_shift_bounds[1]) ## ADD TIME SHIFT??
-
     # set fixed parameters
     if len(fixed_names) != 0 :
         assert len(fixed_names) == len(fixed_values)
@@ -261,8 +249,6 @@ def initialize_grbprior(approx,
                 logger.warning("Requested fixed parameter ({}={}) is not in the list of all parameters. The command will be ignored.".format(ni,vi))
             else:
                 dict[ni] = Constant(ni, vi)
-
-    # dict['tgps']  = Constant('tgps', t_gps) ## not a parameter of afterglowpy, find another way to pass it
 
     params, variab, const = fill_params_from_dict(dict)
 
