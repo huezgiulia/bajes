@@ -310,6 +310,8 @@ class SamplerDynesty(SamplerBody):
         self.nested_samples     = self.results.samples
         logger.info(" - number of nested samples : {}".format(len(self.nested_samples)))
 
+        print("logzerr: ", np.sqrt(2*self.results.information[-1]/self.results.nlive))
+
         # extract posteriors
         ns = []
         wt = []

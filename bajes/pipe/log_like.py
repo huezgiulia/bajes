@@ -307,14 +307,19 @@ class GRBLikelihood(Likelihood):
     def log_like(self, params):
 
         # compute lightcurve
-        mags    = self.light.compute_mag(params)
-        logL    = 0.
+        try: 
+            mags    = self.light.compute_mag(params)
+            logL    = 0.
 
-        for bi in self.filters.nu:
-            lambda_bi = bi
-            interp_mag  = np.interp(self.filters.times[bi], self.light.times, mags[lambda_bi]) ## ADD T_GPS??
-            residuals   = ((self.filters.magnitudes[bi]- interp_mag)/self.filters.mag_stdev[bi])**2.
-            logL       += -0.5*residuals.sum() 
-        logL += self.logNorm
+            for bi in self.filters.nu:
+                lambda_bi = bi
+                interp_mag  = np.interp(self.filters.times[bi], self.light.times, mags[lambda_bi])
+                residuals   = ((self.filters.magnitudes[bi]- interp_mag)/self.filters.mag_stdev[bi])**2.
+                logL       += -0.5*residuals.sum() 
+            logL += self.logNorm
 
-        return logL
+            return logL
+        except Exception as e:
+           logger.error(f"Afterglowpy error: {e}")
+           return -np.inf
+

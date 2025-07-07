@@ -156,6 +156,22 @@ def get_detector_information(ifo):
         yarm_azimuth    =  0.7853981634
         xarm_tilt       = 0.
         yarm_tilt       = 0.
+    elif ifo=='ET-EMR':
+        latitude        = 0.8867
+        longitude       = 0.1063
+        elevation       = 51.884
+        xarm_azimuth    = 0.0438
+        yarm_azimuth    = 1.615
+        xarm_tilt       = 0.
+        yarm_tilt       = 0.
+    elif ifo=='ET-Sar':
+        latitude        = 0.7057
+        longitude       = 0.1615
+        elevation       = 59.735
+        xarm_azimuth    = 0.8285
+        yarm_azimuth    = 2.3997
+        xarm_tilt       = 0.
+        yarm_tilt       = 0.
     else:
         raise ValueError("Can't get information from input detector. Please check you use a correct name. Available options: ['H1', 'L1', 'V1', 'K1', 'G1', 'I1', 'ET1', 'ET2', 'ET3', 'CE'].")
 
