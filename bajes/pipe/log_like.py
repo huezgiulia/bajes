@@ -14,6 +14,36 @@ try:
 except ImportError:
     from scipy.misc import logsumexp
 
+def upper_limit(sigma, data, model = None):
+    '''
+    sigma >  0 corresponds to magnitude data below threshold: the sigma are good and not touched
+    sigma <= 0 corresponds to magnitude data above threshold:
+          with mag_diff = mag_model - mag_data, thus
+          large_sigma_mask: mag_diff >= 0 corresponds to the model being above threshold as well,
+                            sigma cannot discriminate the model and a large sigma value is returned
+          abs_sigma_mask:   mag_diff <  0 corresponds to the model being below threshold,
+                            sigma can discriminate the model and the absolute value of sigma is returned
+    '''
+    sigma = np.array(sigma).copy()
+    for i in range(0,len(sigma)):
+        if sigma[i] <= 0:
+            if np.any(model == None):
+                mag_diff = - 1
+            else: mag_diff =  model[i] - data[i]
+            if mag_diff >= 0:
+                sigma[i] = 1e6
+            else:
+                if sigma[i] < 0:
+                    sigma[i] = np.abs(sigma[i])
+                else:
+                    flux = 10**(- 0.4 * (data[i] + 48.6))
+                    flux_low = flux - 0.1 * flux
+                    flux_high = flux + 0.1 * flux
+                    mag_low = -2.5 * np.log10(flux_high) - 48.6
+                    mag_high = -2.5 * np.log10(flux_low) - 48.6
+                    sigma[i] = mag_high - mag_low
+    return sigma
+
 # GRAVITATIONAL-WAVE LIKELIHOOD
 # Gaussian Likelihood function:
 # -0.5 (d-h|d-h) = Re(d|h) - 0.5 (d|d) - 0.5 (h|h)
@@ -296,9 +326,8 @@ class GRBLikelihood(Likelihood):
         # set data properties
         self.filters = filters
 
-        # compute data normalization
-        self.logZ_noise = -0.5*sum([np.power(self.filters.magnitudes[bi]/self.filters.mag_stdev[bi],2.).sum() for bi in self.filters.nu])
-        self.logNorm    = -0.5*sum([np.log(2*np.pi*self.filters.mag_stdev[bi]**2).sum() for bi in self.filters.nu])
+        # self.logZ_noise = -0.5*sum([np.power(self.filters.magnitudes[bi]/self.filters.mag_stdev[bi],2.).sum() for bi in self.filters.nu])        
+        self.logNorm    = -0.5*sum([np.log(2*np.pi*upper_limit(self.filters.mag_stdev[bi],self.filters.magnitudes[bi])**2).sum() for bi in self.filters.nu])
 
         # initialize lightcurve model
         from ..obs.grb.lightcurve import GRB_Lightcurve
@@ -313,8 +342,8 @@ class GRBLikelihood(Likelihood):
 
             for bi in self.filters.nu:
                 lambda_bi = bi
-                interp_mag  = np.interp(self.filters.times[bi], self.light.times, mags[lambda_bi])
-                residuals   = ((self.filters.magnitudes[bi]- interp_mag)/self.filters.mag_stdev[bi])**2.
+                interp_mag  = np.interp(self.filters.times[bi], self.light.times, mags[lambda_bi])                 
+                residuals = ((self.filters.magnitudes[bi]- interp_mag)/upper_limit(self.filters.mag_stdev[bi], self.filters.magnitudes[bi], interp_mag))**2.
                 logL       += -0.5*residuals.sum() 
             logL += self.logNorm
 
@@ -322,4 +351,3 @@ class GRBLikelihood(Likelihood):
         except Exception as e:
            logger.error(f"Afterglowpy error: {e}")
            return -np.inf
-
