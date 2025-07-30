@@ -60,4 +60,8 @@ __photometric_bands__       = { 'Xray'      : 1.2e18,
                                 'ALMA'      : 105.5e9,
                                 'X'         : 11e9,
                                 'O'         : 5.1e14,
+                                'radio-3GHz': 3e9,
+                                'radio-6GHz': 6e9,
+                                'X-ray-1keV': 2.42e17,
+                                'bessellv'  : 5.08e14,
                             }

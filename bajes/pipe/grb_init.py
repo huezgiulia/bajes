@@ -37,7 +37,7 @@ def initialize_grblikelihood_kwargs(opts):
     # initialize grb keyword arguments
     l_kwargs = {}
     l_kwargs['approx']              = opts.grb_approx
-    l_kwargs['filters']             = Filter(opts.mag_folder, nus)
+    l_kwargs['filters']             = Filter(opts.mag_folder_grb, nus)
 
     # set intrinsic parameters bounds
     theta_obs_bounds    = [opts.theta_obs_min, opts.theta_obs_max]

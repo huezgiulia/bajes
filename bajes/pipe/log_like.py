@@ -35,6 +35,7 @@ def upper_limit(sigma, data, model = None):
             else:
                 if sigma[i] < 0:
                     sigma[i] = np.abs(sigma[i])
+
                 else:
                     flux = 10**(- 0.4 * (data[i] + 48.6))
                     flux_low = flux - 0.1 * flux
@@ -326,7 +327,7 @@ class GRBLikelihood(Likelihood):
         # set data properties
         self.filters = filters
 
-        # self.logZ_noise = -0.5*sum([np.power(self.filters.magnitudes[bi]/self.filters.mag_stdev[bi],2.).sum() for bi in self.filters.nu])        
+        # self.logZ_noise = -0.5*sum([np.power(self.filters.magnitudes[bi]/self.filters.mag_stdev[bi],2.).sum() for bi in self.filters.nu])
         self.logNorm    = -0.5*sum([np.log(2*np.pi*upper_limit(self.filters.mag_stdev[bi],self.filters.magnitudes[bi])**2).sum() for bi in self.filters.nu])
 
         # initialize lightcurve model
@@ -342,7 +343,7 @@ class GRBLikelihood(Likelihood):
 
             for bi in self.filters.nu:
                 lambda_bi = bi
-                interp_mag  = np.interp(self.filters.times[bi], self.light.times, mags[lambda_bi])                 
+                interp_mag  = np.interp(self.filters.times[bi], self.light.times, mags[lambda_bi])
                 residuals = ((self.filters.magnitudes[bi]- interp_mag)/upper_limit(self.filters.mag_stdev[bi], self.filters.magnitudes[bi], interp_mag))**2.
                 logL       += -0.5*residuals.sum() 
             logL += self.logNorm

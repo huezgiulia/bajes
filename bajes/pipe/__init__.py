@@ -485,6 +485,7 @@ def parse_setup_options():
     #
 
     # Data information
+    parser.add_argument('--mag-folder-grb',         dest='mag_folder_grb',      type=str,                         default=None,   help='Path to magnitudes data folder for GRB')
     parser.add_argument('--grb-approx',             dest='grb_approx',          type=str,                         default=None,   help='GRB approximant. Default: None')
     parser.add_argument('--grb-model',              dest='grb_model',           type=str,                         default=None,   help='GRB model. Default: None. Available options: [Top-hat, Gaussian, Power-law].')
 
