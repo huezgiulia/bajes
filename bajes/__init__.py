@@ -78,5 +78,6 @@ SEC_2_DAY       = 1.157407407e-5            #[day/s]
 DAY_2_SEC       = 86400.                    #[sec/day]
 SEC_2_HOUR      = 2.777778e-4               #[hr/s]
 DAY_2_HOUR      = 24.                       #[hr/day]
+MPC_2_CM        = 3.0857e24                 #[cm/Mpc]
 
 from . import inf, obs

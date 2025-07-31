@@ -17,6 +17,6 @@ def afterglow_wrapper(t, nu, params):
     grb_params['n0']        = 10**params['n0']
     grb_params['epsilon_e'] = 10**params['epsilon_e']
     grb_params['epsilon_B'] = 10**params['epsilon_B']
-    # grb_params['d_L']       = params['d_L'] * 3.0857e24
+    # grb_params['d_L']       = params['d_L'] * MPC_2_CM
 
     return afterglowpy(t, nu, grb_params)

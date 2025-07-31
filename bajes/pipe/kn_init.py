@@ -82,15 +82,16 @@ def initialize_knlikelihood_kwargs(opts):
     l_kwargs['t_start']             = opts.init_t
     l_kwargs['t_scale']             = opts.t_scale
     l_kwargs['use_calib_sigma_lc']  = opts.use_calib_sigma_lc
-    
+
     # inizialize MKN class
-    from xkn import MKN, MKNConfig
+
     if not opts.xkn:
             logger.info("No config file was passed for MKN inizialization.")
             l_kwargs['mkn_config']          = None
             l_kwargs['xkn_config']          = None
 
     else:
+        from xkn import MKN, MKNConfig
         config_path  = os.path.abspath(opts.xkn)
         tag             = config_path.split('.')[-1]
 
