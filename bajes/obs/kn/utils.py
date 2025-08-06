@@ -74,3 +74,29 @@ def NRfit_log_mass_disk(mtot, q, lambda1, lambda2):
     corr_l = 1. + Abar*((1./np.pi)*np.arctan((lambda1+lambda2-Lbar)/Sbar) - 0.5)
     corr_p = 1 + a1*(lambda1)**2 + a2*(lambda2)**2 + b1*m1**2 + b2*m2**2
     return alpha * corr_l * corr_p
+
+def compute_integral(E0, theta_C, theta_w, N=50):
+    # Gauss-Legendre nodes and weights
+    x, w = np.polynomial.legendre.leggauss(N)
+
+    # Map from x in [-1, 1] to theta in [0, theta_w]
+    theta = 0.5 * theta_w * (x + 1)
+
+    E_theta = E0 * np.exp(-0.5 * (theta / theta_C)**2)
+    integrand = E_theta * np.sin(theta)
+    integral = 2 * np.pi * 0.5 * theta_w * np.dot(w, integrand)
+
+    return integral
+
+def joint_rel_mdisc(thetaCore, E0, thetaWing, disc_sec_frac, **kwargs):
+    """
+        Relation to connect the disc mass
+        to the isotropic energy of the GRB
+        for Gaussian jet
+        https://arxiv.org/abs/2006.07376
+    """
+    eta = 0.6e-3
+    fw = 0.3
+    energy = compute_integral(E0, thetaCore, thetaWing)
+    mdisc  = energy * thetaCore**2 / (2 * eta * (1 - fw))
+    return mdisc * disc_sec_frac

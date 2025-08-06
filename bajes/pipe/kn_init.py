@@ -239,6 +239,7 @@ def initialize_knprior(approx,
     elif approx=='GrossmanKBP-2-polar':         comps = ['isotropic', 'polar']
     elif approx=='GrossmanKBP-2-eq+pol':        comps = ['equatorial', 'polar']
     elif 'GrossmanKBP-2-NRfits' in approx:      comps = ['dyn', 'wind']
+    elif 'GrossmanKBP-2-joint-grb' in approx:   comps = ['dynamics', 'secular']
     elif approx=='GrossmanKBP-3-isotropic':     comps = ['isotropic1', 'isotropic2', 'isotropic3']
     elif approx=='GrossmanKBP-3-anisotropic':   comps = ['isotropic', 'equatorial', 'polar']
     elif approx=='Xkn-1':                       comps = ['dynamics']
@@ -376,6 +377,18 @@ def initialize_knprior(approx,
         dict['mej_{}'.format(dyn_tag)]  = Variable(name='mej_{}'.format(dyn_tag),   func=NRfit_recal_mass_dyn)
         dict['vel_{}'.format(dyn_tag)]  = Variable(name='vel_{}'.format(dyn_tag),   func=NRfit_recal_vel_dyn)
         dict['mej_{}'.format(wind_tag)] = Variable(name='mej_{}'.format(wind_tag),  func=NRfit_recal_mass_wind)
+
+    if 'joint-grb' in approx:
+        logger.warning("Activating relation for secular mass and isotropic energy. This option works only with joint KN+GRB model. Please be sure you are using the correct framework.")
+        
+        dyn_tag     = comps[0]
+        sec_tag    = comps[1]
+
+        from ..obs.kn.utils import joint_rel_mdisc
+
+        dict['disc_sec_frac']           = Parameter(name='disc_sec_frac',         min = 0.,   max = 0.6,   prior='uniform') 
+        #dict['disc_sec_frac']           = Constant(name='disc_sec_frac',         value=0.3)
+        dict['mej_{}'.format(sec_tag)]  = Variable(name='mej_{}'.format(sec_tag),   func=joint_rel_mdisc)
 
     # include theoretical error
     if use_calib_sigma:

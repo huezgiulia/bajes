@@ -1,7 +1,7 @@
 from __future__ import division, unicode_literals, absolute_import
 import numpy as np
 import afterglowpy as grb
-
+from bajes import MPC_2_CM
 
 def afterglowpy(t, nu, grb_params):
     # compute fluxes

@@ -47,7 +47,9 @@ __approx_dict__ = { ### TIME-DOMAIN
                                                              'type': 'fnc'},
                     'Xkn-3':                                {'path': 'bajes.obs.kn.approx.xkn_model.xkn_wrapper_3comp',
                                                              'type': 'fnc'},
-                  }
+                    'GrossmanKBP-2-joint-grb-iso':          {'path': 'bajes.obs.kn.approx.grossman_kbp.korobkin_barnes_grossman_perego_et_al_two_joint_grb_isotropic_wrapper',
+                                                             'type': 'cls'},
+                    }
 
 def __get_lightcurve_generator__(approx, times, lambdas, **kwargs):
 
