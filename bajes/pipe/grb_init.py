@@ -210,6 +210,10 @@ def initialize_grbprior(approx,
                                         max=theta_wing_bounds[1])
             logger.warning("Requested bounds for theta-wing parameter is empty. Setting standard bound [0, pi]")
 
+    dict['z']               = Parameter(name='z',
+                                    min=0.001,
+                                    max=10)
+
     # setting distance
     if dist_min == None and dist_max == None:
         logger.warning("Requested bounds for distance parameter is empty. Setting standard bound [10,1000] Mpc")
