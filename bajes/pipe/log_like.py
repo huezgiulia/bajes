@@ -267,6 +267,7 @@ class KNLikelihood(Likelihood):
         from ..obs.kn.lightcurve import Lightcurve
         light_kwargs    = {'v_min': v_min, 'n_v': n_v, 't_start': t_start , 'xkn_config' : kwargs['xkn_config'], 'mkn_config' : kwargs['mkn_config']}
         self.light      = Lightcurve(times=t_axis, lambdas=filters.lambdas, approx=approx, **light_kwargs)
+        self.approx = approx
 
         # calib_sigma flag
         self.use_calib_sigma = use_calib_sigma_lc
@@ -285,6 +286,14 @@ class KNLikelihood(Likelihood):
                 logL = -np.inf
                 return logL
             
+        if 'sum' in self.approx:
+            # check that the sum of the component masses is the one from the fit
+            from ..obs.kn.utils import NRfit_recal_mass_dyn, NRfit_recal_mass_wind
+            Mtot_fit = NRfit_recal_mass_dyn(1.1975, 1.4, 254, 639, 0) + NRfit_recal_mass_wind(1.1975, 1.4, 254, 639, 0.4)
+            if (np.abs(params['mej_dynamics'] + params['mej_wind'] - Mtot_fit)) > 1e-4:
+                logL = -np.inf
+                return logL
+
         # compute lightcurve
 
         # If the used model is one inside bajes, 'mags' is a magnitudes dictionary

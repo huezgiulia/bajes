@@ -242,6 +242,7 @@ def initialize_knprior(approx,
     elif approx=='GrossmanKBP-2-eq+pol':        comps = ['equatorial', 'polar']
     elif 'GrossmanKBP-2-NRfits' in approx:      comps = ['dynamics', 'wind']
     elif 'GrossmanKBP-2-joint-grb' in approx:   comps = ['dynamics', 'secular']
+    elif 'GrossmanKBP-2-sum' in approx:         comps = ['dynamics', 'wind']
     elif approx=='GrossmanKBP-3-isotropic':     comps = ['isotropic1', 'isotropic2', 'isotropic3']
     elif approx=='GrossmanKBP-3-anisotropic':   comps = ['isotropic', 'equatorial', 'polar']
     elif approx=='Xkn-1':                       comps = ['dynamics']
@@ -362,8 +363,6 @@ def initialize_knprior(approx,
 
     # setting inclination
     dict['cos_iota']   =  Parameter(name='cos_iota', min=-1., max=+1.)
-
-    
 
     # use NR fits for dynamical ejecta and baryonic wind
     if 'GrossmanKBP-2-NRfits' in approx:

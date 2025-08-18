@@ -462,6 +462,7 @@ def parse_setup_options():
     parser.add_argument('--heat-alpha',             dest='heating_alpha',       type=float,                       default=1.3,  help='Alpha coefficient for heating rate (default 1.3)')
     parser.add_argument('--heat-time',              dest='heating_time',        type=float,                       default=1.3,  help='Time coefficient for heating rate (default 1.3)')
     parser.add_argument('--heat-sigma',             dest='heating_sigma',       type=float,                       default=0.11, help='Sigma coefficient for heating rate (default 0.11)')
+    parser.add_argument('--sample-heating-corr',    dest='heat_sampling_corr',                action="store_true",default=False,help='Include a heating rate correction coefficient in sampling, default False')
 
     # Flags 
     parser.add_argument('--use-mag-dev',            dest='use_calib_sigma_lc',                action="store_true",default=False,help='Include systematic deviation parameter for each band')
