@@ -272,7 +272,19 @@ class KNLikelihood(Likelihood):
         self.use_calib_sigma = use_calib_sigma_lc
 
     def log_like(self, params):
-
+        
+        # check the dynamical velocity  parameters value (for the case with NR fit)
+        if 'Xkn' in self.approx:
+            if params['vel_dynamics'] > 0.333 or params['vel_dynamics'] < 1e-4:
+                logL = -np.inf
+                return logL
+        
+        if '3-NRfits' in self.approx:
+            # check the two disk_frac parameters values (for the case with NR fit)
+            if params['disk_frac_sec'] + params['disk_frac_wind'] > 0.6:
+                logL = -np.inf
+                return logL
+            
         # compute lightcurve
 
         # If the used model is one inside bajes, 'mags' is a magnitudes dictionary

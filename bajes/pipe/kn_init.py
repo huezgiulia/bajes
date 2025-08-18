@@ -184,7 +184,8 @@ def initialize_knlikelihood_kwargs(opts):
                                 dist_max=opts.dist_max, dist_min=opts.dist_min,
                                 eps0_max=opts.eps_max,  eps0_min=opts.eps_min,
                                 dist_flag=opts.dist_flag, log_eps0_flag=opts.log_eps_flag,
-                                heating_sampling=opts.heat_sampling, heating_alpha=opts.heating_alpha,
+                                heating_sampling=opts.heat_sampling,  heat_sampling_corr=opts.heat_sampling_corr,
+                                heating_alpha=opts.heating_alpha,
                                 heating_time=opts.heating_time,heating_sigma=opts.heating_sigma,
                                 time_shift_bounds=[opts.time_shift_min, opts.time_shift_max],
                                 fixed_names=opts.fixed_names, fixed_values=opts.fixed_values,
@@ -216,6 +217,7 @@ def initialize_knprior(approx,
                        dist_flag            = False,
                        log_eps0_flag        = False,
                        heating_sampling     = False,
+                       heat_sampling_corr   = False,
                        heating_alpha        = 1.3,
                        heating_time         = 1.3,
                        heating_sigma        = 0.11,
@@ -243,8 +245,12 @@ def initialize_knprior(approx,
     elif approx=='GrossmanKBP-3-isotropic':     comps = ['isotropic1', 'isotropic2', 'isotropic3']
     elif approx=='GrossmanKBP-3-anisotropic':   comps = ['isotropic', 'equatorial', 'polar']
     elif approx=='Xkn-1':                       comps = ['dynamics']
+    elif 'Xkn-1-NRfits' in approx:              comps = ['dynamics']
     elif approx=='Xkn-2':                       comps = ['dynamics', 'secular']
+    elif 'Xkn-2-NRfits' in approx:              comps = ['dynamics', 'secular']
     elif approx=='Xkn-3':                       comps = ['dynamics', 'secular', 'wind']
+    elif 'Xkn-3-NRfits' in approx:              comps = ['dynamics', 'secular', 'wind']
+
 
     # initializing disctionary for wrap up all information
     dict = {}
@@ -287,6 +293,10 @@ def initialize_knprior(approx,
         dict['eps_alpha']   = Constant('eps_alpha', heating_alpha)
         dict['eps_time']    = Constant('eps_time',  heating_time)
         dict['eps_sigma']   = Constant('eps_sigma', heating_sigma)
+
+    if heat_sampling_corr:
+        logger.warning("Including heating correction coefficiets in sampling using default bounds with uniform prior.")
+        dict['nuc_corr']   = Parameter(name='nuc_corr', min = 1., max = 10., prior='uniform')
 
     # setting distance
     if dist_min == None and dist_max == None:
@@ -363,20 +373,35 @@ def initialize_knprior(approx,
         # These parameters are used to determined the predictions of the fits and they are automatically included by the
         # GW initialization routine. So the NR ejecta fits work only with GW+KN framework.
 
-        dyn_tag     = comps[0]
-        wind_tag    = comps[1]
+        # dyn_tag     = comps[0]
+        # wind_tag    = comps[1]
 
-        from ..obs.kn.utils import NRfit_recal_mass_dyn, NRfit_recal_vel_dyn, NRfit_recal_mass_wind
+        # from ..obs.kn.utils import NRfit_recal_mass_dyn, NRfit_recal_vel_dyn, NRfit_recal_mass_wind
+
+        # # include calibrations and disk fracion
+        # dict['disk_frac_wind']    = Parameter(name='disk_frac_wind',      min = 0.,   max = 1.,   prior='uniform')
+        # dict['NR_fit_recal_mdyn'] = Parameter(name='NR_fit_recal_mdyn',   min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.136)
+        # dict['NR_fit_recal_vdyn'] = Parameter(name='NR_fit_recal_vdyn',   min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.21)
+
+        # # fix (m-dyn, v-dyn, m-wind) with NR fits
+        # dict['mej_{}'.format(dyn_tag)]  = Variable(name='mej_{}'.format(dyn_tag),   func=NRfit_recal_mass_dyn)
+        # dict['vel_{}'.format(dyn_tag)]  = Variable(name='vel_{}'.format(dyn_tag),   func=NRfit_recal_vel_dyn)
+        # dict['mej_{}'.format(wind_tag)] = Variable(name='mej_{}'.format(wind_tag),  func=NRfit_recal_mass_wind)
+
+        dyn_tag    = comps[0]
+        sec_tag    = comps[1]
+
+        from ..obs.kn.utils import NRfit_recal_mass_dyn_sum_breschi, NRfit_recal_vel_dyn_breschi, NRfit_recal_mass_sec_sum_breschi
 
         # include calibrations and disk fracion
-        dict['disk_frac']         = Parameter(name='disk_frac',         min = 0.,   max = 1.,   prior='uniform')
-        dict['NR_fit_recal_mdyn'] = Parameter(name='NR_fit_recal_mdyn', min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.136)
-        dict['NR_fit_recal_vdyn'] = Parameter(name='NR_fit_recal_vdyn', min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.21)
+        dict['disk_frac_sec']     = Parameter(name='disk_frac_sec',         min = 0.,   max = 1,   prior='uniform')
+        dict['frac']              = Parameter(name='frac',                  min = 0.,   max = 1,   prior='uniform')
 
         # fix (m-dyn, v-dyn, m-wind) with NR fits
-        dict['mej_{}'.format(dyn_tag)]  = Variable(name='mej_{}'.format(dyn_tag),   func=NRfit_recal_mass_dyn)
-        dict['vel_{}'.format(dyn_tag)]  = Variable(name='vel_{}'.format(dyn_tag),   func=NRfit_recal_vel_dyn)
-        dict['mej_{}'.format(wind_tag)] = Variable(name='mej_{}'.format(wind_tag),  func=NRfit_recal_mass_wind)
+        dict['mej_{}'.format(dyn_tag)]  = Variable(name='mej_{}'.format(dyn_tag),       func=NRfit_recal_mass_dyn_sum_breschi)
+        dict['vel_{}'.format(dyn_tag)]  = Variable(name='vel_{}'.format(dyn_tag),       func=NRfit_recal_vel_dyn_breschi)
+        dict['mej_{}'.format(sec_tag)]  = Variable(name='mej_{}'.format(sec_tag),       func=NRfit_recal_mass_sec_sum_breschi)
+
 
     if 'joint-grb' in approx:
         logger.warning("Activating relation for secular mass and isotropic energy. This option works only with joint KN+GRB model. Please be sure you are using the correct framework.")
@@ -389,6 +414,163 @@ def initialize_knprior(approx,
         dict['disc_sec_frac']           = Parameter(name='disc_sec_frac',         min = 0.,   max = 0.6,   prior='uniform') 
         #dict['disc_sec_frac']           = Constant(name='disc_sec_frac',         value=0.3)
         dict['mej_{}'.format(sec_tag)]  = Variable(name='mej_{}'.format(sec_tag),   func=joint_rel_mdisc)
+
+    if 'Xkn-1-NRfits' in approx:
+
+        logger.warning("Activating NR fits for ejecta properties. This option works only with joint KN+GW model. Please be sure you are using the correct framework.")
+        # NOTE: the NR fits work only if the prior already includes the BNS parameters, i.e. mchirp, q, lambda1, lambda2.
+        # These parameters are used to determined the predictions of the fits and they are automatically included by the
+        # GW initialization routine. So the NR ejecta fits work only with GW+KN framework.
+
+        dyn_tag     = comps[0]
+        
+        if approx=='Xkn-1-NRfits-old':
+            from ..obs.kn.utils import NRfit_recal_mass_dyn, NRfit_recal_vel_dyn, NRfit_recal_mass_sec, NRfit_recal_mass_wind
+
+            # include calibrations and disk fracion
+            #dict['NR_fit_recal_mdyn'] = Parameter(name='NR_fit_recal_mdyn', min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.136) #delta_1 articolo joint
+            #dict['NR_fit_recal_vdyn'] = Parameter(name='NR_fit_recal_vdyn', min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.21) #delta_2 articolo joint
+
+            # fix (m-dyn, v-dyn, m-wind) with NR fits
+            dict['mej_{}'.format(dyn_tag)]  = Variable(name='mej_{}'.format(dyn_tag),   func=NRfit_recal_mass_dyn)
+            dict['vel_{}'.format(dyn_tag)]  = Variable(name='vel_{}'.format(dyn_tag),   func=NRfit_recal_vel_dyn)
+        
+        elif approx=='Xkn-1-NRfits-breschi':
+            from ..obs.kn.utils import NRfit_recal_mass_dyn_breschi, NRfit_recal_vel_dyn_breschi, NRfit_recal_mass_sec_breschi, NRfit_recal_mass_wind_breschi
+
+            # include calibrations and disk fracion
+            #dict['NR_fit_recal_mdyn'] = Parameter(name='NR_fit_recal_mdyn', min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.136) #delta_1 articolo joint
+            #dict['NR_fit_recal_vdyn'] = Parameter(name='NR_fit_recal_vdyn', min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.21) #delta_2 articolo joint
+
+            # fix (m-dyn, v-dyn, m-wind) with NR fits
+            dict['mej_{}'.format(dyn_tag)]  = Variable(name='mej_{}'.format(dyn_tag),   func=NRfit_recal_mass_dyn_breschi)
+            dict['vel_{}'.format(dyn_tag)]  = Variable(name='vel_{}'.format(dyn_tag),   func=NRfit_recal_vel_dyn_breschi)
+
+        elif approx=='Xkn-1-NRfits-nedora':
+            from ..obs.kn.utils import NRfit_recal_mass_dyn_nedora, NRfit_recal_vel_dyn_nedora, NRfit_recal_mass_sec_nedora, NRfit_recal_mass_wind_nedora
+
+            # include calibrations and disk fracion
+            #dict['NR_fit_recal_mdyn'] = Parameter(name='NR_fit_recal_mdyn', min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.136) #delta_1 articolo joint
+            #dict['NR_fit_recal_vdyn'] = Parameter(name='NR_fit_recal_vdyn', min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.21) #delta_2 articolo joint
+
+            # fix (m-dyn, v-dyn, m-wind) with NR fits
+            dict['mej_{}'.format(dyn_tag)]  = Variable(name='mej_{}'.format(dyn_tag),   func=NRfit_recal_mass_dyn_nedora)
+            dict['vel_{}'.format(dyn_tag)]  = Variable(name='vel_{}'.format(dyn_tag),   func=NRfit_recal_vel_dyn_nedora)
+
+        else:
+            logger.error("Invalid model with NR fits or invalid fit formula")
+
+    if 'Xkn-2-NRfits' in approx:
+
+        logger.warning("Activating NR fits for ejecta properties. This option works only with joint KN+GW model. Please be sure you are using the correct framework.")
+        # NOTE: the NR fits work only if the prior already includes the BNS parameters, i.e. mchirp, q, lambda1, lambda2.
+        # These parameters are used to determined the predictions of the fits and they are automatically included by the
+        # GW initialization routine. So the NR ejecta fits work only with GW+KN framework.
+
+        dyn_tag     = comps[0]
+        sec_tag    = comps[1]
+        
+        if approx=='Xkn-2-NRfits-old':
+            from ..obs.kn.utils import NRfit_recal_mass_dyn, NRfit_recal_vel_dyn, NRfit_recal_mass_sec
+
+            # include calibrations and disk fracion
+            dict['disk_frac_sec']         = Parameter(name='disk_frac_sec',         min = 0.,   max = 0.5,   prior='uniform') # epsilon articolo joint
+            #dict['NR_fit_recal_mdyn'] = Parameter(name='NR_fit_recal_mdyn', min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.136) #delta_1 articolo joint
+            #dict['NR_fit_recal_vdyn'] = Parameter(name='NR_fit_recal_vdyn', min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.21) #delta_2 articolo joint
+
+            # fix (m-dyn, v-dyn, m-wind) with NR fits
+            dict['mej_{}'.format(dyn_tag)]  = Variable(name='mej_{}'.format(dyn_tag),   func=NRfit_recal_mass_dyn)
+            dict['vel_{}'.format(dyn_tag)]  = Variable(name='vel_{}'.format(dyn_tag),   func=NRfit_recal_vel_dyn)
+            dict['mej_{}'.format(sec_tag)]  = Variable(name='mej_{}'.format(sec_tag),   func=NRfit_recal_mass_sec)
+        
+        elif approx=='Xkn-2-NRfits-breschi':
+            from ..obs.kn.utils import NRfit_recal_mass_dyn_breschi, NRfit_recal_vel_dyn_breschi, NRfit_recal_mass_sec_breschi
+
+            # include calibrations and disk fracion
+            dict['disk_frac_sec']     = Parameter(name='disk_frac_sec',         min = 0.,   max = 0.5,   prior='uniform') # epsilon articolo joint
+            #dict['NR_fit_recal_mdyn'] = Parameter(name='NR_fit_recal_mdyn', min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.136) #delta_1 articolo joint
+            #dict['NR_fit_recal_vdyn'] = Parameter(name='NR_fit_recal_vdyn', min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.21) #delta_2 articolo joint
+
+            # fix (m-dyn, v-dyn, m-wind) with NR fits
+            dict['mej_{}'.format(dyn_tag)]  = Variable(name='mej_{}'.format(dyn_tag),   func=NRfit_recal_mass_dyn_breschi)
+            dict['vel_{}'.format(dyn_tag)]  = Variable(name='vel_{}'.format(dyn_tag),   func=NRfit_recal_vel_dyn_breschi)
+            dict['mej_{}'.format(sec_tag)]  = Variable(name='mej_{}'.format(sec_tag),   func=NRfit_recal_mass_sec_breschi)
+
+        elif approx=='Xkn-2-NRfits-nedora':
+            from ..obs.kn.utils import NRfit_recal_mass_dyn_nedora, NRfit_recal_vel_dyn_nedora, NRfit_recal_mass_sec_nedora
+
+            # include calibrations and disk fracion
+            dict['disk_frac_sec']     = Parameter(name='disk_frac_sec',         min = 0.,   max = 0.5,   prior='uniform') # epsilon articolo joint
+            #dict['NR_fit_recal_mdyn'] = Parameter(name='NR_fit_recal_mdyn', min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.136) #delta_1 articolo joint
+            #dict['NR_fit_recal_vdyn'] = Parameter(name='NR_fit_recal_vdyn', min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.21) #delta_2 articolo joint
+
+            # fix (m-dyn, v-dyn, m-wind) with NR fits
+            dict['mej_{}'.format(dyn_tag)]  = Variable(name='mej_{}'.format(dyn_tag),   func=NRfit_recal_mass_dyn_nedora)
+            dict['vel_{}'.format(dyn_tag)]  = Variable(name='vel_{}'.format(dyn_tag),   func=NRfit_recal_vel_dyn_nedora)
+            dict['mej_{}'.format(sec_tag)]  = Variable(name='mej_{}'.format(sec_tag),   func=NRfit_recal_mass_sec_nedora)
+
+        else:
+            logger.error("Invalid model with NR fits or invalid fit formula")
+
+    if 'Xkn-3-NRfits' in approx:
+
+        logger.warning("Activating NR fits for ejecta properties. This option works only with joint KN+GW model. Please be sure you are using the correct framework.")
+        # NOTE: the NR fits work only if the prior already includes the BNS parameters, i.e. mchirp, q, lambda1, lambda2.
+        # These parameters are used to determined the predictions of the fits and they are automatically included by the
+        # GW initialization routine. So the NR ejecta fits work only with GW+KN framework.
+
+        dyn_tag     = comps[0]
+        sec_tag     = comps[1]
+        wind_tag    = comps[2]
+        
+        if approx=='Xkn-3-NRfits-old':
+            from ..obs.kn.utils import NRfit_recal_mass_dyn, NRfit_recal_vel_dyn, NRfit_recal_mass_sec, NRfit_recal_mass_wind
+
+            # include calibrations and disk fracion
+            dict['disk_frac_sec']     = Parameter(name='disk_frac_sec',         min = 0.,   max = 0.5,   prior='uniform') # epsilon articolo joint
+            dict['disk_frac_wind']    = Parameter(name='disk_frac_wind',        min = 0.,   max = 0.5,   prior='uniform')
+            #dict['NR_fit_recal_mdyn'] = Parameter(name='NR_fit_recal_mdyn', min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.136) #delta_1 articolo joint
+            #dict['NR_fit_recal_vdyn'] = Parameter(name='NR_fit_recal_vdyn', min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.21) #delta_2 articolo joint
+
+            # fix (m-dyn, v-dyn, m-wind) with NR fits
+            dict['mej_{}'.format(dyn_tag)]  = Variable(name='mej_{}'.format(dyn_tag),   func=NRfit_recal_mass_dyn)
+            dict['vel_{}'.format(dyn_tag)]  = Variable(name='vel_{}'.format(dyn_tag),   func=NRfit_recal_vel_dyn)
+            dict['mej_{}'.format(sec_tag)]  = Variable(name='mej_{}'.format(sec_tag),   func=NRfit_recal_mass_sec)
+            dict['mej_{}'.format(wind_tag)] = Variable(name='mej_{}'.format(wind_tag),  func=NRfit_recal_mass_wind)
+        
+        elif approx=='Xkn-3-NRfits-breschi':
+            from ..obs.kn.utils import NRfit_recal_mass_dyn_breschi, NRfit_recal_vel_dyn_breschi, NRfit_recal_mass_sec_breschi, NRfit_recal_mass_wind_breschi
+
+            # include calibrations and disk fracion
+            dict['disk_frac_sec']     = Parameter(name='disk_frac_sec',         min = 0.,   max = 0.5,   prior='uniform') # epsilon articolo joint
+            dict['disk_frac_wind']    = Parameter(name='disk_frac_wind',        min = 0.,   max = 0.5,   prior='uniform')
+            #dict['NR_fit_recal_mdyn'] = Parameter(name='NR_fit_recal_mdyn', min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.136) #delta_1 articolo joint
+            #dict['NR_fit_recal_vdyn'] = Parameter(name='NR_fit_recal_vdyn', min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.21) #delta_2 articolo joint
+
+            # fix (m-dyn, v-dyn, m-wind) with NR fits
+            dict['mej_{}'.format(dyn_tag)]  = Variable(name='mej_{}'.format(dyn_tag),   func=NRfit_recal_mass_dyn_breschi)
+            dict['vel_{}'.format(dyn_tag)]  = Variable(name='vel_{}'.format(dyn_tag),   func=NRfit_recal_vel_dyn_breschi)
+            dict['mej_{}'.format(sec_tag)]  = Variable(name='mej_{}'.format(sec_tag),   func=NRfit_recal_mass_sec_breschi)
+            dict['mej_{}'.format(wind_tag)] = Variable(name='mej_{}'.format(wind_tag),  func=NRfit_recal_mass_wind_breschi)
+
+        elif approx=='Xkn-3-NRfits-nedora':
+            from ..obs.kn.utils import NRfit_recal_mass_dyn_nedora, NRfit_recal_vel_dyn_nedora, NRfit_recal_mass_sec_nedora, NRfit_recal_mass_wind_nedora
+
+            # include calibrations and disk fracion
+            dict['disk_frac_sec']     = Parameter(name='disk_frac_sec',         min = 0.,   max = 0.5,   prior='uniform') # epsilon articolo joint
+            dict['disk_frac_wind']    = Parameter(name='disk_frac_wind',        min = 0.,   max = 0.5,   prior='uniform')
+            #dict['NR_fit_recal_mdyn'] = Parameter(name='NR_fit_recal_mdyn', min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.136) #delta_1 articolo joint
+            #dict['NR_fit_recal_vdyn'] = Parameter(name='NR_fit_recal_vdyn', min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.21) #delta_2 articolo joint
+
+            # fix (m-dyn, v-dyn, m-wind) with NR fits
+            dict['mej_{}'.format(dyn_tag)]  = Variable(name='mej_{}'.format(dyn_tag),   func=NRfit_recal_mass_dyn_nedora)
+            dict['vel_{}'.format(dyn_tag)]  = Variable(name='vel_{}'.format(dyn_tag),   func=NRfit_recal_vel_dyn_nedora)
+            dict['mej_{}'.format(sec_tag)]  = Variable(name='mej_{}'.format(sec_tag),   func=NRfit_recal_mass_sec_nedora)
+            dict['mej_{}'.format(wind_tag)] = Variable(name='mej_{}'.format(wind_tag),  func=NRfit_recal_mass_wind_nedora)
+
+        else:
+            logger.error("Invalid model with NR fits or invalid fit formula")
+
 
     # include theoretical error
     if use_calib_sigma:
