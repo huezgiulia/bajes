@@ -85,15 +85,15 @@ def NRfit_log_mass_disk(mtot, q, lambda1, lambda2):
 # NR-informed relations "breschi"
 #####
 
-def NRfit_recal_mass_dyn_breschi(mchirp, q, lambda1, lambda2, **kwargs): #NR_fit_recal_mdyn
+def NRfit_recal_mass_dyn_breschi(mchirp, q, lambda1, lambda2, NR_fit_recal_mdyn, **kwargs):
     mtot        = mchirp / (q/(1+q)**2)**0.6
-    log_mdyn    = NRfit_log_mass_dyn_breschi(mtot, q, lambda1, lambda2) #* (1. + NR_fit_recal_mdyn)
+    log_mdyn    = NRfit_log_mass_dyn_breschi(mtot, q, lambda1, lambda2) * (1. + NR_fit_recal_mdyn)
     mdyn        = mtot * np.exp(log_mdyn)
     return np.max([0., mdyn])
 
-def NRfit_recal_vel_dyn_breschi(mchirp, q, lambda1, lambda2, **kwargs): #NR_fit_recal_vdyn
+def NRfit_recal_vel_dyn_breschi(mchirp, q, lambda1, lambda2, NR_fit_recal_vdyn, **kwargs):
     mtot    = mchirp / (q/(1+q)**2)**0.6
-    vdyn    = NRfit_vel_dyn_breschi(mtot, q, lambda1, lambda2) #* (1. + NR_fit_recal_vdyn)
+    vdyn    = NRfit_vel_dyn_breschi(mtot, q, lambda1, lambda2) * (1. + NR_fit_recal_vdyn)
     return np.max([1e-10, vdyn])
 
 def NRfit_recal_mass_sec_breschi(mchirp, q, lambda1, lambda2, disk_frac_sec, **kwargs):
