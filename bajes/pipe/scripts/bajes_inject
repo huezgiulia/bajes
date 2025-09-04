@@ -242,10 +242,10 @@ class Injection(object):
                 if td_input:    series_type = 'time'
                 else:           series_type = 'freq'
                 ser_hp  = Series(series_type, hp,   srate=self.srate,   seglen=self.seglen,
-                                 f_min=self.f_min,  f_max=self.f_max,   importfreqs=freqs,
+                                 f_min=self.f_min,  f_max=self.f_max,   #importfreqs=freqs,
                                  t_gps=self.t_gps,  alpha_taper=0.0)
                 ser_hc  = Series(series_type, hc,   srate=self.srate,   seglen=self.seglen,
-                                 f_min=self.f_min,  f_max=self.f_max,   importfreqs=freqs,
+                                 f_min=self.f_min,  f_max=self.f_max,   #importfreqs=freqs,
                                  t_gps=self.t_gps,  alpha_taper=0.0)
 
                 # # estimate actual GPS time of merger
