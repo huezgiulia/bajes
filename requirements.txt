@@ -8,7 +8,7 @@ lalsuite
 matplotlib
 mlgw
 mpi4py
-numpy>=1.23.5
+numpy
 scipy
 teobresums
 ultranest

@@ -287,7 +287,7 @@ class Prior(object):
 
     def cumulative(self, x, name=None):
 
-        if isinstance(x, (float, int, np.float)):
+        if isinstance(x, (float, int, float)):
             x = [x]
 
         if len(x) == self.ndim:

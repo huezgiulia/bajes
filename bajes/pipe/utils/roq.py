@@ -514,7 +514,7 @@ except ImportError:
 #             mu = []
 #             e = [] + prebuilt_basis
 #             added_elements = []
-#         projected_funcs = np.zeros((len(training_space), len(training_space[0])), dtype=np.complex_)
+#         projected_funcs = np.zeros((len(training_space), len(training_space[0])), dtype=complex_)
 #
 #         for element in e:
 #             self.update_projection(projected_funcs, element, training_space)
@@ -624,7 +624,7 @@ except ImportError:
 #         """
 #         # already bring them into the correct final shape to avoid costly appending
 #         j = np.argmax(np.abs(V[:, 0])) # j in [0, M)
-#         U = np.zeros(np.shape(V), dtype=np.complex128) # Mxm matrix
+#         U = np.zeros(np.shape(V), dtype=complex128) # Mxm matrix
 #         P = np.zeros(np.shape(V)) # Mxm matrix
 #         p_xval = np.zeros(np.shape(V)[1], dtype=self.quad_points.dtype)
 #         p_ind = np.zeros(np.shape(V)[1], dtype=np.int_) # m vector
@@ -761,10 +761,10 @@ except ImportError:
 #         from os.path import join
 #
 #         self.orig_freqs = np.loadtxt(join(path, ROQ.FILE_ORIG_FREQS))
-#         self.linear_basis = np.loadtxt(join(path, ROQ.FILE_LINEAR_BASIS), dtype=np.complex_)
+#         self.linear_basis = np.loadtxt(join(path, ROQ.FILE_LINEAR_BASIS), dtype=complex_)
 #         self.linear_nodes = np.loadtxt(join(path, ROQ.FILE_LINEAR_NODES))
 #         self.linear_nodes_ind = np.loadtxt(join(path, ROQ.FILE_LINEAR_NODES_INDS), dtype=np.int_)
-#         self.quadratic_basis = np.loadtxt(join(path, ROQ.FILE_QUADRATIC_BASIS), dtype=np.complex_)
+#         self.quadratic_basis = np.loadtxt(join(path, ROQ.FILE_QUADRATIC_BASIS), dtype=complex_)
 #         self.quadratic_nodes = np.loadtxt(join(path, ROQ.FILE_QUADRATIC_NODES))
 #         self.quadratic_nodes_ind = np.loadtxt(join(path, ROQ.FILE_QUADRATIC_NODES_INDS), dtype=np.int_)
 #

@@ -88,7 +88,7 @@ def make_injection_plot(ifo, time, inj_strain, wave_strain, noise, f_min, outdir
         pass
 
 
-    from scipy.signal import tukey
+    from scipy.signal.windows import tukey
 
     dt                   = np.median(np.diff(time))
     seglen               = time[-1]-time[0]
@@ -219,7 +219,7 @@ class Injection(object):
                 # apply window according to input
                 if td_input:
 
-                    from scipy.signal import tukey
+                    from scipy.signal.windows import tukey
                     if wind_flag == 'low':
                         window  = tukey(len(hp), alpha=self.tukey)
                         imin    = np.max(np.where(window==1))

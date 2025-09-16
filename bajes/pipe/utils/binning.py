@@ -315,7 +315,7 @@ class GWBinningLikelihood(Likelihood):
         r0  = 0.5*(r[:-1] + r[1:])
         r1  = (r[1:] - r[:-1])/(f[1:] - f[:-1])
 
-        return np.array([r0, r1], dtype=np.complex128)
+        return np.array([r0, r1], dtype=complex128)
     
     def log_like(self, params):
         """

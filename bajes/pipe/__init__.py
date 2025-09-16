@@ -177,7 +177,7 @@ def save_dict_to_hdf5(dic, path, filename):
 
 def _try_convertable_list(key, item):
     try:
-        _item = np.array(item,dtype=np.float64)
+        _item = np.array(item,dtype=float64)
     except Exception:
         try:
             _item =np.array(item,dtype=utf8_type)
@@ -187,7 +187,7 @@ def _try_convertable_list(key, item):
 
 def _try_convertable_item(key, item):
     try:
-        _item = np.float64(item)
+        _item = float64(item)
     except Exception:
         try:
             _item = str(item)
@@ -197,7 +197,7 @@ def _try_convertable_item(key, item):
 
 def recursively_save_dict_contents_to_group(h5file, path, dic):
     for key, item in dic.items():
-        if isinstance(item, (np.int64, np.float64, str, bytes)):
+        if isinstance(item, (np.int64, float64, str, bytes)):
             h5file[path + key] = item
         elif isinstance(item, (np.ndarray, list)):
             h5file[path + key] = _try_convertable_list(key, item)
