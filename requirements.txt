@@ -1,7 +1,7 @@
 astropy
 corner
 cpnest
-dynesty=1.0.1
+dynesty
 emcee
 h5py
 lalsuite

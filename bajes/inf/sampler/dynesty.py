@@ -291,7 +291,7 @@ class SamplerDynesty(SamplerBody):
 
     def __update__(self):
 
-        (worst, ustar, vstar, loglstar, logvol, logwt, logz, logzvar, h, nc, worst_it, boundidx, bounditer, eff, delta_logz) = self._last_iter
+        (worst, ustar, vstar, loglstar, logvol, logwt, logz, logzvar, h, nc, worst_it, boundidx, bounditer, eff, delta_logz, blob) = self._last_iter
 
         args = {'it' :      self.sampler.it,
                 'eff' :     '{:.2f}%'.format(eff),
