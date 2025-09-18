@@ -251,11 +251,10 @@ class KNLikelihood(Likelihood):
             for bi in self.filters.bands:
 
                 if params['xkn_config'] == None:  # Grossman model
-                    lambda_bi = bi
-                    interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
+                    interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[bi])
                 
                 else: # xkn model
-                    # tranform keys from band names into lambdas[nm] (ONLY FOR XKN MODELS)
+                    # tranform keys from band names into lambdas[nm]
                     lambda_bi = int(self.filters.lambdas[bi]*1e9)
                     interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
 
@@ -267,11 +266,10 @@ class KNLikelihood(Likelihood):
             for bi in self.filters.bands:
 
                 if params['xkn_config'] == None:  # Grossman model
-                    lambda_bi = bi
-                    interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
+                    interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[bi])
                 
                 else: # xkn model
-                    # tranform keys from band names into lambdas[nm] (ONLY FOR XKN MODELS)
+                    # tranform keys from band names into lambdas[nm]
                     lambda_bi = int(self.filters.lambdas[bi]*1e9)
                     interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
 
