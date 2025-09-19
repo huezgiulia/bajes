@@ -675,6 +675,10 @@ def init_proposal(engine, post, use_slice=False, use_gw=False, maxmcmc=4096, min
     elif 'dynesty' in engine:
         from ..inf.sampler.dynesty import initialize_proposals
         return initialize_proposals(maxmcmc=maxmcmc, minmcmc=minmcmc, nact=nact)
+    
+    elif 'pocomc' in engine:
+        from ..inf.sampler.pocomc import initialize_proposals
+        return initialize_proposals(maxmcmc=maxmcmc, minmcmc=minmcmc, nact=nact) ##CHECK
 
     elif engine == 'ultranest':
         return None
