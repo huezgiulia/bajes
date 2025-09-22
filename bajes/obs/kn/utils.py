@@ -96,7 +96,6 @@ def joint_rel_mdisc(thetaCore, E0, thetaWing, disc_sec_frac, **kwargs):
         https://arxiv.org/abs/2006.07376
     """
     eta = 0.6e-3
-    fw = 0.3
     energy = compute_integral(E0, thetaCore, thetaWing)
-    mdisc  = energy * thetaCore**2 / (2 * eta * (1 - fw))
+    mdisc  = energy * thetaCore**2 / (2 * eta * (1 - disc_sec_frac))
     return mdisc * disc_sec_frac

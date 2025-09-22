@@ -107,7 +107,7 @@ def initialize_knlikelihood_kwargs(opts):
         else: 
             logger.error("Impossible to initialize MKN object from {} file. Use ini.".format(tag))
             l_kwargs['mkn_config']          = None
-            l_kwargs['xkn_config']          = None
+            l_kwargs['xkn_zconfig']          = None
 
 
 
@@ -386,7 +386,7 @@ def initialize_knprior(approx,
 
         from ..obs.kn.utils import joint_rel_mdisc
 
-        dict['disc_sec_frac']           = Parameter(name='disc_sec_frac',         min = 0.,   max = 0.6,   prior='uniform') 
+        dict['disc_sec_frac']           = Parameter(name='disc_sec_frac',         min = 0.2,   max = 0.5,   prior='uniform') 
         #dict['disc_sec_frac']           = Constant(name='disc_sec_frac',         value=0.3)
         dict['mej_{}'.format(sec_tag)]  = Variable(name='mej_{}'.format(sec_tag),   func=joint_rel_mdisc)
 
