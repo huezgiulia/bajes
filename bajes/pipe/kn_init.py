@@ -241,6 +241,7 @@ def initialize_knprior(approx,
     elif approx=='GrossmanKBP-2-polar':         comps = ['isotropic', 'polar']
     elif approx=='GrossmanKBP-2-eq+pol':        comps = ['equatorial', 'polar']
     elif 'GrossmanKBP-2-NRfits' in approx:      comps = ['dynamics', 'wind']
+    elif 'GrossmanKBP-2-dynfits' in approx:     comps = ['dynamics', 'wind']
     elif 'GrossmanKBP-2-joint-grb' in approx:   comps = ['dynamics', 'secular']
     elif 'GrossmanKBP-2-sum' in approx:         comps = ['dynamics', 'wind']
     elif approx=='GrossmanKBP-3-isotropic':     comps = ['isotropic1', 'isotropic2', 'isotropic3']
@@ -401,6 +402,24 @@ def initialize_knprior(approx,
         dict['vel_{}'.format(dyn_tag)]  = Variable(name='vel_{}'.format(dyn_tag),       func=NRfit_recal_vel_dyn_breschi)
         dict['mej_{}'.format(sec_tag)]  = Variable(name='mej_{}'.format(sec_tag),       func=NRfit_recal_mass_sec_sum_breschi)
 
+    if 'GrossmanKBP-2-dynfits' in approx:
+
+        logger.warning("Activating NR fits for ejecta properties. This option works only with joint KN+GW model. Please be sure you are using the correct framework.")
+        # NOTE: the NR fits work only if the prior already includes the BNS parameters, i.e. mchirp, q, lambda1, lambda2.
+        # These parameters are used to determined the predictions of the fits and they are automatically included by the
+        # GW initialization routine. So the NR ejecta fits work only with GW+KN framework.
+
+        dyn_tag     = comps[0]
+
+        from ..obs.kn.utils import NRfit_recal_mass_dyn, NRfit_recal_vel_dyn
+
+        # include calibrations and disk fracion
+        dict['NR_fit_recal_mdyn'] = Parameter(name='NR_fit_recal_mdyn',   min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.136)
+        dict['NR_fit_recal_vdyn'] = Parameter(name='NR_fit_recal_vdyn',   min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.21)
+
+        # fix (m-dyn, v-dyn, m-wind) with NR fits
+        dict['mej_{}'.format(dyn_tag)]  = Variable(name='mej_{}'.format(dyn_tag),   func=NRfit_recal_mass_dyn)
+        dict['vel_{}'.format(dyn_tag)]  = Variable(name='vel_{}'.format(dyn_tag),   func=NRfit_recal_vel_dyn)
 
     if 'joint-grb' in approx:
         logger.warning("Activating relation for secular mass and isotropic energy. This option works only with joint KN+GRB model. Please be sure you are using the correct framework.")

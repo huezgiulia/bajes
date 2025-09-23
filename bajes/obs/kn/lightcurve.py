@@ -35,6 +35,8 @@ __approx_dict__ = { ### TIME-DOMAIN
                                                              'type': 'cls'},
                     'GrossmanKBP-2-NRfits-iso':             {'path': 'bajes.obs.kn.approx.grossman_kbp.korobkin_barnes_grossman_perego_et_al_two_nrfit_isotropic_wrapper',
                                                              'type': 'cls'},
+                    'GrossmanKBP-2-NRfits-dyn-iso':         {'path': 'bajes.obs.kn.approx.grossman_kbp.korobkin_barnes_grossman_perego_et_al_two_nrfit_isotropic_wrapper',
+                                                             'type': 'cls'},
                     'GrossmanKBP-2-sum':                    {'path': 'bajes.obs.kn.approx.grossman_kbp.korobkin_barnes_grossman_perego_et_al_two_nrfit_isotropic_wrapper',
                                                              'type': 'cls'},
                     'GrossmanKBP-2-NRfits-ani':             {'path': 'bajes.obs.kn.approx.grossman_kbp.korobkin_barnes_grossman_perego_et_al_two_nrfit_anisotropic_wrapper',
