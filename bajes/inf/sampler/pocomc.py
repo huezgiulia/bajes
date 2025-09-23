@@ -40,9 +40,14 @@ class BajesPocoMCProposal(object):
 
 class SamplerMCMC(SamplerBody):
 
-    def __initialize__(self, posterior,nwalk,
-                       proposals=None,
-                       pool=None, **kwargs):
+    def __initialize__(self, posterior, nlive, 
+                       proposals=None, 
+                       pool=None, n_active=512, 
+                       flow='nsf6', precondition=True,
+                       **kwargs):
+        
+        n_steps = self.ndim
+        n_max_steps = 10*self.ndim
 
         # initialize proposals
         if proposals == None:
@@ -54,39 +59,39 @@ class SamplerMCMC(SamplerBody):
         self.sampler = pc.sampler(prior=posterior.prior,
                                     likelihood=posterior.like,
                                     vectorize=True,
-                                    random_state=0)
+                                    random_state=0,
+                                    n_effective=nlive,
+                                    n_steps=n_steps,
+                                    n_max_steps=n_max_steps,
+                                    pool=pool,
+                                    )
 
         # extract prior samples for initial state
         logger.info("Extracting prior samples ...")
-        self._previous_state = posterior.prior.get_prior_samples(nwalk)
 
         self.stop   = False
 
     def __restore__(self, pool, **kwargs):
 
         # re-initialize pool
-        if pool == None:
-            self.sampler.pool   = pool
-        else:
-            self.sampler.pool   = pool
+        self.sampler.pool   = pool
 
     def __update__(self):
 
-        (worst, ustar, vstar, loglstar, logvol, logwt, logz, logzvar, h, nc, worst_it, boundidx, bounditer, eff, delta_logz, blob) = self._last_iter
+        # (worst, ustar, vstar, loglstar, logvol, logwt, logz, logzvar, h, nc, worst_it, boundidx, bounditer, eff, delta_logz, blob) = self._last_iter
 
         args = {'it' :      self.sampler.it,
-                'eff' :     '{:.2f}%'.format(eff),
-                'nc' :      nc,
-                #'logL' :    '{:.3f}'.format(loglstar),
-                'logLmax' : '{:.3f}'.format(np.max(self.sampler.live_logl)),
-                'logZ' :    '{:.3f}'.format(logz),
-                'H' :       '{:.2f}'.format(h),
-                'dZ' :      '{:.3f}'.format(delta_logz)}
+                # 'eff' :     '{:.2f}%'.format(eff),
+                # 'nc' :      nc,
+                # #'logL' :    '{:.3f}'.format(loglstar),
+                # 'logLmax' : '{:.3f}'.format(np.max(self.sampler.live_logl)),
+                # 'logZ' :    '{:.3f}'.format(logz),
+                # 'H' :       '{:.2f}'.format(h),
+                # 'dZ' :      '{:.3f}'.format(delta_logz)
+                }
 
         return args
     
-    # def _stop_sampler(self):
-
 
     def __run__(self):
 
@@ -139,13 +144,12 @@ class SamplerMCMC(SamplerBody):
             logger.warning("Impossible to produce standard plots. Cannot import matplotlib.")
 
         try:
-
             samples, weights, logl, logP = self.sampler.posterior()
 
             fig = plt.figure()
             corner.corner(samples[:,:4], weights=weights, color="C0")
 
-            plt.savefig(self.outdir+'/posterior.png', dpi=200)
+            fig.savefig(self.outdir+'/posterior.png', dpi=200)
 
             plt.close()
 
