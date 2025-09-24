@@ -49,14 +49,16 @@ class SamplerMCMC(SamplerBody):
         n_steps = self.ndim
         n_max_steps = 10*self.ndim
 
+        prior = PriorPocoMC(self.posterior.prior)
+
         # initialize proposals
         if proposals == None:
             logger.info("Initializing proposal methods ...")
-            proposals = initialize_proposals(posterior.like, posterior.prior)
+            proposals = initialize_proposals(posterior.like, prior)
 
         # initialize sampler
         logger.info("Initializing sampler ...")
-        self.sampler = pc.sampler(prior=posterior.prior,
+        self.sampler = pc.sampler(prior=prior,
                                     likelihood=posterior.like,
                                     vectorize=True,
                                     random_state=0,
@@ -92,6 +94,12 @@ class SamplerMCMC(SamplerBody):
 
         return args
     
+
+    def _stop_sampler(self):
+
+        # if the number of collected samples is greater than ntotal, the sampling is done
+        if self.neff >= self.ntotal :
+            self.stop = True
 
     def __run__(self):
 
@@ -155,3 +163,62 @@ class SamplerMCMC(SamplerBody):
 
         except Exception:
             pass
+        
+class PriorPocoMC():
+    """Wrapper for prior class to make it compatible with pocomc.
+
+    Parameters
+    ----------
+    bilby_priors: bilby.core.prior.PriorDict
+        Bilby prior dictionary.
+    """
+
+    logpdf = None
+    """Log-prior probability density function.
+    """
+
+    rvs = None
+    """Function for drawing random samples from the prior.
+    """
+
+    def __init__(
+        self,
+        priors,
+    ):
+        self.priors = priors
+        self.sampling_parameters = []
+        for p in priors.parameters:
+            self.sampling_parameters.append(p.name)
+
+        self.logpdf = self._logpdf_with_constraints
+        self.rvs = self._rvs_with_constraints
+
+
+    def to_dict(self, x):
+        return {k: x[..., i] for i, k in enumerate(self.sampling_parameters)}
+
+    def from_dict(self, x, keys=None):
+        if keys is None:
+            keys = self.sampling_parameters
+        return np.array([x[v] for v in keys]).T
+
+    def _logpdf_with_constraints(self, x):
+        x_dict = self.to_dict(x)
+        # The priors already include the constraints
+        return self.bilby_priors.ln_prob(x_dict, axis=0)
+
+    def _rvs_with_constraints(self, size=1):
+        return self.from_dict(
+            self.bilby_priors.sample_subset_constrained(
+                keys=list(self.bilby_priors.keys()), size=size
+            ),
+            self.sampling_parameters,
+        )
+
+    @property
+    def bounds(self):
+        return self.priors.bounds
+
+    @property
+    def dim(self):
+        return len(self.sampling_parameters)
