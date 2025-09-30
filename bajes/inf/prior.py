@@ -212,8 +212,8 @@ class Prior(object):
 
             # check that name is not in constants
             if vi.name in list(self.const.keys()):
-                logger.error("Repeated name {} between variables and contants. Please use different names.".format(vi.name))
-                raise ValueError("Repeated name {} in sampling variables and contants. Please use different names.".format(vi.name))
+                logger.error("Repeated name {} between variables and constants. Please use different names.".format(vi.name))
+                raise ValueError("Repeated name {} in sampling variables and constants. Please use different names.".format(vi.name))
 
             # append information
             self.v_names.append(vi.name)
@@ -237,8 +237,8 @@ class Prior(object):
 
             # check that name is not repeated
             if pi.name in temp_names:
-                logger.error("Repeate name {} for different parameters. Please use different names.".format(pi.name))
-                raise ValueError("Repeate name {} for different parameters. Please use different names.".format(pi.name))
+                logger.error("Repeat name {} for different parameters. Please use different names.".format(pi.name))
+                raise ValueError("Repeat name {} for different parameters. Please use different names.".format(pi.name))
 
             # check that name is not in constants
             if pi.name in list(self.const.keys()) or pi.name in self.v_names:

@@ -58,7 +58,7 @@ def Sampler(engine, model, **kwargs):
     elif engine == 'ultranest':
         from .sampler.ultranest import SamplerUltraNest as sampler
     elif engine == 'pocomc':
-        from sampler.pocomc import SamplerPocoMC as sampler
+        from .sampler.pocomc import SamplerPocoMC as sampler
     else:
         raise ValueError("Unable to define {} sampler. Please use one of the following: {}".format(engine, ', '.join(__known_samplers__)))
 
