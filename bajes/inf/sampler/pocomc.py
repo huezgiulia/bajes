@@ -4,35 +4,22 @@ import numpy as np
 import logging
 logger = logging.getLogger(__name__)
 
-from itertools import repeat
-
 import pocomc as pc
 
 from . import SamplerBody
 from .proposal import _init_proposal_methods
 
-def initialize_proposals(like, priors):
+
+def initialize_proposals(like, priors, use_slice=False, use_gw=False):
 
     prop_kwargs  = {}
+
+    prop_kwargs['like'] = like
+    prop_kwargs['dets'] = like.dets
 
     return BajesPocoMCProposal(priors, **prop_kwargs)
 
 class PriorPocoMC():
-    """Wrapper for prior class to make it compatible with pocomc.
-
-    Parameters
-    ----------
-    bilby_priors: bilby.core.prior.PriorDict
-        Bilby prior dictionary.
-    """
-
-    logpdf = None
-    """Log-prior probability density function.
-    """
-
-    rvs = None
-    """Function for drawing random samples from the prior.
-    """
 
     def __init__(
         self,
@@ -42,31 +29,6 @@ class PriorPocoMC():
         self.sampling_parameters = []
         for p in priors.parameters:
             self.sampling_parameters.append(p.name)
-
-        self.logpdf = self._logpdf_with_constraints
-        self.rvs = self._rvs_with_constraints
-
-
-    def to_dict(self, x):
-        return {k: x[..., i] for i, k in enumerate(self.sampling_parameters)}
-
-    def from_dict(self, x, keys=None):
-        if keys is None:
-            keys = self.sampling_parameters
-        return np.array([x[v] for v in keys]).T
-
-    def _logpdf_with_constraints(self, x):
-        x_dict = self.to_dict(x)
-        # The priors already include the constraints
-        return self.bilby_priors.ln_prob(x_dict, axis=0)
-
-    def _rvs_with_constraints(self, size=1):
-        return self.from_dict(
-            self.bilby_priors.sample_subset_constrained(
-                keys=list(self.bilby_priors.keys()), size=size
-            ),
-            self.sampling_parameters,
-        )
 
     @property
     def bounds(self):
@@ -111,20 +73,20 @@ class SamplerPocoMC(SamplerBody):
         self.ncheckpoints = kwargs.get('ncheckpoints')
 
         prior = PriorPocoMC(posterior.prior)
+        log_like = posterior.like.log_like(params)
 
+        # try with pocomc priors and likelihood
         from scipy.stats import uniform, norm
         prior = pc.Prior(10*[norm(0.0, 3.0)])
-
-        # # initialize proposals
-        # if proposals == None:
-        #     logger.info("Initializing proposal methods ...")
-        #     proposals = initialize_proposals(posterior.like, prior)
-        
-        # log_like = posterior.like.log_like(params)
 
         def log_like(x):
             return -np.sum(10.0 * (x[:, ::2] ** 2.0 - x[:, 1::2]) ** 2.0 + (x[:, ::2] - 1.0) ** 2.0, axis=1)
         
+        # # initialize proposals
+        # if proposals == None:
+        #     logger.info("Initializing proposal methods ...")
+        #     proposals = initialize_proposals(posterior.like, prior)
+               
         # initialize sampler
         logger.info("Initializing sampler ...")
         self.sampler = pc.Sampler(prior=prior,
@@ -152,7 +114,7 @@ class SamplerPocoMC(SamplerBody):
 
         while not self.stop:
 
-            it = 5
+            it = 5 # use (number of iterations // ncheckpoints) * ncheckpoints
             path = 'states/pmc_' + str(it) + '.state'
             print(self.ncheckpoints)
             self.sampler.run(save_every = self.ncheckpoints) #,resume_state_path=path) 
