@@ -30,9 +30,22 @@ class PriorPocoMC():
         for p in priors.parameters:
             self.sampling_parameters.append(p.name)
 
+    def logpdf(self, x):
+        N, D = x.shape
+        logp = np.zeros(N)
+        for i in range(N):
+            logp[i] = self.priors.log_prior(x[i])
+        return logp
+    
+    def rvs(self, size=1):
+        samples = np.zeros((size, self.dim))
+        for i in range(size):
+            samples[i] = self.priors.sample()
+        return samples
+
     @property
     def bounds(self):
-        return self.priors.bounds
+        return np.array(self.priors.bounds)
 
     @property
     def dim(self):
@@ -72,16 +85,8 @@ class SamplerPocoMC(SamplerBody):
         n_max_steps = 10*self.ndim
         self.ncheckpoints = kwargs.get('ncheckpoints')
 
-        prior = PriorPocoMC(posterior.prior)
-        log_like = posterior.like.log_like(params)
+        prior = PriorPocoMC(posterior.prior)       
 
-        # try with pocomc priors and likelihood
-        from scipy.stats import uniform, norm
-        prior = pc.Prior(10*[norm(0.0, 3.0)])
-
-        def log_like(x):
-            return -np.sum(10.0 * (x[:, ::2] ** 2.0 - x[:, 1::2]) ** 2.0 + (x[:, ::2] - 1.0) ** 2.0, axis=1)
-        
         # # initialize proposals
         # if proposals == None:
         #     logger.info("Initializing proposal methods ...")
@@ -90,8 +95,7 @@ class SamplerPocoMC(SamplerBody):
         # initialize sampler
         logger.info("Initializing sampler ...")
         self.sampler = pc.Sampler(prior=prior,
-                                    likelihood=log_like,
-                                    vectorize=True,
+                                    likelihood=posterior.log_like,
                                     random_state=0,
                                     n_effective=nlive,
                                     n_steps=n_steps,
@@ -116,7 +120,6 @@ class SamplerPocoMC(SamplerBody):
 
             it = 5 # use (number of iterations // ncheckpoints) * ncheckpoints
             path = 'states/pmc_' + str(it) + '.state'
-            print(self.ncheckpoints)
             self.sampler.run(save_every = self.ncheckpoints) #,resume_state_path=path) 
 
             # update sampler status
