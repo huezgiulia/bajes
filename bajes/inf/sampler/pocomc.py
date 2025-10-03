@@ -40,7 +40,7 @@ class PriorPocoMC():
     def rvs(self, size=1):
         samples = np.zeros((size, self.dim))
         for i in range(size):
-            samples[i] = self.priors.sample()
+            samples[i] = self.priors.sample
         return samples
 
     @property
@@ -119,8 +119,16 @@ class SamplerPocoMC(SamplerBody):
         while not self.stop:
 
             it = 5 # use (number of iterations // ncheckpoints) * ncheckpoints
-            path = 'states/pmc_' + str(it) + '.state'
-            self.sampler.run(save_every = self.ncheckpoints) #,resume_state_path=path) 
+            path = 'states/pmc_final.state'
+            self.sampler.run(save_every = self.ncheckpoints) #, resume_state_path=path) 
+            # samples, weights, logl, logp = self.sampler.posterior()
+            # import matplotlib.pyplot as plt
+            # import corner
+            # # Trace plot for the first 4 parameters
+            # fig = corner.corner(samples[:,:4], weights=weights, color="C0")
+            # plt.show()
+
+            # self.stop = True
 
             # update sampler status
             # self.update()
