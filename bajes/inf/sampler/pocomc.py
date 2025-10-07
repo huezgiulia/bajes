@@ -9,15 +9,8 @@ import pocomc as pc
 from . import SamplerBody
 from .proposal import _init_proposal_methods
 
+import os
 
-def initialize_proposals(like, priors, use_slice=False, use_gw=False):
-
-    prop_kwargs  = {}
-
-    prop_kwargs['like'] = like
-    prop_kwargs['dets'] = like.dets
-
-    return BajesPocoMCProposal(priors, **prop_kwargs)
 
 class PriorPocoMC():
 
@@ -52,27 +45,6 @@ class PriorPocoMC():
         return len(self.sampling_parameters)
 
 
-class BajesPocoMCProposal(object):
-
-    def __init__(self, priors, props=None,
-                    nsplits=2, randomize_split=True,
-                    **kwargs):
-
-        self.names                  = priors.names
-        self.bounds                 = priors.bounds
-        self.ndim                   = len(self.names)
-        self.period_reflect_list    = priors.periodics
-
-        self._proposals, self._weights = _init_proposal_methods(priors, props=props, **kwargs)
-
-        # run proposal init
-        super(BajesPocoMCProposal, self).__init__(nsplits=nsplits, randomize_split=randomize_split)
-
-    def get_proposal(self, s, c, p, model):
-        _p = model.random.choice(self._proposals, p=self._weights)
-        return _p.get_proposal(s, c, p, model)
-
-
 class SamplerPocoMC(SamplerBody):
 
     def __initialize__(self, posterior, nlive, 
@@ -85,13 +57,7 @@ class SamplerPocoMC(SamplerBody):
         n_max_steps = 10*self.ndim
         self.ncheckpoints = kwargs.get('ncheckpoints')
 
-        prior = PriorPocoMC(posterior.prior)       
-
-        # # initialize proposals
-        # if proposals == None:
-        #     logger.info("Initializing proposal methods ...")
-        #     proposals = initialize_proposals(posterior.like, prior)
-               
+        prior = PriorPocoMC(posterior.prior)                      
         # initialize sampler
         logger.info("Initializing sampler ...")
         self.sampler = pc.Sampler(prior=prior,
@@ -117,30 +83,29 @@ class SamplerPocoMC(SamplerBody):
     def __run__(self):
 
         while not self.stop:
+            
+            # find resume state
+            files = os.listdir('states')            
+            if len(files) == 0:
+                path = None
+            elif 'pmc_final.state' in files:
+                    path = 'states/pmc_final.state'
+                    self.stop = True
+            else:
+                # look for the file with the highest iteration number
+                iterations = [int(f.split('_')[1].split('.')[0]) for f in files if f.startswith('pmc_')]
+                if len(iterations) > 0:
+                    max_iter = max(iterations)
+                    path = 'states/pmc_' + str(max_iter) + '.state'
 
-            it = 5 # use (number of iterations // ncheckpoints) * ncheckpoints
-            path = 'states/pmc_final.state'
-            self.sampler.run(save_every = self.ncheckpoints) #, resume_state_path=path) 
-            # samples, weights, logl, logp = self.sampler.posterior()
-            # import matplotlib.pyplot as plt
-            # import corner
-            # # Trace plot for the first 4 parameters
-            # fig = corner.corner(samples[:,:4], weights=weights, color="C0")
-            # plt.show()
-
-            # self.stop = True
-
-            # update sampler status
-            # self.update()
-
-            # compute stopping condition
-            # self._stop_sampler()
+            self.sampler.run(save_every = self.ncheckpoints, resume_state_path=path)
 
         # final store inference
-        self.store()
+        # self.store() # FIXME: saving files
 
     def get_posterior(self):
 
+        print("get posterior")
         samples, weights, logl, logP = self.sampler.posterior()
         self.posterior_samples  = samples
 
@@ -173,11 +138,11 @@ class SamplerPocoMC(SamplerBody):
             samples, weights, logl, logP = self.sampler.posterior()
 
             fig = plt.figure()
-            corner.corner(samples[:,:4], weights=weights, color="C0")
-
+            corner.corner(samples[:,:self.ndim], weights=weights, color="C0")
+            plt.show()
             fig.savefig(self.outdir+'/posterior.png', dpi=200)
 
-            plt.close()
+            # plt.close()
 
         except Exception:
             pass
