@@ -1036,10 +1036,13 @@ if __name__ == "__main__":
     
     # produce histogram plots
     logger.info("Producing histograms...")
-    make_histograms(priors.names, posterior, prior_samples, hist_dir)
-    make_histograms(list(z_post.keys()), z_post, z_prio, hist_dir)
-    
-    # produce corner plots
+    try:
+        make_histograms(priors.names, posterior, prior_samples, hist_dir)
+        make_histograms(list(z_post.keys()), z_post, z_prio, hist_dir)
+    except:
+        pass
+        
+        # produce corner plots
     logger.info("Producing corners...")
     make_corners(posterior, opts.spin_flag, opts.lambda_flag, corner_dir, priors)
 

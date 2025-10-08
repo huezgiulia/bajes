@@ -79,7 +79,6 @@ class SamplerPocoMC(SamplerBody):
         # re-initialize pool
         self.sampler.pool   = pool
 
-
     def __run__(self):
         while not self.stop:
             
@@ -99,9 +98,6 @@ class SamplerPocoMC(SamplerBody):
                         path = 'states/pmc_' + str(max_iter) + '.state'
 
             self.sampler.run(save_every = self.nsave, resume_state_path=path)
-
-        # final store inference
-        self.store() # FIXME: saving files
 
     def get_posterior(self):
 
