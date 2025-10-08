@@ -52,10 +52,10 @@ class SamplerPocoMC(SamplerBody):
                        pool=None, n_active=512, 
                        flow='nsf6', precondition=True,
                        **kwargs):
-        
+
         n_steps = self.ndim
         n_max_steps = 10*self.ndim
-        self.ncheckpoints = kwargs.get('ncheckpoints')
+        self.nsave = kwargs['nsave']
 
         prior = PriorPocoMC(posterior.prior)                      
         # initialize sampler
@@ -81,37 +81,36 @@ class SamplerPocoMC(SamplerBody):
 
 
     def __run__(self):
-
         while not self.stop:
             
             # find resume state
-            files = os.listdir('states')            
-            if len(files) == 0:
+            if not os.path.exists('states'):
                 path = None
-            elif 'pmc_final.state' in files:
-                    path = 'states/pmc_final.state'
-                    self.stop = True
             else:
-                # look for the file with the highest iteration number
-                iterations = [int(f.split('_')[1].split('.')[0]) for f in files if f.startswith('pmc_')]
-                if len(iterations) > 0:
-                    max_iter = max(iterations)
-                    path = 'states/pmc_' + str(max_iter) + '.state'
+                files = os.listdir('states')
+                if 'pmc_final.state' in files:
+                        path = 'states/pmc_final.state'
+                        self.stop = True
+                else:
+                    # look for the file with the highest iteration number
+                    iterations = [int(f.split('_')[1].split('.')[0]) for f in files if f.startswith('pmc_')]
+                    if len(iterations) > 0:
+                        max_iter = max(iterations)
+                        path = 'states/pmc_' + str(max_iter) + '.state'
 
-            self.sampler.run(save_every = self.ncheckpoints, resume_state_path=path)
+            self.sampler.run(save_every = self.nsave, resume_state_path=path)
 
         # final store inference
-        # self.store() # FIXME: saving files
+        self.store() # FIXME: saving files
 
     def get_posterior(self):
 
-        print("get posterior")
         samples, weights, logl, logP = self.sampler.posterior()
         self.posterior_samples  = samples
 
+
         self.real_nout = self.posterior_samples.shape[0]
         logger.info("  - number of posterior samples : {}".format(self.real_nout))
-
         post_file = open(self.outdir + '/posterior.dat', 'w')
 
         post_file.write('#')
@@ -129,20 +128,15 @@ class SamplerPocoMC(SamplerBody):
     def make_plots(self):
 
         try:
-            import matplotlib.pyplot as plt
             import corner
         except Exception:
-            logger.warning("Impossible to produce standard plots. Cannot import matplotlib.")
+            logger.warning("Impossible to produce standard plots. Cannot import corner.")
 
         try:
             samples, weights, logl, logP = self.sampler.posterior()
 
-            fig = plt.figure()
-            corner.corner(samples[:,:self.ndim], weights=weights, color="C0")
-            plt.show()
-            fig.savefig(self.outdir+'/posterior.png', dpi=200)
-
-            # plt.close()
+            fig = corner.corner(samples[:,:self.ndim], weights=weights, show_titles=True, labels=self.names)
+            fig.savefig(self.outdir+'/corner.png', dpi=200)
 
         except Exception:
             pass
