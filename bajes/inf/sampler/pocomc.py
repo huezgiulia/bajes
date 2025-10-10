@@ -49,7 +49,7 @@ class SamplerPocoMC(SamplerBody):
 
     def __initialize__(self, posterior, nlive, 
                        proposals=None, 
-                       pool=None, n_active=512, 
+                       pool=None, n_active=1024, n_effective=2048,
                        flow='nsf6', precondition=True,
                        **kwargs):
 
