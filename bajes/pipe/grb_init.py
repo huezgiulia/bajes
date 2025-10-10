@@ -103,6 +103,15 @@ def initialize_grbprior(approx,
         dict['jetType'] = Constant('jetType', 0)
     elif model == 'PowerLaw':
         dict['jetType'] = Constant('jetType', 4)
+    elif model == 'TopHat-DeepNewtonian':
+        dict['jetType'] = Constant('jetType', -1)
+        dict['specType'] = Constant('specType', 32)
+    elif model == 'Gaussian-DeepNewtonian':
+        dict['jetType'] = Constant('jetType', 0)
+        dict['specType'] = Constant('specType', 32)
+    elif model == 'PowerLaw-DeepNewtonian':
+        dict['jetType'] = Constant('jetType', 4)
+        dict['specType'] = Constant('specType', 32)
     else:
         logger.error("Unknown jet type. Please use 'TopHat', 'PowerLaw' or 'Gaussian'.")
         raise RuntimeError("Unknown jet type. Please use 'TopHat', 'PowerLaw' or 'Gaussian'.")
