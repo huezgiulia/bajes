@@ -197,7 +197,7 @@ def initialize_grbprior(approx,
                                     min=xin_bounds[0], 
                                     max=xin_bounds[1])
 
-    if model == 'PowerLaw':
+    if 'PowerLaw' in model:
         if b_bounds[0] == None and b_bounds[1] == None:
             dict['b']           = Parameter(name='b',
                                         min=0, 
@@ -208,16 +208,17 @@ def initialize_grbprior(approx,
                                         min=b_bounds[0],
                                     max=b_bounds[1])
 
-    if model == 'PowerLaw' or model == 'Gaussian':
+    if 'PowerLaw' in model or 'Gaussian' in model:
         if theta_wing_bounds[0] == None and theta_wing_bounds[1] == None:
             dict['thetaWing']   = Parameter(name='thetaWing',
                                         min=0,
-                                        max=1.57)
+                                        max=1.57)            
+            logger.warning("Requested bounds for theta-wing parameter is empty. Setting standard bound [0, pi]")
+
         else:
             dict['thetaWing']   = Parameter(name='thetaWing',
                                         min=theta_wing_bounds[0], 
                                         max=theta_wing_bounds[1])
-            logger.warning("Requested bounds for theta-wing parameter is empty. Setting standard bound [0, pi]")
 
     dict['z']               = Parameter(name='z',
                                     min=0.001,
