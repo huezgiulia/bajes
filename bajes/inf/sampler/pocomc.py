@@ -47,9 +47,11 @@ class PriorPocoMC():
 
 class SamplerPocoMC(SamplerBody):
 
-    def __initialize__(self, posterior, nlive, 
+    def __initialize__(self, posterior, nlive, pool=None,
                        proposals=None, 
-                       pool=None, n_active=1024, n_effective=2048,
+                       n_steps = 50, n_max_steps = 500,
+                       # BNS - slow https://arxiv.org/pdf/2506.18977 
+                       n_tot = 9192, n_active=1024, n_effective=2048,
                        flow='nsf6', precondition=True,
                        **kwargs):
 
