@@ -7,7 +7,6 @@ logger = logging.getLogger(__name__)
 import pocomc as pc
 
 from . import SamplerBody
-from .proposal import _init_proposal_methods
 
 import os
 
@@ -59,16 +58,24 @@ class SamplerPocoMC(SamplerBody):
         n_max_steps = 10*self.ndim
         self.nsave = kwargs['nsave']
 
+        # periodic parameters
+        index_periodic = []
+        for p,i in zip(posterior.prior.parameters, range(len(posterior.prior.parameters))):
+            if p.periodic: 
+                index_periodic.append(i)
+
         prior = PriorPocoMC(posterior.prior)                      
         # initialize sampler
         logger.info("Initializing sampler ...")
         self.sampler = pc.Sampler(prior=prior,
                                     likelihood=posterior.log_like,
                                     random_state=0,
-                                    n_effective=nlive,
-                                    n_steps=n_steps,
-                                    n_max_steps=n_max_steps,
-                                    pool=pool,
+                                    # n_effective=nlive,
+                                    # n_steps=n_steps,
+                                    # n_max_steps=n_max_steps,
+                                    n_steps = 50, n_max_steps = 500,
+                                    n_active=1024, n_effective=2048,
+                                    pool=pool,periodic=index_periodic,
                                     )
 
         # extract prior samples for initial state
@@ -99,7 +106,7 @@ class SamplerPocoMC(SamplerBody):
                         max_iter = max(iterations)
                         path = 'states/pmc_' + str(max_iter) + '.state'
 
-            self.sampler.run(save_every = self.nsave, resume_state_path=path)
+            self.sampler.run(save_every = self.nsave, resume_state_path=path, n_total = 9192,)
 
     def get_posterior(self):
 
