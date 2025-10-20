@@ -74,7 +74,8 @@ class SamplerPocoMC(SamplerBody):
                                     # n_steps=n_steps,
                                     # n_max_steps=n_max_steps,
                                     n_steps = 50, n_max_steps = 500,
-                                    n_active=1024, n_effective=2048,
+                                    # n_active=1024, n_effective=2048,
+                                    n_effective = 1024, n_active = 512,
                                     pool=pool,periodic=index_periodic,
                                     )
 
@@ -106,7 +107,7 @@ class SamplerPocoMC(SamplerBody):
                         max_iter = max(iterations)
                         path = 'states/pmc_' + str(max_iter) + '.state'
 
-            self.sampler.run(save_every = self.nsave, resume_state_path=path, n_total = 9192,)
+            self.sampler.run(save_every = self.nsave, resume_state_path=path, n_total = 4096) #n_total = 9192,)
 
     def get_posterior(self):
 
