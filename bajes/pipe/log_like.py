@@ -360,3 +360,53 @@ class GRBLikelihood(Likelihood):
         except Exception as e:
            logger.error(f"Afterglowpy error: {e}")
            return -np.inf
+
+
+# ASTROMETRIC LIKELIHOOD
+# Multivariate normal function:
+# cfr. eq. 15 in Ryan et al. 2023 (arXiv:2310.02328)
+
+def build_diag_cov_matrix(sigmas_flux, sigmas_ra, sigmas_dec):
+    """
+    diagonal covariant matrix 
+    """
+    N = len(sigmas_ra)
+    Sigma = np.zeros((N, 3, 3))
+    for i in range(N):
+        Sigma[i, 0, 0] = sigmas_flux[i]**2
+        Sigma[i, 1, 1] = sigmas_ra[i]**2
+        Sigma[i, 2, 2] = sigmas_dec[i]**2
+    return Sigma
+
+class AMLikelihood(Likelihood):
+
+    def __init__(self, filters, approx, **kwargs):
+
+        super(AMLikelihood, self).__init__()
+
+        # astrometric data
+        self.data = filters
+
+        from ..obs.am.lightcurve import AM_Lightcurve
+        self.light      = AM_Lightcurve(times=filters.all_times, nu=filters.nu, approx=approx, **kwargs)
+
+    def log_like(self, params):
+
+        for bi in self.data.nu:
+
+            model = self.light.compute_centroid_motion(params)
+
+            Sigma       = build_diag_cov_matrix(self.data.flux_stdev[bi], self.data.ra_stdev[bi], self.data.dec_stdev[bi])
+            residual    =  np.stack([self.data.fluxes[bi] - model[bi][0],
+                                    self.data.ras[bi]    - model[bi][1],
+                                    self.data.decs[bi]   - model[bi][2]],axis=1)
+            
+            N           = len(self.data.fluxes[bi])
+            logL        = 0.
+            for i in range(N):
+                res         = residual[i]
+                cov         = Sigma[i]
+                _, logdet   = np.linalg.slogdet(cov)
+                logL        += -0.5 * (res.T @ np.linalg.inv(cov) @ res + logdet + 3 * np.log(2 * np.pi))
+
+        return logL

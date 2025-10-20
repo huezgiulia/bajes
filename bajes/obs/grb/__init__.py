@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from __future__ import unicode_literals, absolute_import
-__import__("pkg_resources").declare_namespace(__name__)
 
 from .lightcurve import GRB_Lightcurve, __approx_dict__
 from ... import CLIGHT_SI
