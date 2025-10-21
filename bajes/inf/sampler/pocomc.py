@@ -46,16 +46,15 @@ class PriorPocoMC():
 
 class SamplerPocoMC(SamplerBody):
 
-    def __initialize__(self, posterior, nlive, pool=None,
-                       proposals=None, 
+    def __initialize__(self, posterior, pool=None,
+                       proposals=None,
                        n_steps = 50, n_max_steps = 500,
-                       # BNS - slow https://arxiv.org/pdf/2506.18977 
-                       n_tot = 9192, n_active=1024, n_effective=2048,
-                       flow='nsf6', precondition=True,
+                       n_active=256, n_effective=512,
+                       n_tot = 9192, flow='nsf6', precondition=True,
                        **kwargs):
 
-        n_steps = self.ndim
-        n_max_steps = 10*self.ndim
+        # n_steps = self.ndim
+        # n_max_steps = 10*self.ndim
         self.nsave = kwargs['nsave']
 
         # periodic parameters
@@ -70,12 +69,8 @@ class SamplerPocoMC(SamplerBody):
         self.sampler = pc.Sampler(prior=prior,
                                     likelihood=posterior.log_like,
                                     random_state=0,
-                                    # n_effective=nlive,
-                                    # n_steps=n_steps,
-                                    # n_max_steps=n_max_steps,
-                                    n_steps = 50, n_max_steps = 500,
-                                    # n_active=1024, n_effective=2048,
-                                    n_effective = 1024, n_active = 512,
+                                    n_steps = n_steps, n_max_steps = n_max_steps,
+                                    n_effective = n_effective, n_active = n_active,
                                     pool=pool,periodic=index_periodic,
                                     )
 
