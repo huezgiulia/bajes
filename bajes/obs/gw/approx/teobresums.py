@@ -58,7 +58,6 @@ def l_to_k(lmax, remove_ks = [], custom_modes=None):
     if not(remove_ks==[]):
         for k_exlc in remove_ks:
             k_modes.remove(k_exlc)
-    print(k_modes)
     return k_modes
 
 def additional_opts(params_teob, params):
