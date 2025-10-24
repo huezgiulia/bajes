@@ -58,7 +58,7 @@ def l_to_k(lmax, remove_ks = [], custom_modes=None):
     if not(remove_ks==[]):
         for k_exlc in remove_ks:
             k_modes.remove(k_exlc)
-
+    print(k_modes)
     return k_modes
 
 def additional_opts(params_teob, params):
@@ -103,7 +103,7 @@ def teobresums_wrapper(freqs, params):
     if params['lmax'] == 0:
         modes = [1]
     else:
-        modes = l_to_k(params['lmax'])
+        modes = l_to_k(params['lmax'],remove_ks=[3,4,5,6,7])
 
     # set TEOB dict
     params_teob = { 'M':                    params['mtot'],

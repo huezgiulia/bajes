@@ -9,7 +9,7 @@ matplotlib
 mlgw
 mpi4py
 numpy
-scipy
+scipy=1.13.1
 teobresums
 ultranest
 
