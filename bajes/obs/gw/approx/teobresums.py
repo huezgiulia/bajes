@@ -338,7 +338,7 @@ def teobresums_spa_wrapper(freqs, params):
     if params['lmax'] == 0:
         modes = [1]
     else:
-        modes = l_to_k(params['lmax'])
+        modes = l_to_k(params['lmax'],remove_ks=[3,4,5,6,7])
 
     # set TEOB dict
     params_teob = { 'M':                    params['mtot'],
