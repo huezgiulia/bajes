@@ -77,9 +77,9 @@ def initialize_amprior(approx,
     # setting parameters
     if ra_bounds[0] == None and ra_bounds[1] == None:
         dict['ra']   = Parameter(name='ra',
-                                    min=0,
-                                    max=2*np.pi)
-        logger.warning("Requested bounds for ra parameter is empty. Setting standard bound [0, 2pi]")
+                                    min=-10,
+                                    max=10)
+        logger.warning("Requested bounds for ra parameter is empty. Setting standard bound [-10, 10]mas")
     else:
         dict['ra']        = Parameter(name='ra',
                                     min=ra_bounds[0], 
@@ -87,9 +87,9 @@ def initialize_amprior(approx,
         
     if dec_bounds[0] == None and dec_bounds[1] == None:
         dict['dec']   = Parameter(name='dec',
-                                    min=0,
-                                    max=2*np.pi)
-        logger.warning("Requested bounds for dec parameter is empty. Setting standard bound [0, 2pi]")
+                                    min=-10,
+                                    max=10)
+        logger.warning("Requested bounds for dec parameter is empty. Setting standard bound [-10, 10]mas")
     else:
         dict['dec']        = Parameter(name='dec',
                                     min=dec_bounds[0], 
@@ -97,9 +97,9 @@ def initialize_amprior(approx,
     
     if pa_bounds[0] == None and pa_bounds[1] == None:
         dict['pa']   = Parameter(name='pa',
-                                    min=-10,
-                                    max=10)
-        logger.warning("Requested bounds for position angle parameter is empty. Setting standard bound [-10, 10]mas")
+                                    min=0,
+                                    max=2*np.pi)
+        logger.warning("Requested bounds for position angle parameter is empty. Setting standard bound [0, 2pi]")
     else:
         dict['pa']        = Parameter(name='pa',
                                     min=pa_bounds[0], 
