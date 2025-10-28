@@ -17,6 +17,7 @@ def afterglow_wrapper(t, nu, params):
     grb_params['n0']        = 10**params['n0']
     grb_params['epsilon_e'] = 10**params['epsilon_e']
     grb_params['epsilon_B'] = 10**params['epsilon_B']
-    # grb_params['d_L']       = params['d_L'] * MPC_2_CM
-
+    grb_params['d_L']       = params['d_L'] * MPC_2_CM
+    grb_params['thetaObs']  = np.pi / 2 - np.abs(np.arccos(params['thetaObs']) - np.pi / 2)
+    
     return afterglowpy(t, nu, grb_params)

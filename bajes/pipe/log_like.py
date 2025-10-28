@@ -342,9 +342,9 @@ class GRBLikelihood(Likelihood):
         afterglowpy_params  = ['thetaObs', 'thetaCore', 'E0', 'n0', 'p', 'epsilon_e', 'epsilon_B', 'thetaWing', 'jetType', 'xi_N', 'd_L', 'z']
         params_grb          = {k: v for k, v in params.items() if k in afterglowpy_params}
         if 'distance' in params:
-            params_grb['d_L'] = params['distance'] * MPC_2_CM
+            params_grb['d_L'] = params['distance'] #* MPC_2_CM
         if 'cos_iota' in params:
-           params_grb['thetaObs'] = np.pi - np.arccos(params['cos_iota'])
+           params_grb['thetaObs'] = params['cos_iota'] #np.pi - np.arccos(params['cos_iota'])
         try: 
             mags    = self.light.compute_mag(params_grb)
             logL    = 0.
