@@ -48,14 +48,17 @@ class SamplerPocoMC(SamplerBody):
 
     def __initialize__(self, posterior, pool=None,
                        proposals=None,
-                       n_steps = 25, n_max_steps = 250,
-                       n_active=256, n_effective=512,
-                       n_tot = 9192, flow='nsf6', precondition=True,
+                       flow='nsf6', precondition=True,
                        **kwargs):
 
         # n_steps = self.ndim
         # n_max_steps = 10*self.ndim
-        self.nsave = kwargs['nsave']
+        self.nsave      = kwargs['nsave']
+        self.nactv      = kwargs['nactv']
+        self.neff       = kwargs['neff']
+        self.nsteps     = kwargs['nsteps']
+        self.ntot       = kwargs['ntot']
+        self.nmaxsteps  = self.nsteps * 10
 
         # periodic parameters
         index_periodic = []
@@ -69,8 +72,8 @@ class SamplerPocoMC(SamplerBody):
         self.sampler = pc.Sampler(prior=prior,
                                     likelihood=posterior.log_like,
                                     random_state=0,
-                                    n_steps = n_steps, n_max_steps = n_max_steps,
-                                    n_effective = n_effective, n_active = n_active,
+                                    n_steps = self.nsteps, n_max_steps = self.nmaxsteps,
+                                    n_effective = self.neff, n_active = self.nactv,
                                     pool=pool,periodic=index_periodic,
                                     )
 
@@ -102,7 +105,7 @@ class SamplerPocoMC(SamplerBody):
                         max_iter = max(iterations)
                         path = 'states/pmc_' + str(max_iter) + '.state'
 
-            self.sampler.run(save_every = self.nsave, resume_state_path=path, n_total = 4096) #n_total = 9192,)
+            self.sampler.run(save_every = self.nsave, resume_state_path=path, n_total = self.ntot)
 
     def get_posterior(self):
 

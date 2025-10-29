@@ -289,7 +289,13 @@ def parse_main_options():
     parser.add_argument('--nbatch',         dest='nbatch',          default=512,        type=int,                                   help='[nest] number of live points for batch (dynesty-dyn). Default: 512')
     parser.add_argument('--dkl',            dest='dkl',             default=0.5,        type=float,                                 help='[nest] target KL divergence (ultranest). Default: 0.5')
     parser.add_argument('--z-frac',         dest='z_frac',          default=None,       type=float,                                 help='[nest] remaining Z fraction (ultranest). Default: None')
+
+    # Normalizing flow sampling options
     parser.add_argument('--nsave',          dest='nsave',           default=10,         type=int,                                   help='[pocomc] how often state files are saved. Default: 10')
+    parser.add_argument('--neff',           dest='neff',            default=512,        type=int,                                   help='[pocomc] number of effective particles. Default: 512')
+    parser.add_argument('--nactv',          dest='nactv',           default=256,        type=int,                                   help='[pocomc] number of active particles. Default: 256. It should be an integer multiple of the number of CPUs.')
+    parser.add_argument('--nsteps',         dest='nsteps',          default=25,         type=int,                                   help='[pocomc] number of MCMC steps. Default: 25')
+    parser.add_argument('--ntot',           dest='ntot',            default=2048,       type=int,                                   help='[pocomc] number of effectively independent samples. Default: 2048')
 
     # MCMC options
     parser.add_argument('--nout',           dest='nout',            default=10000,      type=int,                                   help='[mcmc] number of posterior samples')
@@ -652,6 +658,10 @@ def init_sampler(posterior, pool, opts, proposals=None, rank=0):
                 'proposals':    proposals,
                 'rank':         rank,
                 'nsave':        opts.nsave,
+                'neff':         opts.neff,
+                'nactv':        opts.nactv,
+                'nsteps':       opts.nsteps,
+                'ntot':         opts.ntot,
                 'proposals_kwargs' : {'use_gw': opts.use_gw, 'use_slice': opts.use_slice}
                 }
  
