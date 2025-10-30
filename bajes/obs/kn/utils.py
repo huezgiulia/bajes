@@ -88,7 +88,7 @@ def compute_integral(E0, theta_C, theta_w, N=50):
 
     return integral
 
-def joint_rel_mdisc(thetaCore, E0, thetaWing, disc_sec_frac, **kwargs):
+def joint_rel_mdisc(thetaCore, E0, thetaWing, disc_sec_frac = 0.3, **kwargs):
     """
         Relation to connect the disc mass
         to the isotropic energy of the GRB
