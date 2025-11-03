@@ -392,21 +392,25 @@ class AMLikelihood(Likelihood):
 
     def log_like(self, params):
 
-        for bi in self.data.nu:
+        try:
+            for bi in self.data.nu:
 
-            model = self.light.compute_centroid_motion(params)
+                model = self.light.compute_centroid_motion(params)
 
-            Sigma       = build_diag_cov_matrix(self.data.flux_stdev[bi], self.data.ra_stdev[bi], self.data.dec_stdev[bi])
-            residual    =  np.stack([self.data.fluxes[bi] - model[bi][0],
-                                    self.data.ras[bi]    - model[bi][1],
-                                    self.data.decs[bi]   - model[bi][2]],axis=1)
-            
-            N           = len(self.data.fluxes[bi])
-            logL        = 0.
-            for i in range(N):
-                res         = residual[i]
-                cov         = Sigma[i]
-                _, logdet   = np.linalg.slogdet(cov)
-                logL        += -0.5 * (res.T @ np.linalg.inv(cov) @ res + logdet + 3 * np.log(2 * np.pi))
+                Sigma       = build_diag_cov_matrix(self.data.flux_stdev[bi], self.data.ra_stdev[bi], self.data.dec_stdev[bi])
+                residual    =  np.stack([self.data.fluxes[bi] - model[bi][0],
+                                        self.data.ras[bi]    - model[bi][1],
+                                        self.data.decs[bi]   - model[bi][2]],axis=1)
+                
+                N           = len(self.data.fluxes[bi])
+                logL        = 0.
+                for i in range(N):
+                    res         = residual[i]
+                    cov         = Sigma[i]
+                    _, logdet   = np.linalg.slogdet(cov)
+                    logL        += -0.5 * (res.T @ np.linalg.inv(cov) @ res + logdet + 3 * np.log(2 * np.pi))
 
-        return logL
+            return logL
+        except Exception as e:
+           logger.error(f"Afterglowpy error: {e}")
+           return -np.inf

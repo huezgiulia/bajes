@@ -57,7 +57,11 @@ def afterglow_wrapper(t, nu, params):
     params_grb['epsilon_B'] = 10**params_grb['epsilon_B']
     params_grb['d_L']       = params_grb['d_L'] * MPC_2_CM
 
-    flux, xc        = compute_centroid_afterglow(t, nu, params_grb)
+    try:
+        flux, xc        = compute_centroid_afterglow(t, nu, params_grb)
+    except Exception as e:
+        print(f"Afterglowpy error: {e}")
+        return -np.inf
     centroid_pos    = compute_centroid_position(params, xc, flux) 
 
     return centroid_pos
