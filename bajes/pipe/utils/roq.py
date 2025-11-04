@@ -624,7 +624,7 @@ except ImportError:
 #         """
 #         # already bring them into the correct final shape to avoid costly appending
 #         j = np.argmax(np.abs(V[:, 0])) # j in [0, M)
-#         U = np.zeros(np.shape(V), dtype=complex128) # Mxm matrix
+#         U = np.zeros(np.shape(V), dtype=np.complex128) # Mxm matrix
 #         P = np.zeros(np.shape(V)) # Mxm matrix
 #         p_xval = np.zeros(np.shape(V)[1], dtype=self.quad_points.dtype)
 #         p_ind = np.zeros(np.shape(V)[1], dtype=np.int_) # m vector

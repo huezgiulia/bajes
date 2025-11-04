@@ -84,7 +84,7 @@ class WalkProposal(object):
         try:
             c   = np.concatenate(c, axis=0)
             q   = list(model.map_fn(random_walk, zip(s,repeat(c), repeat(self.subset))))
-            return np.array(q), np.zeros(len(q), dtype=float64)
+            return np.array(q), np.zeros(len(q), dtype=np.float64)
         except Exception as e:
             logger.error("Cannot take a larger sample than population when 'replace=False'. Increase the number of samples.")
             raise ValueError("Cannot take a larger sample than population when 'replace=False'. Increase the number of samples.")
@@ -148,7 +148,7 @@ class DEProposal(object):
 
     def get_proposal(self, s, c, p, model):
         q = list(model.map_fn(differential_evolution,  zip(s,repeat(c), repeat(self.get_scale()))))
-        return np.array(q), np.zeros(len(q), dtype=float64)
+        return np.array(q), np.zeros(len(q), dtype=np.float64)
 
 def kde_sample(args):
     s, kde  = args
@@ -244,7 +244,7 @@ class GWTargetProposal(object):
         q = list(model.map_fn(eval_func_tuple, zip(this_proposals, s, repeat(c))))
         q = np.array(q) + model.random.normal(0,self.factor, size=(Ns,self.ndim))
 
-        return q, np.zeros(Ns, dtype=float64)
+        return q, np.zeros(Ns, dtype=np.float64)
 
     def gibbs_distance(self, s, c):
 
@@ -482,7 +482,7 @@ class SliceProposal(object):
         Nc      = list(map(len, c))
         Ns = len(s)
         ndim = s.shape[1]
-        q = np.empty((Ns, ndim), dtype=float64)
+        q = np.empty((Ns, ndim), dtype=np.float64)
 
         mean, cov = self.update_mean_and_cov(c)
 
@@ -508,7 +508,7 @@ class SliceProposal(object):
 
         self.iter_cov +=1
 
-        return q, np.zeros(Ns, dtype=float64)
+        return q, np.zeros(Ns, dtype=np.float64)
 
     # methods for differential slice proposal
     def tune_mu_dif(self):
@@ -528,7 +528,7 @@ class SliceProposal(object):
         Nc      = list(map(len, c))
         Ns = len(s)
         ndim = s.shape[1]
-        q = np.empty((Ns, ndim), dtype=float64)
+        q = np.empty((Ns, ndim), dtype=np.float64)
 
         if self.iter_dif > self.threshold:
 
@@ -552,7 +552,7 @@ class SliceProposal(object):
 
         self.iter_dif +=1
 
-        return q, np.zeros(Ns, dtype=float64)
+        return q, np.zeros(Ns, dtype=np.float64)
 
 def eigen_sample(args):
     s, c, r, f = args
@@ -589,7 +589,7 @@ class EigenProposal(object):
         r       = model.random.randint(0,ndim,size=Ns)
         f       = model.random.normal(0,1,size=Ns)
         q       = list(model.map_fn(eigen_sample, zip(s, repeat(np.concatenate(c)), r, f)))
-        return np.array(q), np.zeros(Ns, dtype=float64)
+        return np.array(q), np.zeros(Ns, dtype=np.float64)
 
 
 class PriorProposal(object):
@@ -615,4 +615,4 @@ class PriorProposal(object):
     def get_proposal(self, s, c, p, model):
         Ns  = len(s)
         q   = list(model.map_fn(eval_func_tuple, zip(repeat(self.prior_proposal), range(Ns))))
-        return np.array(q), np.zeros(Ns, dtype=float64)
+        return np.array(q), np.zeros(Ns, dtype=np.float64)
