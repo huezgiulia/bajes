@@ -63,4 +63,11 @@ __photometric_bands__       = { 'Xray'      : 1.2e18,
                                 'radio-6GHz': 6e9,
                                 'X-ray-1keV': 2.42e17,
                                 'bessellv'  : 5.08e14,
+                                'bessellb'  : 6.9e14,
+                                'besselli'  : 3.73e14,
+                                'bessellux' : 8.82e14,
+                                'bessellr'  : 4.69e14,
+                                '2massks'   : 1.39e14,
+                                '2massj'    : 2.43e14
+
                             }
