@@ -242,6 +242,7 @@ def initialize_knprior(approx,
     elif approx=='GrossmanKBP-2-eq+pol':        comps = ['equatorial', 'polar']
     elif 'GrossmanKBP-2-NRfits' in approx:      comps = ['dynamics', 'wind']
     elif 'GrossmanKBP-2-Valefits' in approx:    comps = ['dynamics', 'secular']
+    elif 'GrossmanKBP-2-nedorafits' in approx:  comps = ['dynamics', 'secular']
     elif 'GrossmanKBP-2-sumfits' in approx:     comps = ['dynamics', 'wind']
     elif 'GrossmanKBP-2-dynfits' in approx:     comps = ['dynamics', 'wind']
     elif 'GrossmanKBP-2-joint-grb' in approx:   comps = ['dynamics', 'secular']
@@ -440,6 +441,24 @@ def initialize_knprior(approx,
         # fix (m-dyn, v-dyn, m-wind) with NR fits
         dict['mej_{}'.format(dyn_tag)]  = Variable(name='mej_{}'.format(dyn_tag),   func=NRfit_recal_mass_dyn)
         dict['vel_{}'.format(dyn_tag)]  = Variable(name='vel_{}'.format(dyn_tag),   func=NRfit_recal_vel_dyn)
+
+
+    if 'GrossmanKBP-2-nedorafits' in approx:
+            
+        dyn_tag    = comps[0]
+        sec_tag    = comps[1]
+
+        from ..obs.kn.utils import NRfit_recal_mass_dyn_nedora, NRfit_recal_vel_dyn_nedora, NRfit_recal_mass_sec_nedora, NRfit_recal_mass_wind_nedora
+
+        # include calibrations and disk fracion
+        dict['disk_frac_sec']     = Parameter(name='disk_frac_sec',     min = 0.,   max = 1,    prior='uniform')
+        dict['NR_fit_recal_mdyn'] = Parameter(name='NR_fit_recal_mdyn', min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.792)
+        dict['NR_fit_recal_vdyn'] = Parameter(name='NR_fit_recal_vdyn', min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.092)
+
+        # fix (m-dyn, v-dyn, m-wind) with NR fits
+        dict['mej_{}'.format(dyn_tag)]  = Variable(name='mej_{}'.format(dyn_tag),   func=NRfit_recal_mass_dyn_nedora)
+        dict['vel_{}'.format(dyn_tag)]  = Variable(name='vel_{}'.format(dyn_tag),   func=NRfit_recal_vel_dyn_nedora)
+        dict['mej_{}'.format(sec_tag)]  = Variable(name='mej_{}'.format(sec_tag),   func=NRfit_recal_mass_sec_nedora)
 
     if 'joint-grb' in approx:
         logger.warning("Activating relation for secular mass and isotropic energy. This option works only with joint KN+GRB model. Please be sure you are using the correct framework.")
