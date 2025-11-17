@@ -47,7 +47,6 @@ class PriorPocoMC():
 class SamplerPocoMC(SamplerBody):
 
     def __initialize__(self, posterior, pool=None,
-                       proposals=None,
                        flow='nsf6', precondition=True,
                        **kwargs):
 
@@ -59,6 +58,8 @@ class SamplerPocoMC(SamplerBody):
         self.nsteps     = kwargs['nsteps']
         self.ntot       = kwargs['ntot']
         self.nmaxsteps  = self.nsteps * 10
+
+        print(pool)
 
         # periodic parameters
         index_periodic = []
@@ -72,6 +73,7 @@ class SamplerPocoMC(SamplerBody):
         self.sampler = pc.Sampler(prior=prior,
                                     likelihood=posterior.log_like,
                                     random_state=0,
+                                    flow=flow, precondition=precondition,
                                     n_steps = self.nsteps, n_max_steps = self.nmaxsteps,
                                     n_effective = self.neff, n_active = self.nactv,
                                     pool=pool,periodic=index_periodic,
