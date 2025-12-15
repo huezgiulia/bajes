@@ -386,7 +386,7 @@ def initialize_knprior(approx,
 
         from ..obs.kn.utils import joint_rel_mdisc
 
-        # dict['disc_sec_frac']           = Parameter(name='disc_sec_frac',         min = 0.2,   max = 0.5,   prior='uniform') 
+        dict['disc_sec_frac']           = Parameter(name='disc_sec_frac',         min = 0.2,   max = 0.5,   prior='uniform') 
         dict['mej_{}'.format(sec_tag)]  = Variable(name='mej_{}'.format(sec_tag),   func=joint_rel_mdisc)
 
     # include theoretical error
