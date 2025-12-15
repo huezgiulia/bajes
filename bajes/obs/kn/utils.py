@@ -1,4 +1,5 @@
 import numpy as np
+from ..gw.utils import mcq_to_m1, mcq_to_m2, compute_lambda_tilde
 
 # obs. the following universal constant are not expressed in SI
 units_c        = 2.99792458e10     #[cm/s]
@@ -286,3 +287,65 @@ def joint_rel_mdisc(thetaCore, E0, thetaWing, disc_sec_frac, **kwargs):
 if __name__ == "__main__":
     m_ej = NRfit_recal_mass_dyn(1.1852778957839742, 2.472884198170911, 839.7030363651173, 3465.539569009505)
     print(m_ej)
+
+# New NR fits 12/25
+
+def NRfit_recal_mass_dyn_new(mchirp, q, lambda1, lambda2, NR_fit_recal_mdyn, **kwargs):
+    lambdat = compute_lambda_tilde(mcq_to_m1(mchirp, q), mcq_to_m2(mchirp, q), lambda1, lambda2)
+    mdyn = NRfit_mass_dyn_new(lambdat, q) * (1. + NR_fit_recal_mdyn)
+    return np.max([0., mdyn])
+
+def NRfit_mass_dyn_new(lt, q):
+    """
+        NR-calibrated relation for mass of dynamical ejecta
+
+        Residuals = 4.177388774744708
+        St Dev    = 0.30462433835604796
+        Chi2      =  104.4347193686177
+    """
+    l0 = (lt - 338) / 338
+    q0 = (1 - 1 / q)
+    a, b0, b1, c0, c1 = [0.005465415864767121, 2.7432092625399895, -0.5095276905516682, 
+                         -0.004654444440538087, 3.4572418092166997]
+    return a * (1 + (c0 / a + c1 * l0) * q0) / (1 + b0 * l0 + b1 * l0**2)
+
+def NRfit_recal_vel_dyn_new(mchirp, q, lambda1, lambda2, NR_fit_recal_vdyn, **kwargs):
+    lambdat = compute_lambda_tilde(mcq_to_m1(mchirp, q), mcq_to_m2(mchirp, q), lambda1, lambda2)
+    vdyn    = NRfit_vel_dyn_new(lambdat, q) * (1. + NR_fit_recal_vdyn)
+    return np.max([1e-10, vdyn])
+
+def NRfit_vel_dyn_new(lt, q):
+    """
+        NR-calibrated relation for velocity of dynamical ejecta
+        Returns v_ej / c
+
+        Residuals = 0.537204002095301
+        St Dev    = 0.11250984191094857
+        Chi2 =  13.430100052382517
+    """
+    l0 = (lt - 338) / 338
+    q0 = (1 - 1 / q)
+    a, b0, b1, c0, c1 = [0.25426451470687095, 0.8571917872951094, -0.27004689267758164,
+                         -0.21143849689323335, 0.7419773536876892]
+    return a * (1 + (c0 / a + c1 * l0) * q0) / (1 + b0 * l0 + b1 * l0**2)
+
+def NRfit_recal_mass_sec_new(mchirp, q, lambda1, lambda2, disk_frac_sec, **kwargs):
+    lambdat = compute_lambda_tilde(mcq_to_m1(mchirp, q), mcq_to_m2(mchirp, q), lambda1, lambda2)
+    log_m_disk  = NRfit_log_mass_disk_new(lambdat, q)
+    msec        = np.exp(log_m_disk) * disk_frac_sec
+    return np.max([0., msec])
+
+def NRfit_log_mass_disk_new(lt, q):
+    """
+        NR-calibrated relation for mass of disk mass
+        Returns log_10(m_disk)
+
+        Residuals = 1.5980486826798666
+        St Dev    = 0.19696608880216374
+        Chi2 =  39.951217066996634
+    """
+    l0 = (lt - 338) / 338
+    q0 = (1 - 1 / q)
+    a, b, c, d = [-0.6571971321505049, -2.810766313956197,
+                  1.3857706576461155, 15.363897209682197]
+    return 1 / (a + b * q0) + np.tanh(l0) / (c + d * q0)

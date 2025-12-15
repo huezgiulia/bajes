@@ -254,6 +254,7 @@ def initialize_knprior(approx,
     elif 'Xkn-2-NRfits' in approx:              comps = ['dynamics', 'secular']
     elif approx=='Xkn-3':                       comps = ['dynamics', 'secular', 'wind']
     elif 'Xkn-3-NRfits' in approx:              comps = ['dynamics', 'secular', 'wind']
+    elif 'GrossmanKBP-2-newfits' in approx:     comps = ['dynamics', 'secular']
 
 
     # initializing disctionary for wrap up all information
@@ -422,6 +423,23 @@ def initialize_knprior(approx,
         dict['mej_{}'.format(dyn_tag)]  = Variable(name='mej_{}'.format(dyn_tag),       func=NRfit_recal_mass_dyn_breschi)
         dict['vel_{}'.format(dyn_tag)]  = Variable(name='vel_{}'.format(dyn_tag),       func=NRfit_recal_vel_dyn_breschi)
         dict['mej_{}'.format(sec_tag)]  = Variable(name='mej_{}'.format(sec_tag),       func=NRfit_recal_mass_sec_breschi)
+
+    if 'GrossmanKBP-2-newfits' in approx:
+
+        dyn_tag    = comps[0]
+        sec_tag    = comps[1]
+
+        from ..obs.kn.utils import NRfit_recal_mass_dyn_new, NRfit_recal_vel_dyn_new, NRfit_recal_mass_sec_new
+
+        # include calibrations and disk fracion
+        dict['disk_frac_sec']     = Parameter(name='disk_frac_sec',       min = 0.,   max = 1,    prior='uniform')
+        dict['NR_fit_recal_mdyn'] = Parameter(name='NR_fit_recal_mdyn',   min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.305)
+        dict['NR_fit_recal_vdyn'] = Parameter(name='NR_fit_recal_vdyn',   min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.113)
+
+        # fix (m-dyn, v-dyn, m-wind) with NR fits
+        dict['mej_{}'.format(dyn_tag)]  = Variable(name='mej_{}'.format(dyn_tag),       func=NRfit_recal_mass_dyn_new)
+        dict['vel_{}'.format(dyn_tag)]  = Variable(name='vel_{}'.format(dyn_tag),       func=NRfit_recal_vel_dyn_new)
+        dict['mej_{}'.format(sec_tag)]  = Variable(name='mej_{}'.format(sec_tag),       func=NRfit_recal_mass_sec_new)
 
     if 'GrossmanKBP-2-dynfits' in approx:
 
