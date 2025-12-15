@@ -275,9 +275,9 @@ class KNLikelihood(Likelihood):
     def log_like(self, params):
         
         # check the dynamical velocity  parameters value (for the case with NR fit)
-        if params['vel_dynamics'] > 0.333 or params['vel_dynamics'] < 1e-4:
-            logL = -np.inf
-            return logL
+        # if params['vel_dynamics'] > 0.333 or params['vel_dynamics'] < 1e-4:
+        #     logL = -np.inf
+        #     return logL
         
         if '3-NRfits' in self.approx:
             # check the two disk_frac parameters values (for the case with NR fit)
@@ -290,6 +290,17 @@ class KNLikelihood(Likelihood):
             from ..obs.kn.utils import NRfit_recal_mass_dyn, NRfit_recal_mass_wind
             Mtot_fit = NRfit_recal_mass_dyn(1.1975, 1.4, 254, 639, 0) + NRfit_recal_mass_wind(1.1975, 1.4, 254, 639, 0.4)
             if (np.abs(params['mej_dynamics'] + params['mej_wind'] - Mtot_fit)) > 1e-4:
+                logL = -np.inf
+                return logL
+            
+        if 'constr' in self.approx:
+            from ..obs.kn.utils import NRfit_recal_mass_dyn_new, NRfit_recal_mass_sec_new, NRfit_recal_vel_dyn_new
+            sum_component = NRfit_recal_mass_dyn_new(params['mchirp'], params['q'], params['lambda1'], params['lambda2'], 0) + NRfit_recal_mass_sec_new(params['mchirp'], params['q'], params['lambda1'], params['lambda2'], 0.7)
+            if (params['mej_isotropic1'] + params['mej_isotropic2']) > sum_component:
+                logL = -np.inf
+                return logL
+            vel_component = NRfit_recal_vel_dyn_new(params['mchirp'], params['q'], params['lambda1'], params['lambda2'], 0)
+            if np.sqrt((params['vel_isotropic1']**2 + params['vel_isotropic2']**2)/2) > vel_component:
                 logL = -np.inf
                 return logL
 

@@ -255,6 +255,7 @@ def initialize_knprior(approx,
     elif approx=='Xkn-3':                       comps = ['dynamics', 'secular', 'wind']
     elif 'Xkn-3-NRfits' in approx:              comps = ['dynamics', 'secular', 'wind']
     elif 'GrossmanKBP-2-newfits' in approx:     comps = ['dynamics', 'secular']
+    elif 'GrossmanKBP-2-isotropic-constr' in approx:  comps = ['isotropic1', 'isotropic2']
 
 
     # initializing disctionary for wrap up all information
