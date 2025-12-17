@@ -50,6 +50,8 @@ def afterglow_wrapper(t, nu, params):
     params['thetaObs']  = np.pi / 2 - np.abs(np.arccos(params['cos_iota']) - np.pi / 2)
     afterglowpy_params  = ['thetaObs', 'thetaCore', 'E0', 'n0', 'p', 'epsilon_e', 'epsilon_B', 'thetaWing', 'jetType', 'xi_N', 'd_L', 'z']
     params_grb          = {k: v for k, v in params.items() if k in afterglowpy_params}
+    if 'distance' in params:
+        params_grb['d_L']   = params['distance']
 
     params_grb['E0']        = 10**params_grb['E0']
     params_grb['n0']        = 10**params_grb['n0']
