@@ -59,8 +59,6 @@ class SamplerPocoMC(SamplerBody):
         self.ntot       = kwargs['ntot']
         self.nmaxsteps  = self.nsteps * 10
 
-        print(pool)
-
         # periodic parameters
         index_periodic = []
         for p,i in zip(posterior.prior.parameters, range(len(posterior.prior.parameters))):
@@ -76,7 +74,7 @@ class SamplerPocoMC(SamplerBody):
                                     flow=flow, precondition=precondition,
                                     n_steps = self.nsteps, n_max_steps = self.nmaxsteps,
                                     n_effective = self.neff, n_active = self.nactv,
-                                    pool=pool,periodic=index_periodic,
+                                    pool=pool._processes,periodic=index_periodic,
                                     )
 
         # extract prior samples for initial state
