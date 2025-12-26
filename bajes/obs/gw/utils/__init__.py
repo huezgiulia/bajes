@@ -316,7 +316,7 @@ def read_params(path, flag):
         elif ki == 'nqc-TEOBHyp':
             params[ki] = int(config[flag][ki])
         else:
-            params[ki] = np.float(config[flag][ki])
+            params[ki] = float(config[flag][ki])
 
     if 's1x' not in params_list:
         params['s1x'] = 0.
