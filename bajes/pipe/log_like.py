@@ -212,7 +212,8 @@ class GWLikelihood(Likelihood):
                 R      = np.real(dh)
 
         logL = - 0.5*(hh + dd) + R - self.logZ_noise - 0.5*_psd_fact
-
+        if np.isnan(logL):
+            logL = -np.inf
         return logL
 
 # KILO-NOVA LIKELIHOOD
@@ -308,46 +309,43 @@ class KNLikelihood(Likelihood):
 
         # If the used model is one inside bajes, 'mags' is a magnitudes dictionary
         # If the used model is one inside xkn, 'mags' is a magnitudes AND times dictionary
-        try: 
-            mags    = self.light.compute_mag(params)
-            logL    = 0.
+        mags    = self.light.compute_mag(params)
+        logL    = 0.
 
-            if self.use_calib_sigma:
-                for bi in self.filters.bands:
+        if self.use_calib_sigma:
+            for bi in self.filters.bands:
 
-                    if params['xkn_config'] == None:  # bajes model
-                        lambda_bi = bi
-                        interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
-                    
-                    else: # xkn model
-                        # tranform keys from band names into lambdas[nm] (ONLY FOR XKN MODELS)
-                        lambda_bi = int(self.filters.lambdas[bi]*1e9)
-                        interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
+                if params['xkn_config'] == None:  # bajes model
+                    lambda_bi = bi
+                    interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
+                
+                else: # xkn model
+                    # tranform keys from band names into lambdas[nm] (ONLY FOR XKN MODELS)
+                    lambda_bi = int(self.filters.lambdas[bi]*1e9)
+                    interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
 
-                    sigma2      = self.filters.mag_stdev[bi]**2. + np.exp(params['log_sigma_mag_{}'.format(bi)])**2.
-                    residuals   = (((self.filters.magnitudes[bi]-interp_mag))**2.)/sigma2
-                    logL       += -0.5*(residuals + np.log(2*np.pi*sigma2)).sum()
+                sigma2      = self.filters.mag_stdev[bi]**2. + np.exp(params['log_sigma_mag_{}'.format(bi)])**2.
+                residuals   = (((self.filters.magnitudes[bi]-interp_mag))**2.)/sigma2
+                logL       += -0.5*(residuals + np.log(2*np.pi*sigma2)).sum()
 
-            else:
-                for bi in self.filters.bands:
+        else:
+            for bi in self.filters.bands:
 
-                    if params['xkn_config'] == None:  # bajes model
-                        lambda_bi = bi
-                        interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
-                    
-                    else: # xkn model
-                        # tranform keys from band names into lambdas[nm] (ONLY FOR XKN MODELS)
-                        lambda_bi = int(self.filters.lambdas[bi]*1e9)
-                        interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
+                if params['xkn_config'] == None:  # bajes model
+                    lambda_bi = bi
+                    interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
+                
+                else: # xkn model
+                    # tranform keys from band names into lambdas[nm] (ONLY FOR XKN MODELS)
+                    lambda_bi = int(self.filters.lambdas[bi]*1e9)
+                    interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
 
-                    residuals   = ((self.filters.magnitudes[bi]-interp_mag)/self.filters.mag_stdev[bi])**2.
-                    logL       += -0.5*residuals.sum() 
-                logL += self.logNorm
-
-            return logL
-        except Exception as e:
-           logger.error(f"KN error: {e}")
-           return -np.inf
+                residuals   = ((self.filters.magnitudes[bi]-interp_mag)/self.filters.mag_stdev[bi])**2.
+                logL       += -0.5*residuals.sum() 
+            logL += self.logNorm
+        if np.isnan(logL):
+            logL = -np.inf
+        return logL
 
 
 # GRB LIKELIHOOD
