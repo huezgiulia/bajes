@@ -30,6 +30,7 @@ from .gw_init import initialize_gwlikelihood_kwargs
 from .kn_init import initialize_knlikelihood_kwargs
 from .grb_init import initialize_grblikelihood_kwargs
 from .am_init import initialize_amlikelihood_kwargs
+from .em_init import initialize_emlikelihood_kwargs
 
 def set_logger(label=None, outdir=None, level='INFO', silence=True):
 
@@ -535,6 +536,12 @@ def parse_setup_options():
     parser.add_argument('--pa-max',                 dest='pa_max',              type=float,                       default=None,   help='Upper bounds for position angle parameter')
     parser.add_argument('--pa-min',                 dest='pa_min',              type=float,                       default=None,   help='Lower bounds for position angle parameter')
 
+    #
+    # MMA OPTIONS
+    #
+
+    parser.add_argument('--em-approx',              dest='em_approx',           type=str,                         default=None,   help='KN-GRB approximant. Default: None')
+
     # Flags 
 
     return parser.parse_args()
@@ -897,6 +904,18 @@ def get_likelihood_and_prior(opts):
             l_kwas['priors'] = pr
             logger.info("Initializing astrometric likelihood ...")
             likes.append(AMLikelihood(**l_kwas))
+            priors.append(pr)
+
+        elif ti == 'mma':
+            
+            # select electromagnetic likelihood
+            from .log_like import MMALikelihood
+
+            # read arguments for likelihood
+            l_kwas, pr = initialize_emlikelihood_kwargs(opts)  
+            l_kwas['priors'] = pr
+            logger.info("Initializing electromagnetic likelihood ...")
+            likes.append(MMALikelihood(**l_kwas))
             priors.append(pr)
 
         else:
