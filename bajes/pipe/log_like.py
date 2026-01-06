@@ -489,7 +489,7 @@ class MMALikelihood(Likelihood):
                 # interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
 
                 interp_mag  = np.interp(self.filters.times[bi], self.light.times, mags[lambda_bi])
-                 
+
                 # else: # xkn model
                 #     # tranform keys from band names into lambdas[nm] (ONLY FOR XKN MODELS)
                 #     lambda_bi = int(self.filters.lambdas[bi]*1e9)
