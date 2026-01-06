@@ -150,12 +150,13 @@ class Lightcurve(object):
         for n in self.nus.keys():
             flux_grb[n] = self.light_func_grb(self.times, self.nus[n], params)
 
+
         flux = {}
         for n in self.nus.keys():
             flux[n] = flux_grb[n] + flux_kn[n]
 
         dict_mag = {}
         for n in self.lambdas.keys():
-            mag         = {k: -2.5 * np.log10(v/1e26) - 48.6 for k, v in flux.items()} 
-            dict_mag[n] = mag
+            dict_mag[n] = -2.5 * np.log10(flux[n]/1e26) - 48.6
+
         return dict_mag

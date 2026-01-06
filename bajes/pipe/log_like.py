@@ -488,9 +488,7 @@ class MMALikelihood(Likelihood):
                 lambda_bi = bi
                 # interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
 
-                # interp_mag  = np.interp(self.filters.times[bi], self.light.times, mags[lambda_bi])
-                interp_mag = mags[lambda_bi]
-                print(mags['i'])
+                interp_mag  = np.interp(self.filters.times[bi], self.light.times, mags[lambda_bi])
                  
                 # else: # xkn model
                 #     # tranform keys from band names into lambdas[nm] (ONLY FOR XKN MODELS)
@@ -516,5 +514,8 @@ class MMALikelihood(Likelihood):
                 residuals   = ((self.filters.magnitudes[bi]-interp_mag)/self.filters.mag_stdev[bi])**2.
                 logL       += -0.5*residuals.sum() 
             logL += self.logNorm
+
+        if np.isnan(logL):
+            logL = -np.inf
 
         return logL
