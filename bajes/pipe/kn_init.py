@@ -585,6 +585,22 @@ def initialize_knprior(approx,
             dict['vel_{}'.format(dyn_tag)]  = Variable(name='vel_{}'.format(dyn_tag),   func=NRfit_recal_vel_dyn_nedora)
             dict['mej_{}'.format(sec_tag)]  = Variable(name='mej_{}'.format(sec_tag),   func=NRfit_recal_mass_sec_nedora)
 
+        
+        elif approx=='Xkn-2-NRfits-new':
+            from ..obs.kn.utils import NRfit_recal_mass_dyn_nedora, NRfit_recal_vel_dyn_nedora, NRfit_recal_mass_sec_nedora
+
+            from ..obs.kn.utils import NRfit_recal_mass_dyn_new, NRfit_recal_vel_dyn_new, NRfit_recal_mass_sec_new
+
+            # include calibrations and disk fracion
+            dict['disk_frac_sec']     = Parameter(name='disk_frac_sec',       min = 0.,   max = 1,    prior='uniform')
+            dict['NR_fit_recal_mdyn'] = Parameter(name='NR_fit_recal_mdyn',   min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.305)
+            dict['NR_fit_recal_vdyn'] = Parameter(name='NR_fit_recal_vdyn',   min = -1.,  max = 1.,   prior='normal', mu=0., sigma=0.113)
+
+            # fix (m-dyn, v-dyn, m-wind) with NR fits
+            dict['mej_{}'.format(dyn_tag)]  = Variable(name='mej_{}'.format(dyn_tag),       func=NRfit_recal_mass_dyn_new)
+            dict['vel_{}'.format(dyn_tag)]  = Variable(name='vel_{}'.format(dyn_tag),       func=NRfit_recal_vel_dyn_new)
+            dict['mej_{}'.format(sec_tag)]  = Variable(name='mej_{}'.format(sec_tag),       func=NRfit_recal_mass_sec_new)
+
         else:
             logger.error("Invalid model with NR fits or invalid fit formula")
 

@@ -70,6 +70,8 @@ __approx_dict__ = { ### TIME-DOMAIN
                     'Xkn-2-NRfits-breschi':                 {'path': 'bajes.obs.kn.approx.xkn_model.xkn_wrapper_2comp',
                                                              'type': 'fnc'},
                     'Xkn-2-NRfits-nedora':                  {'path': 'bajes.obs.kn.approx.xkn_model.xkn_wrapper_2comp',
+                                                             'type': 'fnc'},                    
+                    'Xkn-2-NRfits-new':                     {'path': 'bajes.obs.kn.approx.xkn_model.xkn_wrapper_2comp',
                                                              'type': 'fnc'},
                     'Xkn-3':                                {'path': 'bajes.obs.kn.approx.xkn_model.xkn_wrapper_3comp',
                                                              'type': 'fnc'},
