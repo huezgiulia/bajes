@@ -587,8 +587,6 @@ def initialize_knprior(approx,
 
         
         elif approx=='Xkn-2-NRfits-new':
-            from ..obs.kn.utils import NRfit_recal_mass_dyn_nedora, NRfit_recal_vel_dyn_nedora, NRfit_recal_mass_sec_nedora
-
             from ..obs.kn.utils import NRfit_recal_mass_dyn_new, NRfit_recal_vel_dyn_new, NRfit_recal_mass_sec_new
 
             # include calibrations and disk fracion
