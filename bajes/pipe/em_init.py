@@ -338,12 +338,12 @@ def initialize_emprior(approx,
 
     # setting parameters
     if theta_obs_bounds[0] == None and theta_obs_bounds[1] == None:
-        dict['thetaObs']   = Parameter(name='cos_iota',
+        dict['cos_iota']   = Parameter(name='cos_iota',
                                     min=-1,
                                     max=1)
         logger.warning("Requested bounds for theta-obs parameter is empty. Setting standard bound [0, pi]")
     else:
-        dict['thetaObs']        = Parameter(name='cos_iota',
+        dict['cos_iota']        = Parameter(name='cos_iota',
                                     min=np.cos(theta_obs_bounds[1]), 
                                     max=np.cos(theta_obs_bounds[0]))
 
