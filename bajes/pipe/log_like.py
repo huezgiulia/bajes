@@ -434,7 +434,9 @@ class MMALikelihood(Likelihood):
 
         # compute data normalization
         self.logZ_noise = -0.5*sum([np.power(self.filters.magnitudes[bi]/self.filters.mag_stdev[bi],2.).sum() for bi in self.filters.bands])
-        self.logNorm    = -0.5*sum([np.log(2*np.pi*self.filters.mag_stdev[bi]**2).sum() for bi in self.filters.bands])
+        # self.logNorm    = -0.5*sum([np.log(2*np.pi*self.filters.mag_stdev[bi]**2).sum() for bi in self.filters.bands])
+        self.logNorm    = -0.5*sum([np.log(2*np.pi*upper_limit(self.filters.mag_stdev[bi],self.filters.magnitudes[bi])**2).sum() for bi in self.filters.bands])
+
 
         # initilize time axis for lightcurve model
         if t_start > 86400:
@@ -501,7 +503,8 @@ class MMALikelihood(Likelihood):
                 #     interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
 
                 sigma2      = self.filters.mag_stdev[bi]**2. + np.exp(params['log_sigma_mag_{}'.format(bi)])**2.
-                residuals   = (((self.filters.magnitudes[bi]-interp_mag))**2.)/sigma2
+                residuals = ((self.filters.magnitudes[bi]- interp_mag)/upper_limit(self.filters.mag_stdev[bi], self.filters.magnitudes[bi], interp_mag))**2.
+                # residuals   = (((self.filters.magnitudes[bi]-interp_mag))**2.)/sigma2
                 logL       += -0.5*(residuals + np.log(2*np.pi*sigma2)).sum()
 
         else:
@@ -516,7 +519,8 @@ class MMALikelihood(Likelihood):
                 #     lambda_bi = int(self.filters.lambdas[bi]*1e9)
                 #     interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
 
-                residuals   = ((self.filters.magnitudes[bi]-interp_mag)/self.filters.mag_stdev[bi])**2.
+                # residuals   = ((self.filters.magnitudes[bi]-interp_mag)/self.filters.mag_stdev[bi])**2.
+                residuals = ((self.filters.magnitudes[bi]- interp_mag)/upper_limit(self.filters.mag_stdev[bi], self.filters.magnitudes[bi], interp_mag))**2.
                 logL       += -0.5*residuals.sum() 
             logL += self.logNorm
 
