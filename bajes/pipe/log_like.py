@@ -484,47 +484,52 @@ class MMALikelihood(Likelihood):
             params['d_L'] = params['distance'] * MPC_2_CM
         if 'cos_iota' in params:
            params['thetaObs'] = np.pi / 2 - np.abs(np.arccos(params['cos_iota']) - np.pi / 2)
+        try:
 
-        mags = self.light.compute_mag(params)       
-        logL = 0.
+            mags = self.light.compute_mag(params)       
+            logL = 0.
 
-        if self.use_calib_sigma:
-            for bi in self.filters.nu:
+            if self.use_calib_sigma:
+                for bi in self.filters.nu:
 
-                # if params['xkn_config'] == None:  # bajes model
-                lambda_bi = bi
-                # interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
+                    # if params['xkn_config'] == None:  # bajes model
+                    lambda_bi = bi
+                    # interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
 
-                interp_mag  = np.interp(self.filters.times[bi], self.light.times, mags[lambda_bi])
+                    interp_mag  = np.interp(self.filters.times[bi], self.light.times, mags[lambda_bi])
 
-                # else: # xkn model
-                #     # tranform keys from band names into lambdas[nm] (ONLY FOR XKN MODELS)
-                #     lambda_bi = int(self.filters.lambdas[bi]*1e9)
-                #     interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
+                    # else: # xkn model
+                    #     # tranform keys from band names into lambdas[nm] (ONLY FOR XKN MODELS)
+                    #     lambda_bi = int(self.filters.lambdas[bi]*1e9)
+                    #     interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
 
-                sigma2      = self.filters.mag_stdev[bi]**2. + np.exp(params['log_sigma_mag_{}'.format(bi)])**2.
-                residuals = ((self.filters.magnitudes[bi]- interp_mag)/upper_limit(self.filters.mag_stdev[bi], self.filters.magnitudes[bi], interp_mag))**2.
-                # residuals   = (((self.filters.magnitudes[bi]-interp_mag))**2.)/sigma2
-                logL       += -0.5*(residuals + np.log(2*np.pi*sigma2)).sum()
+                    sigma2      = self.filters.mag_stdev[bi]**2. + np.exp(params['log_sigma_mag_{}'.format(bi)])**2.
+                    residuals = ((self.filters.magnitudes[bi]- interp_mag)/upper_limit(self.filters.mag_stdev[bi], self.filters.magnitudes[bi], interp_mag))**2.
+                    # residuals   = (((self.filters.magnitudes[bi]-interp_mag))**2.)/sigma2
+                    logL       += -0.5*(residuals + np.log(2*np.pi*sigma2)).sum()
 
-        else:
-            for bi in self.filters.nu:
+            else:
+                for bi in self.filters.nu:
 
-                # if params['xkn_config'] == None:  # bajes model
-                lambda_bi = bi
-                interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
-                
-                # else: # xkn model
-                #     # tranform keys from band names into lambdas[nm] (ONLY FOR XKN MODELS)
-                #     lambda_bi = int(self.filters.lambdas[bi]*1e9)
-                #     interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
+                    # if params['xkn_config'] == None:  # bajes model
+                    lambda_bi = bi
+                    interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
+                    
+                    # else: # xkn model
+                    #     # tranform keys from band names into lambdas[nm] (ONLY FOR XKN MODELS)
+                    #     lambda_bi = int(self.filters.lambdas[bi]*1e9)
+                    #     interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
 
-                # residuals   = ((self.filters.magnitudes[bi]-interp_mag)/self.filters.mag_stdev[bi])**2.
-                residuals = ((self.filters.magnitudes[bi]- interp_mag)/upper_limit(self.filters.mag_stdev[bi], self.filters.magnitudes[bi], interp_mag))**2.
-                logL       += -0.5*residuals.sum() 
-            logL += self.logNorm
+                    # residuals   = ((self.filters.magnitudes[bi]-interp_mag)/self.filters.mag_stdev[bi])**2.
+                    residuals = ((self.filters.magnitudes[bi]- interp_mag)/upper_limit(self.filters.mag_stdev[bi], self.filters.magnitudes[bi], interp_mag))**2.
+                    logL       += -0.5*residuals.sum() 
+                logL += self.logNorm
 
-        if np.isnan(logL):
+            if np.isnan(logL):
+                logL = -np.inf
+
+            return logL
+
+        except Exception as e:
+            logger.error(f"EM counterpart model error: {e}")
             logL = -np.inf
-
-        return logL
