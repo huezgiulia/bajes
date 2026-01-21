@@ -271,7 +271,7 @@ def compute_integral(E0, theta_C, theta_w, N=50):
 
     return integral
 
-def joint_rel_mdisc(thetaCore, E0, thetaWing, disc_sec_frac, **kwargs):
+def joint_rel_mdisc(thetaCore, E0, thetaWing, disc_sec_frac = 0.3, **kwargs):
     """
         Relation to connect the disc mass
         to the isotropic energy of the GRB
@@ -279,14 +279,10 @@ def joint_rel_mdisc(thetaCore, E0, thetaWing, disc_sec_frac, **kwargs):
         https://arxiv.org/abs/2006.07376
     """
     eta = 0.6e-3
-    fw = 0.3
     energy = compute_integral(E0, thetaCore, thetaWing)
-    mdisc  = energy * thetaCore**2 / (2 * eta * (1 - fw))
+    mdisc  = energy * thetaCore**2 / (2 * eta * (1 - disc_sec_frac))
     return mdisc * disc_sec_frac
 
-if __name__ == "__main__":
-    m_ej = NRfit_recal_mass_dyn(1.1852778957839742, 2.472884198170911, 839.7030363651173, 3465.539569009505)
-    print(m_ej)
 
 # New NR fits 12/25
 

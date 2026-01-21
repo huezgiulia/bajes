@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from __future__ import division, unicode_literals, absolute_import
-__import__("pkg_resources").declare_namespace(__name__)
 
 import os
 import numpy as np
@@ -30,6 +29,7 @@ from .utils import is_picklable, save_container, data_container
 from .gw_init import initialize_gwlikelihood_kwargs
 from .kn_init import initialize_knlikelihood_kwargs
 from .grb_init import initialize_grblikelihood_kwargs
+from .am_init import initialize_amlikelihood_kwargs
 
 def set_logger(label=None, outdir=None, level='INFO', silence=True):
 
@@ -516,6 +516,26 @@ def parse_setup_options():
     parser.add_argument('--b-max',                  dest='b_max',               type=float,                       default=None,   help='Upper bounds for power-law index parameters')
     parser.add_argument('--b-min',                  dest='b_min',               type=float,                       default=None,   help='Lower bounds for power-law index parameters')
 
+    #
+    # ASTROMETRIC OPTIONS
+    #
+
+    # Data information
+    parser.add_argument('--mag-folder-am',          dest='mag_folder_am',       type=str,                         default=None,   help='Path to magnitudes data folder for astrometric data.')
+    parser.add_argument('--am-approx',              dest='am_approx',           type=str,                         default=None,   help='GRB approximant. Default: None')
+
+    # Photometric bands information
+    parser.add_argument('--am-band',                dest='am_bands',            type=str,     action="append",    default=[],     help='Name of photometric bands used in the data')
+    parser.add_argument('--am-nu',                  dest='am_nus',              type=float,   action="append",    default=[],     help='Wave-length of photometric bands used in the data [m]')
+
+    # Prior bounds
+    parser.add_argument('--ra-max',                 dest='ra_max',              type=float,                       default=None,   help='Upper bounds for right ascension parameter')
+    parser.add_argument('--ra-min',                 dest='ra_min',              type=float,                       default=None,   help='Lower bounds for right ascension parameter')
+    parser.add_argument('--dec-max',                dest='dec_max',             type=float,                       default=None,   help='Upper bounds for declination parameter')
+    parser.add_argument('--dec-min',                dest='dec_min',             type=float,                       default=None,   help='Lower bounds for declination parameter')
+    parser.add_argument('--pa-max',                 dest='pa_max',              type=float,                       default=None,   help='Upper bounds for position angle parameter')
+    parser.add_argument('--pa-min',                 dest='pa_min',              type=float,                       default=None,   help='Lower bounds for position angle parameter')
+
     # Flags 
 
     return parser.parse_args()
@@ -858,25 +878,37 @@ def get_likelihood_and_prior(opts):
 
         elif ti == 'grb':
 
-            # select KN likelihood
+            # select GRB likelihood
             from .log_like import GRBLikelihood
 
             # read arguments for likelihood
             l_kwas, pr = initialize_grblikelihood_kwargs(opts)  
             l_kwas['priors'] = pr
-            logger.info("Initializing KN likelihood ...")
+            logger.info("Initializing GRB likelihood ...")
             likes.append(GRBLikelihood(**l_kwas))
+            priors.append(pr)
+
+        elif ti == 'am':
+
+            # select astrometric likelihood
+            from .log_like import AMLikelihood
+
+            # read arguments for likelihood
+            l_kwas, pr = initialize_amlikelihood_kwargs(opts)  
+            l_kwas['priors'] = pr
+            logger.info("Initializing astrometric likelihood ...")
+            likes.append(AMLikelihood(**l_kwas))
             priors.append(pr)
 
         else:
 
-            logger.error("Unknown tag {} for likelihood initialization. Please use gw, kn or a combination.".format(opts.tags[0]))
-            raise ValueError("Unknown tag {} for likelihood initialization. Please use gw, kn or a combination.".format(opts.tags[0]))
+            logger.error("Unknown tag {} for likelihood initialization. Please use gw, kn, grb, am or a combination.".format(opts.tags[0]))
+            raise ValueError("Unknown tag {} for likelihood initialization. Please use gw, kn, grb, am or a combination.".format(opts.tags[0]))
 
     # Either reduce likelihood and prior objects to a single "messenger", or initialise joint objects.
     if len(opts.tags) == 0:
-        logger.error("Unknown tag for likelihood initialization. Please use gw, kn, grb or a combination.")
-        raise ValueError("Unknown tag for likelihood initialization. Please use gw, kn, grb or a combination.")
+        logger.error("Unknown tag for likelihood initialization. Please use gw, kn, grb, am or a combination.")
+        raise ValueError("Unknown tag for likelihood initialization. Please use gw, kn, grb, am or a combination.")
 
     elif len(opts.tags) == 1:
         l_obj = likes[0]

@@ -27,19 +27,19 @@ def initialize_knlikelihood_kwargs(opts):
         raise ValueError("Number of components does not match the number of opacity bounds. Please give in input the same number of arguments in the respective order.")  
     if (len(opts.step_angle_mej_min) != len(opts.step_angle_mej_max)):
         logger.error("Number of lower bounds does not match the number upper bounds for step_angle_mej. Please give in input the same number of arguments in the respective order.")
-        raise ValueError("Number of lower bounds does not match the number oupper bounds. Please give in input the same number of arguments in the respective order.")     
+        raise ValueError("Number of lower bounds does not match the number opper bounds. Please give in input the same number of arguments in the respective order.")     
     if (len(opts.vel_high_min) != len(opts.vel_high_max)):
         logger.error("Number of lower bounds does not match the number upper bounds for vel_high. Please give in input the same number of arguments in the respective order.")
-        raise ValueError("Number of lower bounds does not match the number oupper bounds. Please give in input the same number of arguments in the respective order.")       
+        raise ValueError("Number of lower bounds does not match the number opper bounds. Please give in input the same number of arguments in the respective order.")       
     if (len(opts.step_angle_vel_min) != len(opts.step_angle_vel_max)):
         logger.error("Number of lower bounds does not match the number upper bounds for step_angle_vel. Please give in input the same number of arguments in the respective order.")
-        raise ValueError("Number of lower bounds does not match the number oupper bounds. Please give in input the same number of arguments in the respective order.")       
+        raise ValueError("Number of lower bounds does not match the number opper bounds. Please give in input the same number of arguments in the respective order.")       
     if (len(opts.opac_high_min) != len(opts.opac_high_max)):
         logger.error("Number of lower bounds does not match the number upper bounds for opac_high. Please give in input the same number of arguments in the respective order.")
-        raise ValueError("Number of lower bounds does not match the number oupper bounds. Please give in input the same number of arguments in the respective order.")       
+        raise ValueError("Number of lower bounds does not match the number opper bounds. Please give in input the same number of arguments in the respective order.")       
     if (len(opts.step_angle_op_min) != len(opts.step_angle_op_max)):
         logger.error("Number of lower bounds does not match the number upper bounds for step_angle_op. Please give in input the same number of arguments in the respective order.")
-        raise ValueError("Number of lower bounds does not match the number oupper bounds. Please give in input the same number of arguments in the respective order.")       
+        raise ValueError("Number of lower bounds does not match the number opper bounds. Please give in input the same number of arguments in the respective order.")       
     
 
 
@@ -107,7 +107,7 @@ def initialize_knlikelihood_kwargs(opts):
         else: 
             logger.error("Impossible to initialize MKN object from {} file. Use ini.".format(tag))
             l_kwargs['mkn_config']          = None
-            l_kwargs['xkn_config']          = None
+            l_kwargs['xkn_zconfig']          = None
 
 
 
@@ -487,8 +487,8 @@ def initialize_knprior(approx,
 
         from ..obs.kn.utils import joint_rel_mdisc
 
-        dict['disc_sec_frac']           = Parameter(name='disc_sec_frac',         min = 0.,   max = 0.6,   prior='uniform')
-        #dict['disc_sec_frac']           = Constant(name='disc_sec_frac',         value=0.3)
+
+        dict['disc_sec_frac']           = Parameter(name='disc_sec_frac',         min = 0.2,   max = 0.5,   prior='uniform') 
         dict['mej_{}'.format(sec_tag)]  = Variable(name='mej_{}'.format(sec_tag),   func=joint_rel_mdisc)
 
     if 'Xkn-1-NRfits' in approx:

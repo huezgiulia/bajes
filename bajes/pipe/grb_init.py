@@ -103,20 +103,29 @@ def initialize_grbprior(approx,
         dict['jetType'] = Constant('jetType', 0)
     elif model == 'PowerLaw':
         dict['jetType'] = Constant('jetType', 4)
+    elif model == 'TopHat-DeepNewtonian':
+        dict['jetType'] = Constant('jetType', -1)
+        dict['specType'] = Constant('specType', 32)
+    elif model == 'Gaussian-DeepNewtonian':
+        dict['jetType'] = Constant('jetType', 0)
+        dict['specType'] = Constant('specType', 32)
+    elif model == 'PowerLaw-DeepNewtonian':
+        dict['jetType'] = Constant('jetType', 4)
+        dict['specType'] = Constant('specType', 32)
     else:
         logger.error("Unknown jet type. Please use 'TopHat', 'PowerLaw' or 'Gaussian'.")
         raise RuntimeError("Unknown jet type. Please use 'TopHat', 'PowerLaw' or 'Gaussian'.")
 
     # setting parameters
     if theta_obs_bounds[0] == None and theta_obs_bounds[1] == None:
-        dict['thetaObs']   = Parameter(name='thetaObs',
-                                    min=0,
-                                    max=1.57)
+        dict['thetaObs']   = Parameter(name='cos_iota',
+                                    min=-1,
+                                    max=1)
         logger.warning("Requested bounds for theta-obs parameter is empty. Setting standard bound [0, pi]")
     else:
-        dict['thetaObs']        = Parameter(name='thetaObs',
-                                    min=theta_obs_bounds[0], 
-                                    max=theta_obs_bounds[1])
+        dict['thetaObs']        = Parameter(name='cos_iota',
+                                    min=np.cos(theta_obs_bounds[1]), 
+                                    max=np.cos(theta_obs_bounds[0]))
 
     if theta_core_bounds[0] == None and theta_core_bounds[1] == None:
         dict['thetaCore']   = Parameter(name='thetaCore',
@@ -125,7 +134,7 @@ def initialize_grbprior(approx,
         logger.warning("Requested bounds for theta-core parameter is empty. Setting standard bound [0, pi]")
     else:
         dict['thetaCore']   = Parameter(name='thetaCore',
-                                    min=theta_core_bounds[0], 
+                                    min=theta_core_bounds[0],
                                     max=theta_core_bounds[1])
 
     if e0_bounds[0] == None and e0_bounds[1] == None:
@@ -188,7 +197,7 @@ def initialize_grbprior(approx,
                                     min=xin_bounds[0], 
                                     max=xin_bounds[1])
 
-    if model == 'PowerLaw':
+    if 'PowerLaw' in model:
         if b_bounds[0] == None and b_bounds[1] == None:
             dict['b']           = Parameter(name='b',
                                         min=0, 
@@ -199,16 +208,17 @@ def initialize_grbprior(approx,
                                         min=b_bounds[0],
                                     max=b_bounds[1])
 
-    if model == 'PowerLaw' or model == 'Gaussian':
+    if 'PowerLaw' in model or 'Gaussian' in model:
         if theta_wing_bounds[0] == None and theta_wing_bounds[1] == None:
             dict['thetaWing']   = Parameter(name='thetaWing',
                                         min=0,
-                                        max=1.57)
+                                        max=1.57)            
+            logger.warning("Requested bounds for theta-wing parameter is empty. Setting standard bound [0, pi]")
+
         else:
             dict['thetaWing']   = Parameter(name='thetaWing',
                                         min=theta_wing_bounds[0], 
                                         max=theta_wing_bounds[1])
-            logger.warning("Requested bounds for theta-wing parameter is empty. Setting standard bound [0, pi]")
 
     dict['z']               = Parameter(name='z',
                                     min=0.001,
@@ -227,12 +237,12 @@ def initialize_grbprior(approx,
         dist_max = 1000.
 
     if dist_flag=='log':
-        dict['d_L']   = Parameter(name='d_L',
+        dict['d_L']   = Parameter(name='distance',
                                        min=dist_min,
                                        max=dist_max,
                                        prior='log-uniform')
     elif dist_flag=='vol':
-        dict['d_L']   = Parameter(name='d_L',
+        dict['d_L']   = Parameter(name='distance',
                                        min=dist_min,
                                        max=dist_max,
                                        prior='quadratic')
