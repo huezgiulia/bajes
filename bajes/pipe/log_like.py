@@ -532,4 +532,4 @@ class MMALikelihood(Likelihood):
 
         except Exception as e:
             logger.error(f"EM counterpart model error: {e}")
-            logL = -np.inf
+            return -np.inf
