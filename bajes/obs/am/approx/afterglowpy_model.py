@@ -65,6 +65,8 @@ def afterglow_wrapper(t, nu, params):
         grb_params['thetaWing'] = params['thetaWing']
     if 'b' in params:
         grb_params['b'] = params['b']
+    if 'specType' in params:
+        grb_params['specType'] = params['specType']
 
     try:
         flux, xc        = compute_centroid_afterglow(t, nu, grb_params)
