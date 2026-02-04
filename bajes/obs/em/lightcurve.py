@@ -131,13 +131,9 @@ class Lightcurve(object):
         else:
             raise KeyError("Unable to read inclination parameter, information is missing. Please use iota or cosi.")
         
-        afterglowpy_params  = ['thetaObs', 'thetaCore', 'E0', 'n0', 'p', 'epsilon_e', 'epsilon_B', 'thetaWing', 'jetType', 'xi_N', 'd_L', 'z']
+        afterglowpy_params  = ['cos_iota', 'thetaCore', 'E0', 'n0', 'p', 'epsilon_e', 'epsilon_B', 'thetaWing', 'jetType', 'xi_N', 'distance', 'z']
         params_grb          = {k: v for k, v in params.items() if k in afterglowpy_params}
-        params_kn           = {k: v for k, v in params.items() if k not in afterglowpy_params} 
-        if 'distance' in params:
-            params_grb['d_L'] = params['distance']
-        if 'cos_iota' in params:
-           params_grb['thetaObs'] = params['cos_iota']
+        params_kn           = {k: v for k, v in params.items() if k not in afterglowpy_params or k == 'distance' or k == 'cos_iota'} 
 
         # include band information in params
         params_kn['photometric-lambdas'] = self.lambdas
@@ -149,7 +145,6 @@ class Lightcurve(object):
         flux_grb = {}
         for n in self.nus.keys():
             flux_grb[n] = self.light_func_grb(self.times, self.nus[n], params)
-
 
         flux = {}
         for n in self.nus.keys():

@@ -339,14 +339,8 @@ class GRBLikelihood(Likelihood):
     def log_like(self, params):
 
         # compute lightcurve
-        afterglowpy_params  = ['thetaObs', 'thetaCore', 'E0', 'n0', 'p', 'epsilon_e', 'epsilon_B', 'thetaWing', 'jetType', 'xi_N', 'd_L', 'z']
-        params_grb          = {k: v for k, v in params.items() if k in afterglowpy_params}
-        if 'distance' in params:
-            params_grb['d_L'] = params['distance'] * MPC_2_CM
-        if 'cos_iota' in params:
-           params_grb['thetaObs'] = np.pi / 2 - np.abs(np.arccos(params['cos_iota']) - np.pi / 2)
         try: 
-            mags    = self.light.compute_mag(params_grb)
+            mags    = self.light.compute_mag(params)
             logL    = 0.
 
             for bi in self.filters.nu:
@@ -479,11 +473,6 @@ class MMALikelihood(Likelihood):
 
         # If the used model is one inside bajes, 'mags' is a magnitudes dictionary
         # If the used model is one inside xkn, 'mags' is a magnitudes AND times dictionary
-
-        if 'distance' in params:
-            params['d_L'] = params['distance'] * MPC_2_CM
-        if 'cos_iota' in params:
-           params['thetaObs'] = np.pi / 2 - np.abs(np.arccos(params['cos_iota']) - np.pi / 2)
         try:
 
             mags = self.light.compute_mag(params)       
@@ -527,7 +516,6 @@ class MMALikelihood(Likelihood):
 
             if np.isnan(logL):
                 logL = -np.inf
-
             return logL
 
         except Exception as e:
