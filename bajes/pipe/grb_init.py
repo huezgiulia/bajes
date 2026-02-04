@@ -118,12 +118,12 @@ def initialize_grbprior(approx,
 
     # setting parameters
     if theta_obs_bounds[0] == None and theta_obs_bounds[1] == None:
-        dict['thetaObs']   = Parameter(name='cos_iota',
+        dict['cos_iota']   = Parameter(name='cos_iota',
                                     min=-1,
                                     max=1)
         logger.warning("Requested bounds for theta-obs parameter is empty. Setting standard bound [0, pi]")
     else:
-        dict['thetaObs']        = Parameter(name='cos_iota',
+        dict['cos_iota']        = Parameter(name='cos_iota',
                                     min=np.cos(theta_obs_bounds[1]), 
                                     max=np.cos(theta_obs_bounds[0]))
 
@@ -237,12 +237,12 @@ def initialize_grbprior(approx,
         dist_max = 1000.
 
     if dist_flag=='log':
-        dict['d_L']   = Parameter(name='distance',
+        dict['distance']   = Parameter(name='distance',
                                        min=dist_min,
                                        max=dist_max,
                                        prior='log-uniform')
     elif dist_flag=='vol':
-        dict['d_L']   = Parameter(name='distance',
+        dict['distance']   = Parameter(name='distance',
                                        min=dist_min,
                                        max=dist_max,
                                        prior='quadratic')
