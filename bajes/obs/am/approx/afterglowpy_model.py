@@ -39,28 +39,37 @@ def compute_centroid_position(params, xc, flux):
     """
     Compute theoretical centroid position as in Ryan et al. 2023
     """
-    xra     = xc*np.sin(params['pa'])+params['ra']
-    xdec    = xc*np.cos(params['pa'])+params['dec']
+    xra     = xc*np.sin(params['PA'])+params['RA']
+    xdec    = xc*np.cos(params['PA'])+params['DEC']
 
     return np.array([flux, xra, xdec])
 
 def afterglow_wrapper(t, nu, params):
     ''' Wrapper for grb model from afterglowpy.'''
 
-    params['thetaObs']  = np.pi / 2 - np.abs(np.arccos(params['cos_iota']) - np.pi / 2)
-    afterglowpy_params  = ['thetaObs', 'thetaCore', 'E0', 'n0', 'p', 'epsilon_e', 'epsilon_B', 'thetaWing', 'jetType', 'xi_N', 'd_L', 'z']
-    params_grb          = {k: v for k, v in params.items() if k in afterglowpy_params}
-    if 'distance' in params:
-        params_grb['d_L']   = params['distance']
+    grb_params = {}
 
-    params_grb['E0']        = 10**params_grb['E0']
-    params_grb['n0']        = 10**params_grb['n0']
-    params_grb['epsilon_e'] = 10**params_grb['epsilon_e']
-    params_grb['epsilon_B'] = 10**params_grb['epsilon_B']
-    params_grb['d_L']       = params_grb['d_L'] * MPC_2_CM
+    grb_params['jetType']   = params['jetType']
+    grb_params['thetaCore'] = params['thetaCore']
+    grb_params['d_L']       = params['distance'] * MPC_2_CM
+    grb_params['thetaObs']  = np.pi / 2 - np.abs(np.arccos(params['cos_iota']) - np.pi / 2)
+    grb_params['E0']        = 10**params['E0']
+    grb_params['n0']        = 10**params['n0']
+    grb_params['epsilon_e'] = 10**params['epsilon_e']
+    grb_params['epsilon_B'] = 10**params['epsilon_B']
+    grb_params['p']         = params['p']
+    grb_params['xi_N']      = params['xi_N']
+    grb_params['z']         = params['z']
+
+    if 'thetaWing' in params:
+        grb_params['thetaWing'] = params['thetaWing']
+    if 'b' in params:
+        grb_params['b'] = params['b']
+    if 'specType' in params:
+        grb_params['specType'] = params['specType']
 
     try:
-        flux, xc        = compute_centroid_afterglow(t, nu, params_grb)
+        flux, xc        = compute_centroid_afterglow(t, nu, grb_params)
     except Exception as e:
         print(f"Afterglowpy error: {e}")
         return -np.inf
