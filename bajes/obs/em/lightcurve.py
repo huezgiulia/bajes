@@ -140,7 +140,7 @@ class Lightcurve(object):
         params_kn['xkn_config'] = self.xkn_config
         params_kn['mkn_config'] = self.mkn_config
         mag_kn  = self.light_func(self.times+params['t_gps'], params)
-        flux_kn = {k: 10**(- 0.4 * (v + 48.6)) for k, v in mag_kn.items()}
+        flux_kn = {k: (10**(- 0.4 * (v + 48.6)))*1e26 for k, v in mag_kn.items()}
         
         flux_grb = {}
         for n in self.nus.keys():
