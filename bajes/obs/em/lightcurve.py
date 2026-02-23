@@ -111,7 +111,7 @@ class Lightcurve(object):
         
         self.times      = times
         self.nus        = lambdas
-        self.lambdas    = {k: CLIGHT_SI / v for k, v in lambdas.items() if k != 'X-ray-1keV' and k != 'X-ray-10keV'}
+        self.lambdas    = {k: CLIGHT_SI / v for k, v in lambdas.items() if k != 'X-ray-1keV' and k != 'X-ray-10keV'} 
         self.approx, self.approx_grb = approx.split("+")
         self.xkn_config = kwargs['xkn_config']
         self.mkn_config = kwargs['mkn_config']
@@ -151,13 +151,13 @@ class Lightcurve(object):
             flux[n] = flux_grb[n] + flux_kn[n]
 
         dict_mag = {}
-        for n in self.lambdas.keys():
-            dict_mag[n] = -2.5 * np.log10(flux[n]/1e26) - 48.6
-        
         if 'X-ray-1keV' in self.nus.keys():
-            dict_mag['X-ray-1keV'] = -2.5 * np.log10(flux_grb[n]/1e26) - 48.6
+            dict_mag['X-ray-1keV'] = -2.5 * np.log10(flux_grb['X-ray-1keV']/1e26) - 48.6
 
         if 'X-ray-10keV' in self.nus.keys():
-            dict_mag['X-ray-10keV'] = -2.5 * np.log10(flux_grb[n]/1e26) - 48.6
+            dict_mag['X-ray-10keV'] = -2.5 * np.log10(flux_grb['X-ray-10keV']/1e26) - 48.6
+
+        for n in self.lambdas.keys():
+            dict_mag[n] = -2.5 * np.log10(flux[n]/1e26) - 48.6
 
         return dict_mag
