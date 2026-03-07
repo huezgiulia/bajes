@@ -88,7 +88,8 @@ class Heating(object):
             Ref. Korobkin et al. (2012), arXiv:1206.2379 [astro-ph.SR]
         """
         alpha, t0, sigma0, eps_nuc, m_ej, Omega, v_rms = args
-        eps_th  = self.therm_efficiency(t=t,m=m_ej,omega=Omega,v=v_rms)
+        # eps_th  = self.therm_efficiency(t=t,m=m_ej,omega=Omega,v=v_rms)
+        eps_th = 0.33
         return eps_nuc*np.power(0.5 - 1./np.pi * np.arctan((t-t0)/sigma0),alpha) * (eps_th/0.5)
 
     def therm_efficiency_params(self, m, omega, v):
