@@ -51,6 +51,7 @@ def expand_shell_and_radiate(time, heat, exp_args, eps_args):
     m_diff  = np.interp(time, np.flip(t_diff), np.flip(m_v))
     m_fs    = np.interp(time, np.flip(t_fs),   np.flip(m_v))
     m_rad   = m_diff-m_fs
+    m_rad   = m_diff
 
     # compute heating rate
     eps     = heat.heating_rate(time, eps_args)
