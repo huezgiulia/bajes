@@ -15,7 +15,8 @@ def initialize_emlikelihood_kwargs(opts):
 
     # initial check
     # NOTE: this works only with GrossmanKBP models
-    ncomps = int(opts.em_approx.split('-')[1])
+    kn_approx, grb_approx = opts.em_approx.split("+")
+    ncomps = int(kn_approx.split('-')[1])
 
     if (ncomps != len(opts.mej_min)) or (ncomps != len(opts.mej_max)):
         logger.error("Number of components does not match the number of ejected mass bounds. Please give in input the same number of arguments in the respective order.")
