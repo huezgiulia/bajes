@@ -23,6 +23,12 @@ class Filter(object):
                 raise RuntimeError("Error occured while loading {}".format(folder + '/{}.txt.'.format(k)))
 
             try:
+                if isinstance(m, np.float64):
+                    m = np.array([m])
+                if isinstance(t, np.float64):
+                    t = np.array([t])
+                if isinstance(sm, np.float64):
+                    sm = np.array([sm])
                 assert len(m) == len(sm)
                 assert len(m) == len(t)
             except Exception as exc:

@@ -33,7 +33,7 @@ __approx_dict__ = { ### KN
                                                              'type': 'cls'},
                     'GrossmanKBP-2-polar':                  {'path': 'bajes.obs.kn.approx.grossman_kbp.korobkin_barnes_grossman_perego_et_al_two_isotropic_polar_wrapper',
                                                              'type': 'cls'},
-                    'GrossmanKBP-2-eq+pol':                 {'path': 'bajes.obs.kn.approx.grossman_kbp.korobkin_barnes_grossman_perego_et_al_two_equatorial_polar_wrapper',
+                    'GrossmanKBP-2-eq-pol':                 {'path': 'bajes.obs.kn.approx.grossman_kbp.korobkin_barnes_grossman_perego_et_al_two_equatorial_polar_wrapper',
                                                              'type': 'cls'},
                     'GrossmanKBP-2-NRfits-iso':             {'path': 'bajes.obs.kn.approx.grossman_kbp.korobkin_barnes_grossman_perego_et_al_two_nrfit_isotropic_wrapper',
                                                              'type': 'cls'},
