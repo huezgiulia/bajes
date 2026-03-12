@@ -139,9 +139,17 @@ class Lightcurve(object):
         params_kn['photometric-lambdas'] = self.lambdas
         params_kn['xkn_config'] = self.xkn_config
         params_kn['mkn_config'] = self.mkn_config
-        mag_kn  = self.light_func(self.times+params['t_gps'], params)
-        flux_kn = {k: (10**(- 0.4 * (v + 48.6)))*1e26 for k, v in mag_kn.items()}
-        
+        mag_kn  = self.light_func(self.times+params['t_gps'], params_kn)
+
+        if params_kn['xkn_config'] == None:
+            flux_kn = {k: (10**(- 0.4 * (v + 48.6)))*1e26 for k, v in mag_kn.items()}
+        else:
+            flux_kn = {}
+            for k in self.lambdas.keys():
+                lambda_bi = int(self.lambdas[k]*1e9)
+                mag_interp = np.interp(self.times, mag_kn[lambda_bi]['time'], mag_kn[lambda_bi]['mag'])
+                flux_kn[k] = (10**(- 0.4 * (mag_interp + 48.6)))*1e26
+
         flux_grb = {}
         for n in self.nus.keys():
             flux_grb[n] = self.light_func_grb(self.times, self.nus[n], params)

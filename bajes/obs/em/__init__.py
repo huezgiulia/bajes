@@ -32,8 +32,8 @@ __photometric_bands__       = { # X-ray bands
                                 'S'         : 3.0e9,
                                 'C'         : 6.0e9,
                                 'X'         : 10.0e9,
-                                'Ku'        : 15.0e9,
                                 'K'         : 12.0e9,
+                                'Ku'        : 15.0e9,
                                 'Ka'        : 30.0e9,
                                 'ALMA'      : 105.5e9,
                             }
