@@ -361,7 +361,8 @@ def teobresums_spa_wrapper(freqs, params):
                     'domain':               1,
                     'interp_freqs':         "yes",
                     'freqs':                freqs.tolist(),
-                    'initial_frequency':    params['f_min']
+                    'initial_frequency':    params['f_min'],
+                    'model':                'Giotto'
                     }
 
     if params['eccentricity'] != 0:
