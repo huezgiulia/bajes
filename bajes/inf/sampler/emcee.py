@@ -287,7 +287,7 @@ class SamplerMCMC(SamplerBody):
             else:
                 self.acl    = int(np.max(acls_clean))
                 if self.acl < 1: self.acl = 1
-                self.neff   = (self.backend.iteration-self.nburn)*self.nwalkers//self.acl
+                self.neff   = (self.sampler.backend.iteration-self.nburn)*self.sampler.nwalkers//self.acl
 
             # if the number of collected samples is greater than nout, the sampling is done
             if self.neff >= self.nout :

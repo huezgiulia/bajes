@@ -189,6 +189,8 @@ class GWBinningLikelihood(Likelihood):
         # generate h0
         i_wav       = np.where((freqs>=fiducial_params['f_min']))
         wave0       = Waveform(freqs[i_wav], self.srate , self.seglen, approx)
+        if approx == 'TEOBResumSPA_NRPMw_recal':
+            wave0 = Waveform(freqs[i_wav], self.srate , self.seglen, 'TEOBResumSPA_NRPMw')
         h0p, h0c    = wave0.compute_hphc(fiducial_params)
 
         # fill below f_min
@@ -367,6 +369,7 @@ class GWBinningLikelihood(Likelihood):
         else:
             R      = np.real(dh)
 
+        #logL = - 0.5*(hh + dd) + R - self.logZ_noise - 0.5*_psd_fact
         logL  =  R - 0.5*hh
 
         return logL

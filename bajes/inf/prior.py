@@ -212,8 +212,8 @@ class Prior(object):
 
             # check that name is not in constants
             if vi.name in list(self.const.keys()):
-                logger.error("Repeated name {} between variables and contants. Please use different names.".format(vi.name))
-                raise ValueError("Repeated name {} in sampling variables and contants. Please use different names.".format(vi.name))
+                logger.error("Repeated name {} between variables and constants. Please use different names.".format(vi.name))
+                raise ValueError("Repeated name {} in sampling variables and constants. Please use different names.".format(vi.name))
 
             # append information
             self.v_names.append(vi.name)
@@ -287,7 +287,7 @@ class Prior(object):
 
     def cumulative(self, x, name=None):
 
-        if isinstance(x, (float, int, np.float)):
+        if isinstance(x, (float, int, float)):
             x = [x]
 
         if len(x) == self.ndim:

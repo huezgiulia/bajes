@@ -47,3 +47,5 @@ the user should install additional packages depending on the requested template:
 * [`MLGW`](https://pypi.org/project/mlgw/)
 * [`LALSuite`](https://lscsoft.docs.ligo.org/lalsuite/)
 * [`JenpyROQ`](https://github.com/gcarullo/JenpyROQ)
+* [`xkn`](https://github.com/GiacomoRicigliano/xkn)
+* [`afterglowpy`](https://github.com/geoffryan/afterglowpy)

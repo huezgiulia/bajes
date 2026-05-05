@@ -1,5 +1,10 @@
 ## Changelog
 
+# [v1.3.0] May 2026
+* Add afterglowpy model for GRB afterglow (including centroid motion)
+* Minor fixes for updated dynesty, scipy and numpy versions
+* Fix nrpmw, emcee and relative binning
+
 # [v1.2.0] November 2024
 * Include relative binning 
 * Include xkn model for kilonovae

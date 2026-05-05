@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from __future__ import division, unicode_literals, absolute_import
-__import__("pkg_resources").declare_namespace(__name__)
 
 import os, sys
 import numpy as np
@@ -311,13 +310,13 @@ def read_params(path, flag):
         if ki == 'approx':
             params[ki] = config[flag][ki]
         elif ki == 'lmax':
-            params[ki] = np.int(config[flag][ki])
+            params[ki] = int(config[flag][ki])
         elif ki == 'Eprior':
             params[ki] = config[flag][ki]
         elif ki == 'nqc-TEOBHyp':
             params[ki] = int(config[flag][ki])
         else:
-            params[ki] = np.float(config[flag][ki])
+            params[ki] = float(config[flag][ki])
 
     if 's1x' not in params_list:
         params['s1x'] = 0.

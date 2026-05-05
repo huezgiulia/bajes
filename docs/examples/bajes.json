@@ -1,0 +1,110 @@
+{
+    "445": {
+        "band": [
+            "B"
+        ],
+        "filename": [
+            "B.txt"
+        ],
+        "lambda": 445e-9,
+        "lambdas": [
+            445e-9
+        ],
+        "name": [
+            "B"
+        ],
+        "type": [
+            "fake"
+        ]
+    },
+    "475": {
+        "band": [
+            "g"
+        ],
+        "filename": [
+            "g.txt"
+        ],
+        "lambda": 475e-9,
+        "lambdas": [
+            475e-9
+        ],
+        "name": [
+            "g"
+        ],
+        "type": [
+            "fake"
+        ]
+    },
+    "850": {
+        "band": [
+            "z"
+        ],
+        "filename": [
+            "z.txt"
+        ],
+        "lambda": 850e-9,
+        "lambdas": [
+            850e-9
+        ],
+        "name": [
+            "z"
+        ],
+        "type": [
+            "fake"
+        ]
+    },
+    "2190": {
+        "band": [
+            "K"
+        ],
+        "filename": [
+            "K.txt"
+        ],
+        "lambda":2190e-9,
+        "lambdas": [
+            2190e-9
+        ],
+        "name": [
+            "K"
+        ],
+        "type": [
+            "fake"
+        ]
+    },
+    "658": {
+        "band": [
+            "R"
+        ],
+        "filename": [
+            "R.txt"
+        ],
+        "lambda":658e-9,
+        "lambdas": [
+            658e-9
+        ],
+        "name": [
+            "R"
+        ],
+        "type": [
+            "fake"
+        ]        
+    },
+    "775": {
+        "band": [
+            "I"
+        ],
+        "filename": [
+            "I.txt"
+        ],
+        "lambda":775e-9,
+        "lambdas": [
+            775e-9
+        ],
+        "name": [
+            "I"
+        ],
+        "type": [
+            "fake"
+        ]
+    } 
+}

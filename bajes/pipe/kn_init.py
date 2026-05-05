@@ -24,22 +24,22 @@ def initialize_knlikelihood_kwargs(opts):
         raise ValueError("Number of components does not match the number of velocity bounds. Please give in input the same number of arguments in the respective order.")
     if (ncomps != len(opts.opac_min)) or (ncomps != len(opts.opac_max)):
         logger.error("Number of components does not match the number of opacity bounds. Please give in input the same number of arguments in the respective order.")
-        raise ValueError("Number of components does not match the number of opacity bounds. Please give in input the same number of arguments in the respective order.")  
+        raise ValueError("Number of components does not match the number of opacity bounds. Please give in input the same number of arguments in the respective order.")
     if (len(opts.step_angle_mej_min) != len(opts.step_angle_mej_max)):
         logger.error("Number of lower bounds does not match the number upper bounds for step_angle_mej. Please give in input the same number of arguments in the respective order.")
-        raise ValueError("Number of lower bounds does not match the number oupper bounds. Please give in input the same number of arguments in the respective order.")     
+        raise ValueError("Number of lower bounds does not match the number opper bounds. Please give in input the same number of arguments in the respective order.")
     if (len(opts.vel_high_min) != len(opts.vel_high_max)):
         logger.error("Number of lower bounds does not match the number upper bounds for vel_high. Please give in input the same number of arguments in the respective order.")
-        raise ValueError("Number of lower bounds does not match the number oupper bounds. Please give in input the same number of arguments in the respective order.")       
+        raise ValueError("Number of lower bounds does not match the number opper bounds. Please give in input the same number of arguments in the respective order.")
     if (len(opts.step_angle_vel_min) != len(opts.step_angle_vel_max)):
         logger.error("Number of lower bounds does not match the number upper bounds for step_angle_vel. Please give in input the same number of arguments in the respective order.")
-        raise ValueError("Number of lower bounds does not match the number oupper bounds. Please give in input the same number of arguments in the respective order.")       
+        raise ValueError("Number of lower bounds does not match the number opper bounds. Please give in input the same number of arguments in the respective order.")
     if (len(opts.opac_high_min) != len(opts.opac_high_max)):
         logger.error("Number of lower bounds does not match the number upper bounds for opac_high. Please give in input the same number of arguments in the respective order.")
-        raise ValueError("Number of lower bounds does not match the number oupper bounds. Please give in input the same number of arguments in the respective order.")       
+        raise ValueError("Number of lower bounds does not match the number opper bounds. Please give in input the same number of arguments in the respective order.")
     if (len(opts.step_angle_op_min) != len(opts.step_angle_op_max)):
         logger.error("Number of lower bounds does not match the number upper bounds for step_angle_op. Please give in input the same number of arguments in the respective order.")
-        raise ValueError("Number of lower bounds does not match the number oupper bounds. Please give in input the same number of arguments in the respective order.")       
+        raise ValueError("Number of lower bounds does not match the number opper bounds. Please give in input the same number of arguments in the respective order.")
     
 
 
@@ -82,15 +82,16 @@ def initialize_knlikelihood_kwargs(opts):
     l_kwargs['t_start']             = opts.init_t
     l_kwargs['t_scale']             = opts.t_scale
     l_kwargs['use_calib_sigma_lc']  = opts.use_calib_sigma_lc
-    
+
     # inizialize MKN class
-    from xkn import MKN, MKNConfig
+
     if not opts.xkn:
             logger.info("No config file was passed for MKN inizialization.")
             l_kwargs['mkn_config']          = None
             l_kwargs['xkn_config']          = None
 
     else:
+        from xkn import MKN, MKNConfig
         config_path  = os.path.abspath(opts.xkn)
         tag             = config_path.split('.')[-1]
 
@@ -183,7 +184,8 @@ def initialize_knlikelihood_kwargs(opts):
                                 dist_max=opts.dist_max, dist_min=opts.dist_min,
                                 eps0_max=opts.eps_max,  eps0_min=opts.eps_min,
                                 dist_flag=opts.dist_flag, log_eps0_flag=opts.log_eps_flag,
-                                heating_sampling=opts.heat_sampling, heating_alpha=opts.heating_alpha,
+                                heating_sampling=opts.heat_sampling,  heat_sampling_corr=opts.heat_sampling_corr,
+                                heating_alpha=opts.heating_alpha,
                                 heating_time=opts.heating_time,heating_sigma=opts.heating_sigma,
                                 time_shift_bounds=[opts.time_shift_min, opts.time_shift_max],
                                 fixed_names=opts.fixed_names, fixed_values=opts.fixed_values,
@@ -215,6 +217,7 @@ def initialize_knprior(approx,
                        dist_flag            = False,
                        log_eps0_flag        = False,
                        heating_sampling     = False,
+                       heat_sampling_corr   = False,
                        heating_alpha        = 1.3,
                        heating_time         = 1.3,
                        heating_sigma        = 0.11,
@@ -237,12 +240,23 @@ def initialize_knprior(approx,
     elif approx=='GrossmanKBP-2-equatorial':    comps = ['isotropic', 'equatorial']
     elif approx=='GrossmanKBP-2-polar':         comps = ['isotropic', 'polar']
     elif approx=='GrossmanKBP-2-eq+pol':        comps = ['equatorial', 'polar']
-    elif 'GrossmanKBP-2-NRfits' in approx:      comps = ['dyn', 'wind']
+    elif 'GrossmanKBP-2-NRfits' in approx:      comps = ['dynamics', 'wind']
+    elif 'GrossmanKBP-2-Valefits' in approx:    comps = ['dynamics', 'secular']
+    elif 'GrossmanKBP-2-nedorafits' in approx:  comps = ['dynamics', 'secular']
+    elif 'GrossmanKBP-2-sumfits' in approx:     comps = ['dynamics', 'wind']
+    elif 'GrossmanKBP-2-dynfits' in approx:     comps = ['dynamics', 'wind']
+    elif 'GrossmanKBP-2-joint-grb' in approx:   comps = ['dynamics', 'secular']
     elif approx=='GrossmanKBP-3-isotropic':     comps = ['isotropic1', 'isotropic2', 'isotropic3']
     elif approx=='GrossmanKBP-3-anisotropic':   comps = ['isotropic', 'equatorial', 'polar']
     elif approx=='Xkn-1':                       comps = ['dynamics']
+    elif 'Xkn-1-NRfits' in approx:              comps = ['dynamics']
     elif approx=='Xkn-2':                       comps = ['dynamics', 'secular']
+    elif 'Xkn-2-NRfits' in approx:              comps = ['dynamics', 'secular']
     elif approx=='Xkn-3':                       comps = ['dynamics', 'secular', 'wind']
+    elif 'Xkn-3-NRfits' in approx:              comps = ['dynamics', 'secular', 'wind']
+    elif 'GrossmanKBP-2-newfits' in approx:     comps = ['dynamics', 'secular']
+    elif 'GrossmanKBP-2-isotropic-constr' in approx:  comps = ['isotropic1', 'isotropic2']
+
 
     # initializing disctionary for wrap up all information
     dict = {}
@@ -285,6 +299,10 @@ def initialize_knprior(approx,
         dict['eps_alpha']   = Constant('eps_alpha', heating_alpha)
         dict['eps_time']    = Constant('eps_time',  heating_time)
         dict['eps_sigma']   = Constant('eps_sigma', heating_sigma)
+
+    if heat_sampling_corr:
+        logger.warning("Including heating correction coefficiets in sampling using default bounds with uniform prior.")
+        dict['nuc_corr']   = Parameter(name='nuc_corr', min = 1., max = 10., prior='uniform')
 
     # setting distance
     if dist_min == None and dist_max == None:
@@ -351,8 +369,6 @@ def initialize_knprior(approx,
     # setting inclination
     dict['cos_iota']   =  Parameter(name='cos_iota', min=-1., max=+1.)
 
-    
-
     # use NR fits for dynamical ejecta and baryonic wind
     if 'GrossmanKBP-2-NRfits' in approx:
 
@@ -375,6 +391,7 @@ def initialize_knprior(approx,
         dict['mej_{}'.format(dyn_tag)]  = Variable(name='mej_{}'.format(dyn_tag),   func=NRfit_recal_mass_dyn)
         dict['vel_{}'.format(dyn_tag)]  = Variable(name='vel_{}'.format(dyn_tag),   func=NRfit_recal_vel_dyn)
         dict['mej_{}'.format(wind_tag)] = Variable(name='mej_{}'.format(wind_tag),  func=NRfit_recal_mass_wind)
+
 
     # include theoretical error
     if use_calib_sigma:

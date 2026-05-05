@@ -77,6 +77,12 @@ If you use one of the following kilonova approximants, please provide the relate
     * Nuclear heating rates extracted from O. Korobkin et al., [arxiv](https://arxiv.org/abs/1206.2379)
     * Thermal efficiency described in J. Barnes et al., [arxiv](https://arxiv.org/abs/1605.07218)
     * Multi-component anisotropic model presented in A. Perego et al., [arxiv](https://arxiv.org/abs/1711.03982)
-
+* `xkn`: G. Ricigliano et al., [arxiv](https://arxiv.org/abs/2311.15709)
 The *bajes* repository contains the bolometric magnitudes of AT2017gfo and the corresponding standard deviations
 extracted from V. A. Villar et al., [arxiv](https://arxiv.org/abs/1710.11576)
+
+## GRB afterglow
+
+If you use one of the following gamma-ray burst afterglow approximants, please provide the related citation,
+* `afterglowpy`: G. Ryan et al., [arxiv](https://arxiv.org/abs/1909.11691)
+    * centroid motion and Deep Newtonian regime: G.Ryan et al., [arxiv](https://arxiv.org/abs/2310.02328)

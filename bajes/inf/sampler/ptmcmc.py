@@ -256,11 +256,11 @@ class _PTMCMC(object):
         self._logposterior0 = None
         self._loglikelihood0 = None
 
-        self.nswap = np.zeros(self.ntemps, dtype=np.float)
-        self.nswap_accepted = np.zeros(self.ntemps, dtype=np.float)
+        self.nswap = np.zeros(self.ntemps, dtype=float)
+        self.nswap_accepted = np.zeros(self.ntemps, dtype=float)
 
-        self.nprop = np.zeros((self.ntemps, self.nwalkers), dtype=np.float)
-        self.nprop_accepted = np.zeros((self.ntemps, self.nwalkers), dtype=np.float)
+        self.nprop = np.zeros((self.ntemps, self.nwalkers), dtype=float)
+        self.nprop_accepted = np.zeros((self.ntemps, self.nwalkers), dtype=float)
 
     def __getstate__(self):
         state               = self.__dict__.copy()
@@ -274,8 +274,8 @@ class _PTMCMC(object):
         results = list(self.mapf(self._likeprior, ps.reshape((-1, self.dim))))
 
         # logL, logpr
-        logl    = np.fromiter((r[0] for r in results), np.float, count=len(results)).reshape((self.ntemps, -1))
-        logp    = np.fromiter((r[1] for r in results), np.float, count=len(results)).reshape((self.ntemps, -1))
+        logl    = np.fromiter((r[0] for r in results), float, count=len(results)).reshape((self.ntemps, -1))
+        logp    = np.fromiter((r[1] for r in results), float, count=len(results)).reshape((self.ntemps, -1))
         logger.debug("Probabilities evaluated.")
 
         return logl, logp
