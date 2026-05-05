@@ -107,7 +107,7 @@ def initialize_knlikelihood_kwargs(opts):
         else: 
             logger.error("Impossible to initialize MKN object from {} file. Use ini.".format(tag))
             l_kwargs['mkn_config']          = None
-            l_kwargs['xkn_zconfig']          = None
+            l_kwargs['xkn_config']          = None
 
 
 
