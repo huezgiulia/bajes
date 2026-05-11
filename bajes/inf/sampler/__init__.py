@@ -38,10 +38,11 @@ class SamplerBody(object):
         self.lock_backup    = False
 
         # restore inference from existing container
-        if os.path.exists(self.outdir + self.resume) and (rank==0):
+        if engine not in ['nessai','pocomc']:
+            if os.path.exists(self.outdir + self.resume) and (rank==0):
 
-            kwargs['posterior'] = self._restore_posterior()
-            self.restore(**kwargs)
+                kwargs['posterior'] = self._restore_posterior()
+                self.restore(**kwargs)
 
         # initialize a new inference
         else:
