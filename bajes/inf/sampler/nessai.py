@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 import nessai
 from nessai.model import Model
 from nessai.flowsampler import FlowSampler
+from nessai.gw.proposal import GWFlowProposal
 from nessai.utils.logging import configure_logger
 
 from . import SamplerBody
@@ -57,11 +58,13 @@ class SamplerNessai(SamplerBody):
                        **kwargs):        
         configure_logger(output=self.outdir,label='bajes')
         self.sampler = FlowSampler(NessaiModel(posterior), output=self.outdir, nlive=kwargs['nlive'], 
-                                   stopping=kwargs['tolerance'], pool=pool,)
-    
-    def __run__(self):
-        self.sampler.run()       
+                                   stopping=kwargs['tolerance'], pool=pool,
+                                   flow_class=GWFlowProposal, analytic_priors=True,
+                                   flow_config=dict(n_blocks=6,n_neurons=40),
+                                   )
 
+    def __run__(self):
+        self.sampler.run()
         logZ = self.sampler.ns.log_evidence
         logZerr = self.sampler.ns.log_evidence_error
         with open(f"{self.outdir}/evidence.dat", "w") as f:
