@@ -10,7 +10,7 @@ from collections import namedtuple
 from .prior import Prior, Parameter, JointPrior
 from .likelihood import Likelihood, Posterior, JointLikelihood
 
-__known_samplers__     = ['emcee', 'ptmcmc', 'cpnest', 'ultranest', 'dynesty', 'dynesty-dyn', 'pocomc']
+__known_samplers__     = ['emcee', 'ptmcmc', 'cpnest', 'ultranest', 'dynesty', 'dynesty-dyn', 'pocomc', 'nessai']
 
 def Sampler(engine, model, **kwargs):
     """
@@ -18,7 +18,7 @@ def Sampler(engine, model, **kwargs):
 
         Arguments:
         engine  : str, specify the kind of sampler
-                  mcmc, ptmcmc, nest, cpnest, dynesty, pocoMC
+                  mcmc, ptmcmc, nest, cpnest, dynesty, pocoMC, nessai
         model   : list or bajes.inf.likelihood.Posterior,
                   if list, should contain 2 elements,
                   [bajes.inf.prior.Prior, bajes.inf.likelihood.Likelihood]

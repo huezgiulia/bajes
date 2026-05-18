@@ -58,7 +58,7 @@ class SamplerNessai(SamplerBody):
                        **kwargs):        
         configure_logger(output=self.outdir,label='bajes')
         self.sampler = FlowSampler(NessaiModel(posterior), output=self.outdir, nlive=kwargs['nlive'], 
-                                   stopping=kwargs['tolerance'], pool=pool,
+                                   stopping=kwargs['tolerance'], n_pool=pool._processes,
                                    flow_class=GWFlowProposal, analytic_priors=True,
                                    flow_config=dict(n_blocks=6,n_neurons=40),
                                    )
