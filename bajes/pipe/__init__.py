@@ -481,10 +481,6 @@ def parse_setup_options():
     parser.add_argument('--sigma-max',              dest='sigma_max',           type=float,                       default=None, help='Upper bounds for systematic deviation parameter for each band')
     parser.add_argument('--sigma-min',              dest='sigma_min',           type=float,                       default=None, help='Lower bounds for systematic deviation parameter for each band')
 
-    # Prior bounds Sigma_b
-    parser.add_argument('--sigma-max',       dest='sigma_max',      default=None,     type=float,      help='Upper bounds for systematic deviation parameter for each band')
-    parser.add_argument('--sigma-min',       dest='sigma_min',      default=None,     type=float,      help='Lower bounds for systematic deviation parameter for each band')
-
     # Integrators properties
     parser.add_argument('--nvel',                   dest='n_v',                 type=int,                         default=400,     help='Number of elements in velocity array, default 400')
     parser.add_argument('--vel-min-grid',           dest='vgrid_min',           type=float,                       default=1.e-7,   help='Lower limit for velocity integration, default 1e-7')
@@ -551,9 +547,6 @@ def parse_setup_options():
     parser.add_argument('--pa-min',                 dest='pa_min',              type=float,                       default=None,   help='Lower bounds for position angle parameter')
 
     # Flags 
-
-    # Xkn
-    parser.add_argument('--xkn',       dest='xkn',    type=str,  default='',     help='path to config.ini file for defining the kn model')
 
     return parser.parse_args()
 
