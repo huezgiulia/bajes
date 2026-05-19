@@ -29,7 +29,7 @@ def _get_git_hast():
 
     return git_hash
 
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 __doc__     = "bajes [baɪɛs], Bayesian Jenaer Software. Python package for Bayesian inference \
                developed at Friedrich-Schiller-Universtät Jena and specialized in the analysis \
                of gravitational-wave and multi-messenger transients. The software is designed to be state-of-art, \
@@ -78,5 +78,6 @@ SEC_2_DAY       = 1.157407407e-5            #[day/s]
 DAY_2_SEC       = 86400.                    #[sec/day]
 SEC_2_HOUR      = 2.777778e-4               #[hr/s]
 DAY_2_HOUR      = 24.                       #[hr/day]
+MPC_2_CM        = 3.0857e24                 #[cm/Mpc]
 
 from . import inf, obs
