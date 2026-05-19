@@ -1,5 +1,4 @@
 from __future__ import division, unicode_literals, absolute_import
-__import__("pkg_resources").declare_namespace(__name__)
 
 import numpy as np
 
@@ -269,7 +268,7 @@ class korobkin_barnes_grossman_perego_et_al_two_nrfit_isotropic_wrapper(Korobkin
 
         # initialize shell components
         self.ncomponents    = 2
-        self.components     = [Shell(name='dyn',    geom='isotropic',   time=times,
+        self.components     = [Shell(name='dynamics',    geom='isotropic',   time=times,
                                      angles=angles, omegas=omegas,      heat=heat,
                                      v_min=v_min,   n_v=n_v),
                                Shell(name='wind',   geom='isotropic',   time=times,
@@ -303,7 +302,7 @@ class korobkin_barnes_grossman_perego_et_al_two_nrfit_anisotropic_wrapper(Korobk
 
         # initialize shell components
         self.ncomponents    = 2
-        self.components     = [Shell(name='dyn',    geom='equatorial',   time=times,
+        self.components     = [Shell(name='dynamics',    geom='equatorial',   time=times,
                                      angles=angles, omegas=omegas,      heat=heat,
                                      v_min=v_min,   n_v=n_v),
                                Shell(name='wind',   geom='isotropic',   time=times,

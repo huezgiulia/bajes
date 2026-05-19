@@ -14,6 +14,39 @@ try:
 except ImportError:
     from scipy.misc import logsumexp
 
+from bajes import MPC_2_CM
+
+def upper_limit(sigma, data, model = None):
+    '''
+    sigma >  0 corresponds to magnitude data below threshold: the sigma are good and not touched
+    sigma <= 0 corresponds to magnitude data above threshold:
+          with mag_diff = mag_model - mag_data, thus
+          large_sigma_mask: mag_diff >= 0 corresponds to the model being above threshold as well,
+                            sigma cannot discriminate the model and a large sigma value is returned
+          abs_sigma_mask:   mag_diff <  0 corresponds to the model being below threshold,
+                            sigma can discriminate the model and the absolute value of sigma is returned
+    '''
+    sigma = np.array(sigma).copy()
+    for i in range(0,len(sigma)):
+        if sigma[i] <= 0:
+            if np.any(model == None):
+                mag_diff = - 1
+            else: mag_diff =  model[i] - data[i]
+            if mag_diff >= 0:
+                sigma[i] = 1e6
+            else:
+                if sigma[i] < 0:
+                    sigma[i] = np.abs(sigma[i])
+
+                else:
+                    flux = 10**(- 0.4 * (data[i] + 48.6))
+                    flux_low = flux - 0.1 * flux
+                    flux_high = flux + 0.1 * flux
+                    mag_low = -2.5 * np.log10(flux_high) - 48.6
+                    mag_high = -2.5 * np.log10(flux_low) - 48.6
+                    sigma[i] = mag_high - mag_low
+    return sigma
+
 # GRAVITATIONAL-WAVE LIKELIHOOD
 # Gaussian Likelihood function:
 # -0.5 (d-h|d-h) = Re(d|h) - 0.5 (d|d) - 0.5 (h|h)
@@ -179,7 +212,8 @@ class GWLikelihood(Likelihood):
                 R      = np.real(dh)
 
         logL = - 0.5*(hh + dd) + R - self.logZ_noise - 0.5*_psd_fact
-
+        if np.isnan(logL):
+            logL = -np.inf
         return logL
 
 # KILO-NOVA LIKELIHOOD
@@ -233,7 +267,8 @@ class KNLikelihood(Likelihood):
         # initialize lightcurve model
         from ..obs.kn.lightcurve import Lightcurve
         light_kwargs    = {'v_min': v_min, 'n_v': n_v, 't_start': t_start , 'xkn_config' : kwargs['xkn_config'], 'mkn_config' : kwargs['mkn_config']}
-        self.light      = Lightcurve(times=t_axis, lambdas=filters.lambdas, approx=approx, **light_kwargs) 
+        self.light      = Lightcurve(times=t_axis, lambdas=filters.lambdas, approx=approx, **light_kwargs)
+        self.approx = approx
 
         # calib_sigma flag
         self.use_calib_sigma = use_calib_sigma_lc
@@ -255,6 +290,7 @@ class KNLikelihood(Likelihood):
                 
                 else: # xkn model
                     # tranform keys from band names into lambdas[nm]
+
                     lambda_bi = int(self.filters.lambdas[bi]*1e9)
                     interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
 
@@ -266,7 +302,8 @@ class KNLikelihood(Likelihood):
             for bi in self.filters.bands:
 
                 if params['xkn_config'] == None:  # Grossman model
-                    interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[bi])
+                    lambda_bi = bi
+                    interp_mag  = np.interp(self.filters.times[bi], self.light.times+params['t_gps'], mags[lambda_bi])
                 
                 else: # xkn model
                     # tranform keys from band names into lambdas[nm]
@@ -274,7 +311,103 @@ class KNLikelihood(Likelihood):
                     interp_mag  = np.interp(self.filters.times[bi], mags[lambda_bi]['time']+params['t_gps'], mags[lambda_bi]['mag'])
 
                 residuals   = ((self.filters.magnitudes[bi]-interp_mag)/self.filters.mag_stdev[bi])**2.
-                logL       += -0.5*residuals.sum() 
+                logL       += -0.5*residuals.sum()
+            logL += self.logNorm
+        if np.isnan(logL):
+            logL = -np.inf
+        return logL
+
+
+# GRB LIKELIHOOD
+# Gaussian Likelihood function:
+# -0.5 (|d-L|/s)**2
+class GRBLikelihood(Likelihood):
+
+    def __init__(self, filters, approx,
+                 **kwargs):
+
+        # run standard initialization
+        super(GRBLikelihood, self).__init__()
+
+        # set data properties
+        self.filters = filters
+
+        # self.logZ_noise = -0.5*sum([np.power(self.filters.magnitudes[bi]/self.filters.mag_stdev[bi],2.).sum() for bi in self.filters.nu])
+        self.logNorm    = -0.5*sum([np.log(2*np.pi*upper_limit(self.filters.mag_stdev[bi],self.filters.magnitudes[bi])**2).sum() for bi in self.filters.nu])
+
+        # initialize lightcurve model
+        from ..obs.grb.lightcurve import GRB_Lightcurve
+        self.light      = GRB_Lightcurve(times=filters.all_times, nu=filters.nu, approx=approx, **kwargs)
+
+    def log_like(self, params):
+
+        # compute lightcurve
+        try:
+            mags    = self.light.compute_mag(params)
+            logL    = 0.
+
+            for bi in self.filters.nu:
+                lambda_bi = bi
+                interp_mag  = np.interp(self.filters.times[bi], self.light.times, mags[lambda_bi])
+                residuals = ((self.filters.magnitudes[bi]- interp_mag)/upper_limit(self.filters.mag_stdev[bi], self.filters.magnitudes[bi], interp_mag))**2.
+                logL       += -0.5*residuals.sum()
             logL += self.logNorm
 
-        return logL
+            return logL
+        except Exception as e:
+           logger.error(f"Afterglowpy error: {e}")
+           return -np.inf
+
+
+# ASTROMETRIC LIKELIHOOD
+# Multivariate normal function:
+# cfr. eq. 15 in Ryan et al. 2023 (arXiv:2310.02328)
+
+def build_diag_cov_matrix(sigmas_flux, sigmas_ra, sigmas_dec):
+    """
+    diagonal covariant matrix
+    """
+    N = len(sigmas_ra)
+    Sigma = np.zeros((N, 3, 3))
+    for i in range(N):
+        Sigma[i, 0, 0] = sigmas_flux[i]**2
+        Sigma[i, 1, 1] = sigmas_ra[i]**2
+        Sigma[i, 2, 2] = sigmas_dec[i]**2
+    return Sigma
+
+class AMLikelihood(Likelihood):
+
+    def __init__(self, filters, approx, **kwargs):
+
+        super(AMLikelihood, self).__init__()
+
+        # astrometric data
+        self.data = filters
+
+        from ..obs.am.lightcurve import AM_Lightcurve
+        self.light      = AM_Lightcurve(times=filters.all_times, nu=filters.nu, approx=approx, **kwargs)
+
+    def log_like(self, params):
+
+        try:
+            for bi in self.data.nu:
+
+                model = self.light.compute_centroid_motion(params)
+
+                Sigma       = build_diag_cov_matrix(self.data.flux_stdev[bi], self.data.ra_stdev[bi], self.data.dec_stdev[bi])
+                residual    =  np.stack([self.data.fluxes[bi] - model[bi][0],
+                                        self.data.ras[bi]    - model[bi][1],
+                                        self.data.decs[bi]   - model[bi][2]],axis=1)
+
+                N           = len(self.data.fluxes[bi])
+                logL        = 0.
+                for i in range(N):
+                    res         = residual[i]
+                    cov         = Sigma[i]
+                    _, logdet   = np.linalg.slogdet(cov)
+                    logL        += -0.5 * (res.T @ np.linalg.inv(cov) @ res + logdet + 3 * np.log(2 * np.pi))
+
+            return logL
+        except Exception as e:
+           logger.error(f"Afterglowpy error: {e}")
+           return -np.inf

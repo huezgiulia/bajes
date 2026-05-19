@@ -1043,6 +1043,7 @@ if __name__ == "__main__":
         pass
         
         # produce corner plots
+
     logger.info("Producing corners...")
     make_corners(posterior, opts.spin_flag, opts.lambda_flag, corner_dir, priors)
 
