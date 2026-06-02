@@ -7,54 +7,38 @@ logger = logging.getLogger(__name__)
 
 import nessai
 from nessai.model import Model
-from nessai.flowsampler import FlowSampler
-# from nessai.gw.proposal import GWFlowProposal
 from nessai.proposal import FlowProposal
-from nessai.gw.reparameterisations import get_gw_reparameterisation
+from nessai.flowsampler import FlowSampler
 from nessai.utils.logging import configure_logger
+from nessai.gw.reparameterisations import get_gw_reparameterisation
 
 from . import SamplerBody
-
-import os
 
 class GWFlowProposalBajes(FlowProposal):
     """Wrapper for FlowProposal that has defaults for CBC-PE
         From nessai code, adapted for bajes MMA"""
 
     aliases = {
-        "chirp_mass": ("mass", None),
-        "mass_ratio": ("mass_ratio", None),
-        # "ra": ("sky-ra-dec", ["dec", "Dec"]),
-        # "dec": ("sky-ra-dec", ["ra"]),
-        "azimuth": ("sky-az-zen", ["zenith", "zen", "Zen", "Zenith"]),
-        "zenith": ("sky-az-zen", ["azimuth", "az", "Az", "Azimuth"]),
-        "theta_1": ("angle-sine", None),
-        "theta_2": ("angle-sine", None),
-        "tilt_1": ("angle-sine", None),
-        "tilt_2": ("angle-sine", None),
-        "theta_jn": ("angle-sine", None),
+        "mchirp": ("mass", None),
+        "q": ("mass_ratio", None),
+        # "ra": ("sky-ra-dec", ["ra"]),
+        # "dec": ("sky-ra-dec", ["dec"]),
         "iota": ("angle-sine", None),
-        "phi_jl": ("angle-2pi", None),
-        "phi_12": ("angle-2pi", None),
         "phase": ("angle-2pi", None),
         "psi": ("angle-pi", None),
         "geocent_time": ("time", None),
-        "time_jitter": ("periodic", None),
-        "a_1": ("default", None),
-        "a_2": ("default", None),
-        "chi_1": ("default", None),
-        "chi_2": ("default", None),
-        "luminosity_distance": ("distance", None),
+        "s1z": ("default", None),
+        "s2z": ("default", None),
+        "lambda1": ("default", None),
+        "lambda2": ("default", None),
+        "distance": ("distance", None),
     }
     """
     Dictionary of aliases used to determine the default reparameterisations
     for common gravitational-wave parameters.
     """
     use_default_reparameterisations = True
-    """
-    GW specific reparameterisations will be used by default. This is different
-    to the parent class where they are disabled by default.
-    """
+
 
     def get_reparameterisation(self, reparameterisation):
         """Function to get reparameterisations that checks GW defaults and
