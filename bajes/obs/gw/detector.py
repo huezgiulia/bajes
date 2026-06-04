@@ -24,7 +24,7 @@ def compute_psdweights(ifo, nweights, len_weights, params):
 
 # project array in time-domain
 # function used for inject waveform from txt file
-def calc_project_array(det, hp, hc, dt, ra, dec, psi, t_gps, t_peak=0, domain='time', ax=None):
+def calc_project_array(det, hp, hc, dt, ra, dec, psi, t_gps, t_peak=0, domain='time', freq_dep_antenna=False, ax=None):
     """ Project given waveform on detector
         ----------
         det = Detector class
@@ -39,7 +39,11 @@ def calc_project_array(det, hp, hc, dt, ra, dec, psi, t_gps, t_peak=0, domain='t
         h = F+ h+ + Fx hx , projected strain
         """
 
-    fplus , fcross  = det.antenna_pattern(ra, dec, psi, t_gps+t_peak)
+    if freq_dep_antenna:
+        fplus , fcross  = det.antenna_pattern(ra, dec, psi, t_gps+t_peak)
+        print("Frequency-dependent antenna pattern is not implemented yet.")
+    else:
+        fplus , fcross  = det.antenna_pattern(ra, dec, psi, t_gps+t_peak)
     time_delay      = det.time_delay_from_earth_center(ra , dec , t_gps+t_peak)+t_peak
 
     h = fplus*hp + fcross*hc
@@ -391,7 +395,7 @@ class Detector(object):
         dec = self.latitude
         return ra, dec
 
-    def project_fdwave(self, wave, params, tag, roq=None, freqs=None):
+    def project_fdwave(self, wave, params, tag, roq=None, freqs=None, freq_dep_antenna=False):
         """
             Project waveform on Detector, with frequency-domain output
 
@@ -405,7 +409,11 @@ class Detector(object):
         """
 
         # compute F+,Fx for the detecor at the moment t-gps + time-shift
-        fplus, fcross = self.antenna_pattern(params['ra'], params['dec'], params['psi'], params['t_gps']+params['time_shift'])
+        if freq_dep_antenna:
+            fplus, fcross = self.antenna_pattern(params['ra'], params['dec'], params['psi'], params['t_gps']+params['time_shift'])
+            print("project_fdwave:Frequency-dependent antenna pattern is not implemented yet.")
+        else:
+            fplus, fcross = self.antenna_pattern(params['ra'], params['dec'], params['psi'], params['t_gps']+params['time_shift'])
         # compute delay from Earth geocenter to detector
         delay         = self.time_delay_from_earth_center(params['ra'], params['dec'], params['t_gps']+params['time_shift']) + params['time_shift']
         # apply antenna patterns
@@ -423,7 +431,7 @@ class Detector(object):
             if freqs is not None:    return tdwf_2_fdwf(freqs, proj_h, 1./self.srate) * np.exp(-2j*np.pi*freqs*delay)
             else:           return tdwf_2_fdwf(self.freqs, proj_h, 1./self.srate) * np.exp(-2j*np.pi*self.freqs*delay)
 
-    def project_tdwave(self, wave, params, tag, roq=None, freqs=None):
+    def project_tdwave(self, wave, params, tag, roq=None, freqs=None, freq_dep_antenna=False):
         """
             Project waveform on Detector, with time-domain output
 
@@ -436,7 +444,11 @@ class Detector(object):
                 - projected wave : np.array, waveform projected on this detector in the time-domain
         """
         # compute F+,Fx for the detecor at the moment t-gps + time-shift
-        fplus, fcross = self.antenna_pattern(params['ra'], params['dec'], params['psi'], params['t_gps']+params['time_shift'])
+        if freq_dep_antenna:
+            fplus, fcross = self.antenna_pattern(params['ra'], params['dec'], params['psi'], params['t_gps']+params['time_shift'])
+            print("Frequency-dependent antenna pattern is not implemented yet.")
+        else:
+            fplus, fcross = self.antenna_pattern(params['ra'], params['dec'], params['psi'], params['t_gps']+params['time_shift'])
         # compute delay from Earth geocenter to detector
         delay = self.time_delay_from_earth_center(params['ra'] , params['dec'] , params['t_gps']+params['time_shift']) + params['time_shift']
         # apply antenna patterns
@@ -499,7 +511,7 @@ class Detector(object):
         self._dd = (4./self.seglen) * np.sum(np.abs(self.data)**2./self.psd)
 
 
-    def compute_inner_products(self, hphc, params, tag, psd_weight_factor=False, roq=None, freqs=None):
+    def compute_inner_products(self, hphc, params, tag, psd_weight_factor=False, roq=None, freqs=None, freq_dep_antenna=False):
         """
             Compute inner products
 
@@ -508,6 +520,7 @@ class Detector(object):
                 - params            : dict, parameters
                 - tag               : str, waveform domain
                 - psd_weight_factor : bool, return PSD weight likelihood factor
+                - freq_dep_antenna  : bool, compute frequency-dependent antenna pattern if True
 
             Return:
                 - d_h           : numpy.array corresponding to the integrand of the inner product (if roq=None) or float (if roq is not None) corresponding to the inner product
@@ -517,8 +530,8 @@ class Detector(object):
         """
 
         # The hphc waveform was already time-shifted to the center of the segment (seglen/2.), now add `time_shift` and the time delay, together with projection onto the detector.
-        if freqs is not None: wav = self.project_fdwave(hphc, params, tag, roq=roq, freqs=freqs)
-        else: wav = self.project_fdwave(hphc, params, tag, roq=roq)
+        if freqs is not None: wav = self.project_fdwave(hphc, params, tag, roq=roq, freqs=freqs, freq_dep_antenna=freq_dep_antenna)
+        else: wav = self.project_fdwave(hphc, params, tag, roq=roq, freq_dep_antenna=freq_dep_antenna)
 
         # apply calibration envelopes
         if self.nspcal > 0:

@@ -29,7 +29,7 @@ class GWLikelihood(Likelihood):
                  nspcal=0, spcal_freqs=None,
                  nweights=0, len_weights=None,
                  marg_phi_ref=False, marg_time_shift=False,
-                 roq=None,
+                 roq=None,freq_dep_antenna=False,
                  **kwargs):
 
         # run standard initialization
@@ -41,6 +41,7 @@ class GWLikelihood(Likelihood):
 
         # Load ROQ object containing both frequency axes and weights for all detectors.
         self.roq = roq
+        self.freq_dep_antenna = freq_dep_antenna
 
         # store information
         self.nspcal = nspcal
@@ -139,7 +140,7 @@ class GWLikelihood(Likelihood):
             # compute inner products
             for ifo in self.ifos:
                 logger.debug("Projecting over {}".format(ifo))
-                dh_arr_thisifo, hh_thisifo, dd_thisifo, _psdf = self.dets[ifo].compute_inner_products(wave, params, self.wave.domain, psd_weight_factor=True)
+                dh_arr_thisifo, hh_thisifo, dd_thisifo, _psdf = self.dets[ifo].compute_inner_products(wave, params, self.wave.domain, psd_weight_factor=True, freq_dep_antenna=self.freq_dep_antenna)
                 dh_arr = dh_arr + np.fft.fft(dh_arr_thisifo)
                 hh += np.real(hh_thisifo)
                 dd += np.real(dd_thisifo)
@@ -162,7 +163,7 @@ class GWLikelihood(Likelihood):
             # compute inner products
             for ifo in self.ifos:
                 logger.debug("Projecting over {}".format(ifo))
-                dh_arr_thisifo, hh_thisifo, dd_thisifo, _psdf = self.dets[ifo].compute_inner_products(wave, params, self.wave.domain, psd_weight_factor=True, roq=self.roq)
+                dh_arr_thisifo, hh_thisifo, dd_thisifo, _psdf = self.dets[ifo].compute_inner_products(wave, params, self.wave.domain, psd_weight_factor=True, roq=self.roq, freq_dep_antenna=self.freq_dep_antenna)
                 # In the ROQ case, the sum was already taken when computing the scalar product with the weights.
                 if self.roq is not None: dh += (dh_arr_thisifo)
                 else:                    dh += (dh_arr_thisifo).sum()

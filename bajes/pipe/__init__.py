@@ -401,6 +401,7 @@ def parse_setup_options():
     parser.add_argument('--anomaly-min',       dest='anomaly_min',     default=None,      type=float,                           help='Lower anomaly prior bound')
     parser.add_argument('--a6c-min',           dest='a6c_min',         default=None,      type=float,                           help='Lower a6c prior bound (TEOBResumS_a6cfree option)')
     parser.add_argument('--a6c-max',           dest='a6c_max',         default=None,      type=float,                           help='Upper a6c prior bound (TEOBResumS_a6cfree option)')
+    parser.add_argument('--freq-dep-antenna',  dest='freq_dep_antenna',default=False,                    action="store_true",   help='compute frequency-dependent antenna pattern for the injection')
 
     # Optional, marginalize over phi_ref and/or time_shift
     parser.add_argument('--marg-phi-ref',      dest='marg_phi_ref',    default=False,                     action="store_true",  help='Phi-ref marginalization flag')

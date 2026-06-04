@@ -117,7 +117,7 @@ def make_injection_plot(ifo, time, inj_strain, wave_strain, noise, f_min, outdir
 
 class Injection(object):
 
-    def __init__(self, ifos, dets, noises, data_path, seglen, srate, f_min, f_max, ra, dec, psi, t_gps, wind_flag, zero_flag, fdinj_flag, tukey=None, t_peak=None):
+    def __init__(self, ifos, dets, noises, data_path, seglen, srate, f_min, f_max, ra, dec, psi, t_gps, wind_flag, zero_flag, fdinj_flag, tukey=None, t_peak=None, freq_dep_antenna=False):
 
         # get bajes objects
         self.ifos   = ifos
@@ -138,6 +138,7 @@ class Injection(object):
         self.dec    = dec
         self.psi    = psi
         self.t_gps  = t_gps
+        self.freq_dep_antenna = freq_dep_antenna
 
         if f_max is None:   self.f_max  = self.srate/2.
         else:               self.f_max  = f_max
@@ -275,7 +276,9 @@ class Injection(object):
                                                                  target_hp,     target_hc,  1/self.srate,
                                                                  self.ra,       self.dec,   self.psi,
                                                                  self.t_gps,    t_peak,
-                                                                 domain=series_type, ax=ax)
+                                                                 domain=series_type, 
+                                                                 freq_dep_antenna = self.freq_dep_antenna, 
+                                                                 ax=ax)
 
                 for ifo in self.ifos:
 
@@ -367,14 +370,14 @@ class Injection(object):
                     # compute the data
                     if fdinj_flag:
                         self.freqs[ifo] = np.linspace(0,self.srate/2.,int(self.srate*self.seglen//2)+1)
-                        _wave   = self.dets[ifo].project_fdwave(signal_template, params, wave.domain)
+                        _wave   = self.dets[ifo].project_fdwave(signal_template, params, wave.domain, freq_dep_antenna=self.freq_dep_antenna)
                         _amp    = np.abs(_wave)
                         _phi    = np.unwrap(np.angle(_wave))
                         _amp    = np.interp(self.freqs[ifo], self.dets[ifo].freqs, _amp, right=0., left=0.)
                         _phi    = np.interp(self.freqs[ifo], self.dets[ifo].freqs, _phi, right=0., left=0.)
                         self.wave_strains[ifo] = _amp*np.exp(1j*_phi)
                     else:
-                        self.wave_strains[ifo]  = self.dets[ifo].project_tdwave(signal_template, params, wave.domain)
+                        self.wave_strains[ifo]  = self.dets[ifo].project_tdwave(signal_template, params, wave.domain, freq_dep_antenna=self.freq_dep_antenna)
 
             else:
 
@@ -488,6 +491,7 @@ def bajes_inject_parser():
     parser.add_argument('--dec',        dest='dec',     default=None,       type=float,                       help='declination location of the injected source. Default optimal location for the first IFO.')
     parser.add_argument('--tmerg',      dest='t_peak',  default=None,       type=float,                       help='for ascii injections only, specify the location of the merger with respect to the GPS time')
     parser.add_argument('--pol',        dest='psi',     default=0.,         type=float,                       help='polarization angle of the injected source. Default: 0.')
+    parser.add_argument('--freq-dep-antenna', dest='freq_dep_antenna',default=False,   action="store_true",   help='compute frequency-dependent antenna pattern for the injection')
 
     # time-domain window options
     parser.add_argument('--window',     dest='window',  default='low',      type=str,                      help="Location of the window. Available options: ['low', 'both', 'none']. Default: 'low'.")
@@ -554,7 +558,7 @@ if __name__ == "__main__":
         logger.warning("Waveform option is empty, generating pure noise injection.")
     inj = Injection(opts.ifos, dets, noises, opts.wave, opts.seglen, opts.srate, opts.f_min, opts.f_max,
                     opts.ra, opts.dec, opts.psi, opts.t_gps, opts.window, opts.zero,
-                    opts.fd_inj, opts.tukey, opts.t_peak)
+                    opts.fd_inj, opts.tukey, opts.t_peak, opts.freq_dep_antenna)
 
     # save output
     logger.info("... writing strain data files ...")

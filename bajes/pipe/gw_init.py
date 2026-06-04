@@ -147,6 +147,7 @@ def initialize_gwlikelihood_kwargs(opts):
     l_kwargs['nweights']        = opts.nweights
     l_kwargs['marg_phi_ref']    = opts.marg_phi_ref
     l_kwargs['marg_time_shift'] = opts.marg_time_shift
+    l_kwargs['freq_dep_antenna'] = opts.freq_dep_antenna
 
     # check for extra parameters
     if opts.ej_flag :

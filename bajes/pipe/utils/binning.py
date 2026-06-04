@@ -155,6 +155,7 @@ class GWBinningLikelihood(Likelihood):
                  nspcal=0, spcal_freqs=None,
                  nweights=0, len_weights=None,
                  marg_phi_ref=False, marg_time_shift=False,
+                 freq_dep_antenna=False,
                  **kwargs):
 
         # run standard initialization
@@ -179,6 +180,7 @@ class GWBinningLikelihood(Likelihood):
         self.srate  = srate
         self.seglen = seglen
         self.freqs  = freqs
+        self.freq_dep_antenna = freq_dep_antenna
 
         # frequency binning needs f=0, but this value is value is unphysical.
         # some fiducial template might give an error,
@@ -234,7 +236,7 @@ class GWBinningLikelihood(Likelihood):
             # compute PSDs and quantities for logL evaluation
             psds.append(noises[ifo].interp_psd_pad(freqs)*datas[ifo].window_factor)
             sFTs.append(datas[ifo].freq_series)
-            h0s.append(self.dets[ifo].project_fdwave(h0, fiducial_params, wave0.domain, freqs=freqs))
+            h0s.append(self.dets[ifo].project_fdwave(h0, fiducial_params, wave0.domain, freqs=freqs, freq_dep_antenna=self.freq_dep_antenna))
             self.dd_nopsdweights[ifo] = datas[ifo].inner_product(datas[ifo],noises[ifo],[datas[ifo].f_min,datas[ifo].f_max])
             self.dd += np.real(self.dd_nopsdweights[ifo])
 
@@ -270,7 +272,7 @@ class GWBinningLikelihood(Likelihood):
         self.marg_phi_ref = marg_phi_ref
 
     def inner_products_singleifo(self, i, ifo, params, hphc):
-        wav = self.dets[ifo].project_fdwave(hphc, params, self.wave.domain, freqs=self.fbin)
+        wav = self.dets[ifo].project_fdwave(hphc, params, self.wave.domain, freqs=self.fbin, freq_dep_antenna=self.freq_dep_antenna)
 
         if self.nspcal > 0:
             cal = compute_spcalenvs(ifo, self.nspcal, params)
@@ -357,7 +359,7 @@ class GWBinningLikelihood(Likelihood):
         for ifo in self.ifos:
             self.dets[ifo].psd = self.noises[ifo].interp_psd_pad(freqs)
             self.dets[ifo].data = self.datas[ifo].freq_series[self.i_pm]
-            dh_arr_thisifo, hh_thisifo, dd_thisifo, _psdf = self.dets[ifo].compute_inner_products(wave, params, self.wave.domain, psd_weight_factor=True, freqs=freqs)
+            dh_arr_thisifo, hh_thisifo, dd_thisifo, _psdf = self.dets[ifo].compute_inner_products(wave, params, self.wave.domain, psd_weight_factor=True, freqs=freqs, freq_dep_antenna=self.freq_dep_antenna)
             dh = (dh_arr_thisifo).sum()
             hh = np.real(hh_thisifo)
             dd = np.real(dd_thisifo)
