@@ -24,7 +24,7 @@ def compute_psdweights(ifo, nweights, len_weights, params):
 
 # project array in time-domain
 # function used for inject waveform from txt file
-def calc_project_array(det, hp, hc, dt, ra, dec, psi, t_gps, t_peak=0, domain='time', freq_dep_antenna=False, ax=None):
+def calc_project_array(det, hp, hc, dt, ra, dec, psi, t_gps, t_peak=0, domain='time', freq_dep_antenna=False, freqs=None, ax=None):
     """ Project given waveform on detector
         ----------
         det = Detector class
@@ -40,8 +40,7 @@ def calc_project_array(det, hp, hc, dt, ra, dec, psi, t_gps, t_peak=0, domain='t
         """
 
     if freq_dep_antenna:
-        fplus , fcross  = det.antenna_pattern(ra, dec, psi, t_gps+t_peak)
-        print("Frequency-dependent antenna pattern is not implemented yet.")
+        fplus , fcross  = det.antenna_pattern_freq_dep(ra, dec, psi, t_gps+t_peak, freqs)
     else:
         fplus , fcross  = det.antenna_pattern(ra, dec, psi, t_gps+t_peak)
     time_delay      = det.time_delay_from_earth_center(ra , dec , t_gps+t_peak)+t_peak
@@ -165,6 +164,18 @@ def get_detector_information(ifo):
 
     return latitude, longitude, elevation, xarm_azimuth, yarm_azimuth, xarm_tilt, yarm_tilt
 
+def arm_length(ifo):
+        if ifo in ['H1', 'L1',]:
+            return 4000.
+        elif ifo in ['V1', 'K1']:
+            return 3000.
+        elif ifo in ['ET1', 'ET2', 'ET3']:
+            return 10000.
+        elif ifo in ['CE', 'CE-North', 'CE-South']:
+            return 40000.
+        else:
+            raise ValueError("Can't get arm length from input detector. Please check you use a correct name. Available options: ['H1', 'L1', 'V1', 'K1', 'G1', 'I1', 'ET1', 'ET2', 'ET3', 'CE'].")
+
 class Detector(object):
     """
         A gravitational wave ground-based interferometer
@@ -181,6 +192,8 @@ class Detector(object):
                 - t_gps: float, Earth's rotation will be estimated from a reference time.
 
         """
+
+        self.freq_dep_antenna = freq_dep_antenna
 
         # initialize detector properties
         if isinstance(detector_init, str):
@@ -200,6 +213,12 @@ class Detector(object):
         self.x_arm      = self.compute_arm(self.xarm_tilt, self.xarm_azimuth)
         self.y_arm      = self.compute_arm(self.yarm_tilt, self.yarm_azimuth)
         self.location   = self.compute_location()
+
+        self.xx = np.einsum('i,j->ij', self.x_arm, self.x_arm)
+        self.yy = np.einsum('i,j->ij', self.y_arm, self.y_arm)
+
+        self.x_arm_length = arm_length(self.ifo)
+
         self.response   = self.compute_response()
 
         # initialize times
@@ -212,7 +231,37 @@ class Detector(object):
         """
             Compute detector response tensor
         """
-        return 0.5 * (np.einsum('i,j->ij', self.x_arm, self.x_arm) - np.einsum('i,j->ij', self.y_arm, self.y_arm))
+        return 0.5 * (self.xx - self.yy)
+    
+    def compute_freq_dep_response(self, ra, dec, t_gps, frequencies):
+        """
+            Compute frequency-dependent detector response tensor
+        """
+
+        # unit propagation vector omega
+        gha     = self.gmst_estimate(t_gps) - ra
+        omega = np.array([np.cos(dec) * np.cos(gha), np.cos(dec) * np.sin(gha), np.sin(dec)])
+
+        # projections on arms
+        mu_x = -np.dot(omega, self.x_arm)
+        mu_y = -np.dot(omega, self.y_arm)
+
+        fL = frequencies * self.arm_length / CLIGHT_SI
+
+        # transfer functions
+        T_x = self._finite_size_factor(fL, mu_x)
+        T_y = self._finite_size_factor(fL, mu_y)
+
+        # tensor response
+        response = (0.5 * (T_x[:, None, None] * self.xx -
+                    T_y[:, None, None] * self.yy))
+
+        return response 
+    
+    def finite_size_factor(x, y):
+
+        return 0.5 * (np.exp(-np.pi*1j*x*(y)) * np.sinc(x*(1.-y))
+                     + np.exp(+np.pi*1j*x*(1.-y)) * np.sinc(x*(1.+y)))
 
     def compute_location(self):
         """
@@ -319,6 +368,55 @@ class Detector(object):
 
         return fplus, fcross
 
+    def antenna_pattern_freq_dep(self, right_ascension, declination, polarization, t_gps, freqs):
+        """
+            Detector response with frequency dependence.
+            Inspired from Bilby, freq_dep_antenna_response_HM, Baral et al. 2025
+
+            Arguments:
+                - right_ascension   : float
+                - declination       : float
+                - polarization      : float
+                - freqs             : np.array, frequencies at which to compute the antenna pattern
+
+            Return:
+                - fplus: float, the plus polarization factor for this sky location
+                - fcross: float, the cross polarization factor for this sky location
+        """
+
+        # t_gps is measured from the center of the Earth,
+        # then we have to take into account the time delay
+
+        # geometric_delay = self.time_delay_from_earth_center(right_ascension, declination, t_gps) # this step requires vectorization for time/freq-dependent response
+        # t_gps   += geometric_delay
+        gha     = self.gmst_estimate(t_gps) - right_ascension
+
+        response = self.compute_freq_dep_response(right_ascension, declination, t_gps, freqs)
+
+        cosgha = np.cos(gha)
+        singha = np.sin(gha)
+        cosdec = np.cos(declination)
+        sindec = np.sin(declination)
+        cospsi = np.cos(polarization)
+        sinpsi = np.sin(polarization)
+
+        x0 = -cospsi * singha - sinpsi * cosgha * sindec
+        x1 = -cospsi * cosgha + sinpsi * singha * sindec
+        x2 =  sinpsi * cosdec
+        x = np.array([x0, x1, x2])
+        dx = np.einsum('fij,j->fi', response, x)
+
+        y0 =  sinpsi * singha - cospsi * cosgha * sindec
+        y1 =  sinpsi * cosgha + cospsi * singha * sindec
+        y2 =  cospsi * cosdec
+        y = np.array([y0, y1, y2])
+        dy = np.einsum('fij,j->fi', response, y)
+
+        fplus  = (x[None, :] * dx - y[None, :] * dy).sum(axis=1)
+        fcross = (x[None, :] * dy + y[None, :] * dx).sum(axis=1)
+
+        return fplus, fcross
+
     def time_delay_from_earth_center(self, right_ascension, declination, t_gps):
         """
             Return the time delay from the earth center
@@ -410,8 +508,7 @@ class Detector(object):
 
         # compute F+,Fx for the detecor at the moment t-gps + time-shift
         if freq_dep_antenna:
-            fplus, fcross = self.antenna_pattern(params['ra'], params['dec'], params['psi'], params['t_gps']+params['time_shift'])
-            print("project_fdwave:Frequency-dependent antenna pattern is not implemented yet.")
+            fplus, fcross = self.antenna_pattern_freq_dep(params['ra'], params['dec'], params['psi'], params['t_gps']+params['time_shift'], freqs)
         else:
             fplus, fcross = self.antenna_pattern(params['ra'], params['dec'], params['psi'], params['t_gps']+params['time_shift'])
         # compute delay from Earth geocenter to detector
@@ -445,8 +542,7 @@ class Detector(object):
         """
         # compute F+,Fx for the detecor at the moment t-gps + time-shift
         if freq_dep_antenna:
-            fplus, fcross = self.antenna_pattern(params['ra'], params['dec'], params['psi'], params['t_gps']+params['time_shift'])
-            print("Frequency-dependent antenna pattern is not implemented yet.")
+            fplus, fcross = self.antenna_pattern_freq_dep(params['ra'], params['dec'], params['psi'], params['t_gps']+params['time_shift'], freqs)
         else:
             fplus, fcross = self.antenna_pattern(params['ra'], params['dec'], params['psi'], params['t_gps']+params['time_shift'])
         # compute delay from Earth geocenter to detector
