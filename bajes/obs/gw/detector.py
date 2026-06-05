@@ -193,8 +193,6 @@ class Detector(object):
 
         """
 
-        self.freq_dep_antenna = freq_dep_antenna
-
         # initialize detector properties
         if isinstance(detector_init, str):
             self.ifo = detector_init
@@ -217,7 +215,7 @@ class Detector(object):
         self.xx = np.einsum('i,j->ij', self.x_arm, self.x_arm)
         self.yy = np.einsum('i,j->ij', self.y_arm, self.y_arm)
 
-        self.x_arm_length = arm_length(self.ifo)
+        self.arm_length = arm_length(self.ifo)
 
         self.response   = self.compute_response()
 
