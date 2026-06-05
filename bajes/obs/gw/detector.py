@@ -247,8 +247,8 @@ class Detector(object):
         fL = frequencies * self.arm_length / CLIGHT_SI
 
         # transfer functions
-        T_x = self._finite_size_factor(fL, mu_x)
-        T_y = self._finite_size_factor(fL, mu_y)
+        T_x = self.finite_size_factor(fL, mu_x)
+        T_y = self.finite_size_factor(fL, mu_y)
 
         # tensor response
         response = (0.5 * (T_x[:, None, None] * self.xx -
@@ -256,7 +256,7 @@ class Detector(object):
 
         return response 
     
-    def finite_size_factor(x, y):
+    def finite_size_factor(self, x, y):
 
         return 0.5 * (np.exp(-np.pi*1j*x*(y)) * np.sinc(x*(1.-y))
                      + np.exp(+np.pi*1j*x*(1.-y)) * np.sinc(x*(1.+y)))
