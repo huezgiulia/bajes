@@ -526,7 +526,7 @@ class Detector(object):
             if freqs is not None:    return tdwf_2_fdwf(freqs, proj_h, 1./self.srate) * np.exp(-2j*np.pi*freqs*delay)
             else:           return tdwf_2_fdwf(self.freqs, proj_h, 1./self.srate) * np.exp(-2j*np.pi*self.freqs*delay)
 
-    def project_tdwave(self, wave, params, tag, roq=None, freqs=None, freq_dep_antenna=False):
+    def project_tdwave(self, wave, params, tag, roq=None, freqs=None):
         """
             Project waveform on Detector, with time-domain output
 
@@ -539,10 +539,7 @@ class Detector(object):
                 - projected wave : np.array, waveform projected on this detector in the time-domain
         """
         # compute F+,Fx for the detecor at the moment t-gps + time-shift
-        if freq_dep_antenna:
-            fplus, fcross = self.antenna_pattern_freq_dep(params['ra'], params['dec'], params['psi'], params['t_gps']+params['time_shift'], freqs)
-        else:
-            fplus, fcross = self.antenna_pattern(params['ra'], params['dec'], params['psi'], params['t_gps']+params['time_shift'])
+        fplus, fcross = self.antenna_pattern(params['ra'], params['dec'], params['psi'], params['t_gps']+params['time_shift'])
         # compute delay from Earth geocenter to detector
         delay = self.time_delay_from_earth_center(params['ra'] , params['dec'] , params['t_gps']+params['time_shift']) + params['time_shift']
         # apply antenna patterns

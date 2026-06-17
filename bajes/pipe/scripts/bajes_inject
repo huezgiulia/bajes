@@ -370,14 +370,17 @@ class Injection(object):
                     # compute the data
                     if fdinj_flag:
                         self.freqs[ifo] = np.linspace(0,self.srate/2.,int(self.srate*self.seglen//2)+1)
-                        _wave   = self.dets[ifo].project_fdwave(signal_template, params, wave.domain, freq_dep_antenna=self.freq_dep_antenna)
+                        if self.freq_dep_antenna:
+                            _wave   = self.dets[ifo].project_fdwave(signal_template, params, wave.domain, freqs = _f[_f_mask], freq_dep_antenna=self.freq_dep_antenna)
+                        else:
+                            _wave   = self.dets[ifo].project_fdwave(signal_template, params, wave.domain, freqs = self.freqs[ifo])
                         _amp    = np.abs(_wave)
                         _phi    = np.unwrap(np.angle(_wave))
                         _amp    = np.interp(self.freqs[ifo], self.dets[ifo].freqs, _amp, right=0., left=0.)
                         _phi    = np.interp(self.freqs[ifo], self.dets[ifo].freqs, _phi, right=0., left=0.)
                         self.wave_strains[ifo] = _amp*np.exp(1j*_phi)
                     else:
-                        self.wave_strains[ifo]  = self.dets[ifo].project_tdwave(signal_template, params, wave.domain, freq_dep_antenna=self.freq_dep_antenna)
+                        self.wave_strains[ifo]  = self.dets[ifo].project_tdwave(signal_template, params, wave.domain)
 
             else:
 

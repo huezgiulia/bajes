@@ -136,11 +136,15 @@ class GWLikelihood(Likelihood):
         if self.marg_time_shift:
 
             dh_arr = np.zeros(self.Nfr, dtype=complex)
+            dh_arr = np.zeros(len(self.wave.freqs), dtype=complex) # TODO check correctness
 
             # compute inner products
             for ifo in self.ifos:
                 logger.debug("Projecting over {}".format(ifo))
-                dh_arr_thisifo, hh_thisifo, dd_thisifo, _psdf = self.dets[ifo].compute_inner_products(wave, params, self.wave.domain, psd_weight_factor=True, freq_dep_antenna=self.freq_dep_antenna)
+                if self.freq_dep_antenna:
+                    dh_arr_thisifo, hh_thisifo, dd_thisifo, _psdf = self.dets[ifo].compute_inner_products(wave, params, self.wave.domain, psd_weight_factor=True, freqs=self.wave.freqs, freq_dep_antenna=self.freq_dep_antenna)
+                else:
+                    dh_arr_thisifo, hh_thisifo, dd_thisifo, _psdf = self.dets[ifo].compute_inner_products(wave, params, self.wave.domain, psd_weight_factor=True)
                 dh_arr = dh_arr + np.fft.fft(dh_arr_thisifo)
                 hh += np.real(hh_thisifo)
                 dd += np.real(dd_thisifo)
@@ -163,7 +167,11 @@ class GWLikelihood(Likelihood):
             # compute inner products
             for ifo in self.ifos:
                 logger.debug("Projecting over {}".format(ifo))
-                dh_arr_thisifo, hh_thisifo, dd_thisifo, _psdf = self.dets[ifo].compute_inner_products(wave, params, self.wave.domain, psd_weight_factor=True, roq=self.roq, freq_dep_antenna=self.freq_dep_antenna)
+                if self.freq_dep_antenna:
+                    dh_arr_thisifo, hh_thisifo, dd_thisifo, _psdf = self.dets[ifo].compute_inner_products(wave, params, self.wave.domain, psd_weight_factor=True, roq=self.roq, freqs=self.wave.freqs, freq_dep_antenna=self.freq_dep_antenna)
+                else:
+                    dh_arr_thisifo, hh_thisifo, dd_thisifo, _psdf = self.dets[ifo].compute_inner_products(wave, params, self.wave.domain, psd_weight_factor=True, roq=self.roq)
+
                 # In the ROQ case, the sum was already taken when computing the scalar product with the weights.
                 if self.roq is not None: dh += (dh_arr_thisifo)
                 else:                    dh += (dh_arr_thisifo).sum()
