@@ -461,3 +461,6 @@ def initialize_param_from_func(name, min, max, func, kwarg={}, ngrid=2000, kind=
 
 def prior_sampler(prior, size):
     return np.array([prior.prior_transform(np.random.uniform(0.,1.,prior.ndim)) for _ in range(size)])
+
+def log_prior_from_posterior(x, kde=None):
+    return float(kde.logpdf(x)[0])

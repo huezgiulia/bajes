@@ -340,6 +340,8 @@ def parse_setup_options():
     # Time shift (from GPS time) information
     parser.add_argument('--tshift-max',        dest='time_shift_max', default=[],        type=float,    action="append",        help='upper time shift prior bound')
     parser.add_argument('--tshift-min',        dest='time_shift_min', default=[],        type=float,    action="append",        help='lower time shift prior bound')
+    parser.add_argument('--tshift-path',       dest='time_shift_path',default=None,      type=str,                              help='path for time shift prior distribution')
+
 
     #
     # GW OPTIONS

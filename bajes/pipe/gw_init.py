@@ -206,6 +206,7 @@ def initialize_gwlikelihood_kwargs(opts):
                                                                                   dist_max=opts.dist_max,
                                                                                   dist_min=opts.dist_min,
                                                                                   time_shift_bounds=[opts.time_shift_min, opts.time_shift_max],
+                                                                                  time_shift_path=opts.time_shift_path,
                                                                                   fixed_names=opts.fixed_names,
                                                                                   fixed_values=opts.fixed_values,
                                                                                   extra_opt=opts.extra_opt,
@@ -281,6 +282,7 @@ def initialize_gwprior(ifos,
                        dist_max          = None,
                        dist_min          = None,
                        time_shift_bounds = None,
+                       time_shift_path   = None,
                        fixed_names       = [],
                        fixed_values      = [],
                        extra_opt         = [],
@@ -676,6 +678,13 @@ def initialize_gwprior(ifos,
     # setting time_shift
     if marg_time_shift:
         dict['time_shift'] = Constant('time_shift',0.)
+    elif time_shift_path != None:
+        posterior = np.genfromtxt(time_shift_path, names=True)['time_shift']
+        from scipy.stats import gaussian_kde
+        kde = gaussian_kde(posterior)
+        from ..inf.utils import log_prior_from_posterior
+        dict['time_shift'] = Parameter(name='time_shift', min=posterior.min(), max=posterior.max(),
+                                       func=log_prior_from_posterior, func_kwarg={'kde': kde}, interp_kwarg={'ngrid': 2000, 'kind': 'linear'})
     else:
         if time_shift_bounds == None:
             logger.warning("Requested bounds for time_shift parameter is empty. Setting standard bound [-1.0,+1.0] s")
