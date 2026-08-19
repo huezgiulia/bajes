@@ -464,3 +464,22 @@ def prior_sampler(prior, size):
 
 def log_prior_from_posterior(x, kde=None):
     return float(kde.logpdf(x)[0])
+
+def build_kde_prior(min, max, kde, ngrid=1000):
+    from scipy.interpolate import interp1d
+    from bajes.inf import CustomProbability
+
+    ax     = np.linspace(min, max, ngrid)
+    logpdf = kde.logpdf(ax)
+    pdf    = np.exp(logpdf)
+
+    cdf = np.concatenate([[0.], np.cumsum(0.5*(pdf[1:]+pdf[:-1])*np.diff(ax))])
+    integral = cdf[-1]
+    logpdf   = logpdf - np.log(integral)
+    cdf      = cdf / integral
+
+    log_pdf_intrp = interp1d(ax, logpdf, bounds_error=False, kind='linear', fill_value=(-np.inf,-np.inf))
+    cdf_intrp     = interp1d(ax, cdf,    bounds_error=False, kind='linear', fill_value=(0,1))
+    qnt_intrp     = interp1d(cdf, ax,    bounds_error=True,  kind='linear')
+
+    return CustomProbability(log_density=log_pdf_intrp, cumulative=cdf_intrp, quantile=qnt_intrp)

@@ -681,10 +681,13 @@ def initialize_gwprior(ifos,
     elif time_shift_path != None:
         posterior = np.genfromtxt(time_shift_path, names=True)['time_shift']
         from scipy.stats import gaussian_kde
+        from ..inf.utils import build_kde_prior
         kde = gaussian_kde(posterior)
-        from ..inf.utils import log_prior_from_posterior
-        dict['time_shift'] = Parameter(name='time_shift', min=posterior.min(), max=posterior.max(),
-                                       func=log_prior_from_posterior, func_kwarg={'kde': kde}, interp_kwarg={'ngrid': 2000, 'kind': 'linear'})
+        tmin, tmax = posterior.min(), posterior.max()
+        param = Parameter(name='time_shift', min=tmin, max=tmax, prior='uniform')
+        param._kind = 'custom'
+        param._prob = build_kde_prior(tmin, tmax, kde, ngrid=1000)
+        dict['time_shift'] = param
     else:
         if time_shift_bounds == None:
             logger.warning("Requested bounds for time_shift parameter is empty. Setting standard bound [-1.0,+1.0] s")
