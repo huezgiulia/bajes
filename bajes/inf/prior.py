@@ -66,8 +66,8 @@ class Parameter(object):
             - periodic      : bool, periodic (True) or reflective (False)
             - prior         : str, specify implemented prior distribution to be used:
                               uniform, log-uniform, linear, quadratic, power-law,
-                              triangular, cosinusoidal, sinusoidal, exponential, exp-log,
-                              normal, log-normal (default uniform)
+                              triangular, cosinusoidal, sinusoidal, exponential,
+                              normal (default uniform)
             - func          : method, if not None this method will define the prior
                               distribution and the prior string will be ignored
             - func_kwarg    : dict, optional keyword arguments for input function
@@ -237,8 +237,8 @@ class Prior(object):
 
             # check that name is not repeated
             if pi.name in temp_names:
-                logger.error("Repeate name {} for different parameters. Please use different names.".format(pi.name))
-                raise ValueError("Repeate name {} for different parameters. Please use different names.".format(pi.name))
+                logger.error("Repeated name {} for different parameters. Please use different names.".format(pi.name))
+                raise ValueError("Repeated name {} for different parameters. Please use different names.".format(pi.name))
 
             # check that name is not in constants
             if pi.name in list(self.const.keys()) or pi.name in self.v_names:
@@ -297,7 +297,7 @@ class Prior(object):
             if name == None:
                 raise AttributeError("Unable to estimate partial cumulative probability. Please include the names of the requested parameters.")
 
-            indx = [i for i,pi in enumerate(self.paramters) if pi.name in name]
+            indx = [i for i,pi in enumerate(self.parameters) if pi.name in name]
             return np.prod(list(map(lambda i, xi: self.parameters[i].cumulative(xi), indx, x)))
 
     @property

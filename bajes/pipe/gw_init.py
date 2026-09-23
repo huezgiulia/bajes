@@ -643,6 +643,12 @@ def initialize_gwprior(ifos,
                                        min=dist_min,
                                        max=dist_max,
                                        prior='quadratic')
+    elif dist_flag=='GW170817':
+        dict['distance']   = Parameter(name='distance',
+                                       min=dist_min,
+                                       max=dist_max,
+                                       prior='normal',
+                                       mu = 40., sigma = 3.4)
     elif dist_flag=='com':
         from ..obs.utils.cosmo import Cosmology
         from .utils import _get_astropy_version

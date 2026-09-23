@@ -204,7 +204,7 @@ class TriangularProbability:
 
 class LogUniformProbability:
     """
-        Log-uniforn probability methods
+        Log-uniform probability methods
         ______
         x    : float or array
         min  : lower bound
@@ -261,7 +261,7 @@ class SinusoidalProbability:
 
 class CosinusoidalProbability:
     """
-        Sinusoidal probability methods
+        Cosinusoidal probability methods
         ______
         x    : float or array
         min  : lower bound
@@ -305,11 +305,11 @@ class ExponentialProbability:
 
     def cumulative(self, x):
         n = self._norm/self._tau
-        return (self._expmin - np.exp(-x/tau))/n
+        return (self._expmin - np.exp(-x/self._tau))/n
 
     def quantile(self, x):
         n = self._norm/self._tau
-        return -tau*np.log(self._expmin - n*x)
+        return -self._tau*np.log(self._expmin - n*x)
 
 class NormalProbability:
     """
@@ -339,7 +339,7 @@ class NormalProbability:
         return -0.5*((x-self._mu)/self._sigma)**2. - self._lognorm
 
     def cumulative(self, x):
-        xi = (x-mu)/sigma
+        xi = (x-self._mu)/self._sigma
         px = 0.5*(1.+erf(xi/self._sqrt2))
         return (px-self._pmin)/self._zeta
 

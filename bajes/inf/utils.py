@@ -387,7 +387,6 @@ def get_parameter_distribution_from_string(name, type, min, max, kwargs):
         return ExponentialProbability(min=min, max=max, tau=kwargs['tau'])
 
     elif type == 'normal':
-        kwarg = kwargs
         if 'mu' not in list(kwargs.keys()) or 'sigma' not in list(kwargs.keys()):
             raise AttributeError("Please include 'mu' and 'sigma' in key-word arguments for normal probability density ({} parameter).".format(name))
         if kwargs['sigma'] <= 0 :
