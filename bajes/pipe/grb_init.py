@@ -246,6 +246,12 @@ def initialize_grbprior(approx,
                                        min=dist_min,
                                        max=dist_max,
                                        prior='quadratic')
+    elif dist_flag=='GW170817':
+        dict['distance']   = Parameter(name='distance',
+                                       min=dist_min,
+                                       max=dist_max,
+                                       prior='normal',
+                                       mu = 40., sigma = 3.4)
     else:
         logger.error("Invalid distance flag for Prior initialization. Please use 'vol', 'com' or 'log'.")
         raise RuntimeError("Invalid distance flag for Prior initialization. Please use 'vol', 'com' or 'log'.")
