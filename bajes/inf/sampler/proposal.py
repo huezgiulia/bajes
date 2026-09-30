@@ -37,7 +37,7 @@ def _init_proposal_methods(priors, props=None, **kwargs):
             del props['gwt']
             logger.warning("Requested GW-targeted proposal, but likelihood and detectors objects are not given. Option ignored.")
 
-    # initialise proposals
+    # initialize proposals
     _proposals = []
     _weights   = []
     for ki in list(props.keys()):

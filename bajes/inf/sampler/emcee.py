@@ -209,7 +209,7 @@ class SamplerMCMC(SamplerBody):
         if nwalk < posterior.prior.ndim**2:
             logger.warning("Requested number of walkers < Ndim^2. This may generate problems in the exploration of the parameters space.")
 
-        # inilialize backend
+        # initialize backend
         from emcee.backends import Backend
         backend = Backend()
 
