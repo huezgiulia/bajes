@@ -24,7 +24,7 @@ class Filter(object):
             try:
                 t,m,sm,ra,sra,dec,sdec = np.genfromtxt(folder + '/{}.txt'.format(k), usecols=[0,1,2,3,4,5,6], unpack=True)
             except Exception as exc:
-                raise RuntimeError("Error occured while loading {}".format(folder + '/{}.txt.'.format(k)))
+                raise RuntimeError("Error occurred while loading {}".format(folder + '/{}.txt.'.format(k)))
 
             try:
                 assert len(m) == len(sm)
@@ -33,7 +33,7 @@ class Filter(object):
                 assert len(dec) == len(sdec)
                 assert len(ra) == len(t)
             except Exception as exc:
-                raise RuntimeError("Unconsistent data length detected in magnitude file {}".format(folder + '/{}.txt.'.format(k)))
+                raise RuntimeError("Inconsistent data length detected in magnitude file {}".format(folder + '/{}.txt.'.format(k)))
 
             self.fluxes[k]      = m
             self.flux_stdev[k]  = sm
