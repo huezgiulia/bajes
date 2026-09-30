@@ -77,7 +77,7 @@ class SamplerBody(object):
             # store random seed
             self.seed = seed
 
-            #initialize specific sampler
+            # initialize specific sampler
             self.__initialize__(posterior, **kwargs)
 
     def __getstate__(self):
@@ -120,8 +120,13 @@ class SamplerBody(object):
             logger.warning("Unable to set signal attributes.")
 
         # extract previous variables and methods
-        # TODO: try container.inference, otherwise initialize new inference
-        previous_inference  = container.inference
+        try:
+            previous_inference = container.inference
+        except AttributeError:
+            # initialize new inference if container doesn't have it
+            logger.warning("Container doesn't have inference, initializing new inference ...")
+            self.__initialize__(kwargs.pop('posterior'), **kwargs)
+            return
         for kw in list(previous_inference.keys()):
             logger.debug("Setting {} attribute ...".format(kw))
             self.__setattr__(kw, previous_inference[kw])
@@ -130,7 +135,7 @@ class SamplerBody(object):
         self.__restore__(**kwargs)
 
     def store_and_exit(self, signum=None, frame=None):
-        # exit function when signal is revealed
+        # exit function when signal is received
         logger.warning("Run interrupted by signal {}, checkpoint and exit.".format(signum))
         try:
             self.store()
@@ -151,7 +156,7 @@ class SamplerBody(object):
                 copyfile(self.outdir+self.resume, self.outdir+self.back)
             elif access == 1:
                 # if container is safe,
-                # but inference is not there, so there is not need to copy the resume
+                # but inference is not there, so there is no need to copy the resume
                 logger.debug("Resume file is safe")
             else:
                 # otherwise lock previous backup to the last safe iteration
