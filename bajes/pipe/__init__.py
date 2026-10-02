@@ -472,6 +472,8 @@ def parse_setup_options():
     # Prior bounds Sigma_b
     parser.add_argument('--sigma-max',              dest='sigma_max',           type=float,                       default=None, help='Upper bounds for systematic deviation parameter for each band')
     parser.add_argument('--sigma-min',              dest='sigma_min',           type=float,                       default=None, help='Lower bounds for systematic deviation parameter for each band')
+    parser.add_argument('--iota-flag',              dest='iota_flag',                         action="store_true",default=False,help='Flag to have cos iota prior in [-1,0]')
+
 
     # Integrators properties
     parser.add_argument('--nvel',                   dest='n_v',                 type=int,                         default=400,     help='Number of elements in velocity array, default 400')

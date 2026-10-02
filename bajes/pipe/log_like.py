@@ -246,8 +246,8 @@ class KNLikelihood(Likelihood):
         # the time axis passed to the lightcurve goes from t_start (~0) to the size of the measurement times
         # subsequently (line 489) the time axis is rescaled such that t=0 goes to t_gps
         t_size = np.max(filters.all_times)- np.min(filters.all_times)
-        if 'time_shift' in priors.names:
-            ip = priors.names.index('time_shift')
+        if 'time_shift_kn' in priors.names:
+            ip = priors.names.index('time_shift_kn')
             t_size += priors.bounds[ip][1]-priors.bounds[ip][0]
 
         if t_scale=='linear':

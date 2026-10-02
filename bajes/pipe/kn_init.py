@@ -191,7 +191,7 @@ def initialize_knlikelihood_kwargs(opts):
                                 fixed_names=opts.fixed_names, fixed_values=opts.fixed_values,
                                 prior_grid=opts.priorgrid, kind='linear',
                                 use_calib_sigma=opts.use_calib_sigma_lc,
-                                sigma_max=opts.sigma_max, sigma_min=opts.sigma_min)
+                                sigma_max=opts.sigma_max, sigma_min=opts.sigma_min, iota_flag=opts.iota_flag)
     
 
     # save observations in pickle
@@ -228,7 +228,8 @@ def initialize_knprior(approx,
                        kind                 = 'linear',
                        use_calib_sigma      = True,
                        sigma_max            = None,
-                       sigma_min            = None,):
+                       sigma_min            = None,
+                       iota_flag            = False,):
 
     from ..inf.prior import Prior, Parameter, Variable, Constant
 
@@ -370,10 +371,13 @@ def initialize_knprior(approx,
         logger.warning("Requested bounds for time_shift parameter is empty. Setting standard bound [-1.0,+1.0] day")
         time_shift_bounds  = [-86400.,+86400.]
 
-    dict['time_shift']  = Parameter(name='time_shift', min=time_shift_bounds[0], max=time_shift_bounds[1])
+    dict['time_shift_kn']  = Parameter(name='time_shift_kn', min=time_shift_bounds[0], max=time_shift_bounds[1])
 
     # setting inclination
-    dict['cos_iota']   =  Parameter(name='cos_iota', min=-1., max=+1.)
+    if iota_flag:
+        dict['cos_iota']   =  Parameter(name='cos_iota', min=-1., max=0.)
+    else:
+        dict['cos_iota']   =  Parameter(name='cos_iota', min=-1., max=+1.)
 
     # use NR fits for dynamical ejecta and baryonic wind
     if 'GrossmanKBP-2-NRfits' in approx:

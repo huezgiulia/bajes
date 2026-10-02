@@ -248,4 +248,4 @@ class KorobkinBarnesGrossmanPeregoEtAl(object):
         # compute flux factors
         ff = [fi(_iota) for fi in self.ff_interp]
 
-        return compute_magnitudes(self.times,ff,Rph,Teff,self.lambdas,_dist,params['time_shift'])
+        return compute_magnitudes(self.times,ff,Rph,Teff,self.lambdas,_dist,params['time_shift_kn'])
