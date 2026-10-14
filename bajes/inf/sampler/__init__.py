@@ -37,7 +37,13 @@ class SamplerBody(object):
         self.lock_backup    = False
 
         # restore inference from existing container
+        restorable = False
         if os.path.exists(self.outdir + self.resume) and (rank==0):
+            restorable = (self._check_resume() == 2)
+            if not restorable:
+                logger.warning("Resume file has no inference, initializing new inference ...")
+
+        if restorable:
 
             kwargs['posterior'] = self._restore_posterior()
             self.restore(**kwargs)
@@ -120,13 +126,7 @@ class SamplerBody(object):
             logger.warning("Unable to set signal attributes.")
 
         # extract previous variables and methods
-        try:
-            previous_inference = container.inference
-        except AttributeError:
-            # initialize new inference if container doesn't have it
-            logger.warning("Container doesn't have inference, initializing new inference ...")
-            self.__initialize__(kwargs.pop('posterior'), **kwargs)
-            return
+        previous_inference = container.inference
         for kw in list(previous_inference.keys()):
             logger.debug("Setting {} attribute ...".format(kw))
             self.__setattr__(kw, previous_inference[kw])
