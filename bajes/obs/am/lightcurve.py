@@ -10,11 +10,8 @@ logger = logging.getLogger(__name__)
 # # that include the following keys:
 # #   * 'path':   string to method to be imported, e.g. bajes.obs.gw.approx.taylorf2.taylorf2_35pn_wrapper
 # #   * 'type':   define if the passed func is a function or a class, options: ['fnc', 'cls']
-# #   * 'domain': define if the method returns a frequency- or time-domain waveform, options: ['time', 'freq']
 
-__approx_dict__ = { ### TIME-DOMAIN
-                    # funcs
-                    'am_afterglow':                {'path': 'bajes.obs.am.approx.afterglowpy_model.afterglow_wrapper',
+__approx_dict__ = {                     'am_afterglow':                {'path': 'bajes.obs.am.approx.afterglowpy_model.afterglow_wrapper',
                                                              'type': 'fnc'},
                   }
 
@@ -39,12 +36,12 @@ def __get_lightcurve_generator__(approx, times, nu, **kwargs):
     if path_to_method[-1] not in dir(light_module):
         raise AttributeError("Unable to import {} method from {}".format(path_to_method[-1], light_module))
 
-    # get waveform generator and domain string
+    # get lightcurve generator
     if this_light['type'] == 'fnc':
         light_func = getattr(light_module, path_to_method[-1])
     else:
         # this condition never occurs if the __approx_dict__ is properly written
-        raise AttributeError("Unable to define method for grb lightcurve generator. Check bajes.obs.am.lightcurve.__approx_dict__")
+        raise AttributeError("Unable to define method for am lightcurve generator. Check bajes.obs.am.lightcurve.__approx_dict__")
 
     return light_func
 

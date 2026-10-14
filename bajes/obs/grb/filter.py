@@ -20,13 +20,13 @@ class Filter(object):
             try:
                 t,  m,  sm = np.genfromtxt(folder + '/{}.txt'.format(k), usecols=[0,1,2], unpack=True)
             except Exception as exc:
-                raise RuntimeError("Error occured while loading {}".format(folder + '/{}.txt.'.format(k)))
+                raise RuntimeError("Error occurred while loading {}".format(folder + '/{}.txt.'.format(k)))
 
             try:
                 assert len(m) == len(sm)
                 assert len(m) == len(t)
             except Exception as exc:
-                raise RuntimeError("Unconsistent data length detected in magnitude file {}".format(folder + '/{}.txt.'.format(k)))
+                raise RuntimeError("Inconsistent data length detected in magnitude file {}".format(folder + '/{}.txt.'.format(k)))
 
             self.magnitudes[k]  = m
             self.mag_stdev[k]   = sm
