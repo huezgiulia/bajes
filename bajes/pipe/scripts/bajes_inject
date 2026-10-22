@@ -373,7 +373,7 @@ class Injection(object):
                         if self.freq_dep_antenna:
                             _wave   = self.dets[ifo].project_fdwave(signal_template, params, wave.domain, freqs = _f[_f_mask], freq_dep_antenna=self.freq_dep_antenna)
                         else:
-                            _wave   = self.dets[ifo].project_fdwave(signal_template, params, wave.domain, freqs = self.freqs[ifo])
+                            _wave   = self.dets[ifo].project_fdwave(signal_template, params, wave.domain, freqs = _f[_f_mask])
                         _amp    = np.abs(_wave)
                         _phi    = np.unwrap(np.angle(_wave))
                         _amp    = np.interp(self.freqs[ifo], self.dets[ifo].freqs, _amp, right=0., left=0.)

@@ -2,11 +2,10 @@ from __future__ import division, unicode_literals, absolute_import
 import numpy as np
 import astropy.units as u
 import matplotlib.pyplot as plt
+from math import factorial
 
 import logging
 logger = logging.getLogger(__name__)
-
-from scipy.misc import derivative
 
 class Cosmology(object):
 
@@ -83,11 +82,23 @@ class Cosmology(object):
     def z_to_dc(self,z):
         return self.cosmo.comoving_distance(z).value
 
-    def dvc_dz(self, z, order=3):
-        return derivative(self.z_to_vc, z, dx=self._ztol, order=order)
+    def derivative(func, x0, dx=1.0, n=1, args=(), order=3):
+        if order < n + 1:
+            raise ValueError("'order' (number of points used) must be at least the derivative order 'n' + 1")
+        if order % 2 == 0:
+            raise ValueError("'order' (number of points used) should be odd")
 
-    def dz_ddl(self, dl, order=3):
-        return derivative(self.dl_to_z, dl, dx=self._ztol*1e8, order=order)
+        ho = order >> 1
+        k = np.arange(-ho, ho + 1)
+        A = np.vander(k, increasing=True).T.astype(float)
+        b = np.zeros(order)
+        b[n] = factorial(n)
+        weights = np.linalg.solve(A, b)
+
+        val = 0.0
+        for w, ki in zip(weights, k):
+            val += w * func(x0 + ki * dx, *args)
+        return val / dx**n
 
     def dvc_ddl(self, dl, order=3):
         return derivative(self.dl_to_vc, dl, dx=self._ztol*1e8, order=order)

@@ -6,13 +6,13 @@ logger = logging.getLogger(__name__)
 
 from ..utils import compute_lambda_tilde, compute_delta_lambda
 
-__url__ = 'https://pypi.org/project/mlgw/'
-try:
-    import mlgw as generator
-except ImportError:
-    warnings.warn("Unable to import MLGW package. Please see related documentation at: {}".format(__url__))
-    logger.warning("Unable to import MLGW package. Please see related documentation at: {}".format(__url__))
-    pass
+# __url__ = 'https://pypi.org/project/mlgw/'
+# try:
+#     import mlgw as generator
+# except ImportError:
+#     warnings.warn("Unable to import MLGW package. Please see related documentation at: {}".format(__url__))
+#     logger.warning("Unable to import MLGW package. Please see related documentation at: {}".format(__url__))
+#     pass
 
 __url__ = 'https://pypi.org/project/mlgw-bns/'
 try:
@@ -23,8 +23,7 @@ except ImportError:
     pass
 
 __bns_pars__ = ['mass_ratio', 'lambda_1', 'lambda_2', 'chi_1', 'chi_2',
-                'distance_mpc', 'inclination', 'total_mass',
-                'reference_phase']
+                'distance_mpc', 'inclination', 'total_mass']
 __bjs_pars__ = ['q', 'lambda1', 'lambda2', 's1z', 's2z',
                 'distance', 'iota', 'mtot',
                 'phi_ref']
@@ -34,7 +33,7 @@ def params_bajes_to_mlgwbns(pars):
     # Then, frequency-domain waveform are genereted with the convetion time_shift=0 (according to LALSim)
     # NOTE: In bajes/obs/gw/waveform.py we shift of seglen/2  every frequency-domain waveform
     out = {ki : pars[kj] for ki,kj in zip(__bns_pars__, __bjs_pars__)}
-    out['time_shift'] = 0.
+    # out['time_shift'] = 0.
     return out
 
 def mlgw_bns_merger_time_shift(mt, q, lambda1, lambda2, chi1, chi2):
@@ -128,9 +127,10 @@ class mlgw_bns_wrapper():
 
     def __init__(self, **kwargs):
 
-        self.model = Model.default()
+        self.model = Model.default_for_testing("default_hom_lambda12000")
 
     def __call__(self, freqs, params):
+        print(freqs)
         bns_params      = ParametersWithExtrinsic(**params_bajes_to_mlgwbns(params))
         hp_i, hc_i      = self.model.predict(freqs, bns_params)
         return hp_i, hc_i
