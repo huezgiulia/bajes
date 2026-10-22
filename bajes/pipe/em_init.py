@@ -204,7 +204,7 @@ def initialize_emlikelihood_kwargs(opts):
                                 eps0_max=opts.eps_max,  eps0_min=opts.eps_min,
                                 dist_flag=opts.dist_flag, log_eps0_flag=opts.log_eps_flag,
                                 heating_sampling=opts.heat_sampling, heating_alpha=opts.heating_alpha,
-                                heating_time=opts.heating_time,heating_sigma=opts.heating_sigma,
+                                heating_time=opts.heating_time,heating_sigma=opts.heating_sigma,heat_sampling_corr=opts.heat_sampling_corr,
                                 time_shift_bounds=[opts.time_shift_min, opts.time_shift_max],
                                 fixed_names=opts.fixed_names, fixed_values=opts.fixed_values,
                                 prior_grid=opts.priorgrid, kind='linear',
@@ -245,6 +245,7 @@ def initialize_emprior(approx,
                        dist_flag            = False,
                        log_eps0_flag        = False,
                        heating_sampling     = False,
+                       heat_sampling_corr   = False,
                        heating_alpha        = 1.3,
                        heating_time         = 1.3,
                        heating_sigma        = 0.11,
@@ -317,6 +318,10 @@ def initialize_emprior(approx,
         dict['eps_alpha']   = Constant('eps_alpha', heating_alpha)
         dict['eps_time']    = Constant('eps_time',  heating_time)
         dict['eps_sigma']   = Constant('eps_sigma', heating_sigma)
+
+    if heat_sampling_corr:
+        logger.warning("Including heating correction coefficiets in sampling using default bounds with uniform prior.")
+        dict['nuc_corr']   = Parameter(name='nuc_corr', min = 1., max = 10., prior='uniform')
 
     # setting jetType
     if model == 'TopHat':
