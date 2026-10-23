@@ -17,6 +17,7 @@ from ..utils import compute_lambda_tilde, compute_delta_lambda
 __url__ = 'https://pypi.org/project/mlgw-bns/'
 try:
     from mlgw_bns import Model, ParametersWithExtrinsic
+    from mlgw_bns.higher_order_modes import Mode
 except ImportError:
     warnings.warn("Unable to import MLGW-BNS package. Please see related documentation at: {}".format(__url__))
     logger.warning("Unable to import MLGW-BNS package. Please see related documentation at: {}".format(__url__))
@@ -127,10 +128,9 @@ class mlgw_bns_wrapper():
 
     def __init__(self, **kwargs):
 
-        self.model = Model.default_for_testing("default_hom_lambda12000")
+        self.model = Model.default_for_testing("default_hom_lambda12000", modes=[Mode(2, 2), Mode(3, 3), Mode(4, 4), Mode(2, 1)])
 
     def __call__(self, freqs, params):
-        print(freqs)
         bns_params      = ParametersWithExtrinsic(**params_bajes_to_mlgwbns(params))
         hp_i, hc_i      = self.model.predict(freqs, bns_params)
         return hp_i, hc_i

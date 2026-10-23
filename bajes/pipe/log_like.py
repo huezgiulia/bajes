@@ -136,12 +136,12 @@ class GWLikelihood(Likelihood):
         if self.marg_time_shift:
 
             dh_arr = np.zeros(self.Nfr, dtype=complex)
-            dh_arr = np.zeros(len(self.wave.freqs), dtype=complex) # TODO check correctness
 
             # compute inner products
             for ifo in self.ifos:
                 logger.debug("Projecting over {}".format(ifo))
                 if self.freq_dep_antenna:
+                    dh_arr = np.zeros(len(self.wave.freqs), dtype=complex) # TODO check correctness
                     dh_arr_thisifo, hh_thisifo, dd_thisifo, _psdf = self.dets[ifo].compute_inner_products(wave, params, self.wave.domain, psd_weight_factor=True, freqs=self.wave.freqs, freq_dep_antenna=self.freq_dep_antenna)
                 else:
                     dh_arr_thisifo, hh_thisifo, dd_thisifo, _psdf = self.dets[ifo].compute_inner_products(wave, params, self.wave.domain, psd_weight_factor=True)
