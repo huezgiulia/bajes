@@ -4,8 +4,6 @@ import numpy as np
 import logging
 logger = logging.getLogger(__name__)
 
-from .utils import dict_2_list
-
 from collections import namedtuple
 Variable    = namedtuple("Variable",    ("name","func","kwarg"),    defaults=(None,None,{}) )
 Constant    = namedtuple("Constant",    ("name","value"),           defaults=(None,None) )
@@ -136,10 +134,11 @@ class Parameter(object):
 
         self._kind  = prior
         self._prob  = prob
+        self._kwarg = dict(kwarg) if prior != 'custom' else {}
 
     def __eq__(self, other):
         # check prior arguments
-        args    = ['_name', '_bound', '_periodic', '_kind']
+        args    = ['_name', '_bound', '_periodic', '_kwarg', '_kind']
         bools   = [self.__dict__[ai] == other.__dict__[ai] for ai in args]
         # if customized prior, check agreement between interpolators
         if self._kind == 'custom' and bools[-1]:
@@ -208,7 +207,7 @@ class Prior(object):
             # check that every element in parameters is a Parameter object
             if not isinstance(vi, Variable):
                 logger.error("The Prior received a variable that is not a Variable object.")
-                raise ValueError("The Prior received a variable that is is not a Variable object.")
+                raise ValueError("The Prior received a variable that is not a Variable object.")
 
             # check that name is not in constants
             if vi.name in list(self.const.keys()):
@@ -228,7 +227,7 @@ class Prior(object):
             # check that every element in parameters is a Parameter object
             if not isinstance(pi, Parameter):
                 logger.error("The Prior received a parameter that is not a Parameter object.")
-                raise ValueError("The Prior received a parameter that is is not a Parameter object.")
+                raise ValueError("The Prior received a parameter that is not a Parameter object.")
 
             # check bounds lengths
             if len(pi.bound) !=2:
@@ -242,8 +241,10 @@ class Prior(object):
 
             # check that name is not in constants
             if pi.name in list(self.const.keys()) or pi.name in self.v_names:
-                logger.error("Repeated name {} between parameters/contants/variables. Please use different names.".format(pi.name))
-                raise ValueError("Repeated name {} in sampling parameters/contants/variables. Please use different names.".format(pi.name))
+                logger.error("Repeated name {} between parameters/constants/variables. Please use different names.".format(pi.name))
+                raise ValueError("Repeated name {} in sampling parameters/constants/variables. Please use different names.".format(pi.name))
+            
+            temp_names.append(pi.name) 
 
         self.parameters = parameters
 
@@ -356,8 +357,8 @@ class JointPrior(Prior):
             for ni,fi,ki in zip(pr.v_names, pr.v_funcs, pr.v_kwargs):
 
                 if ni in temp_names:
-                    logger.error("Unable to join prior distributions. Repeated name {} between parameters/contants/variables.".format(ni))
-                    raise ValueError("Unable to join prior distributions. Repeated name {} between parameters/contants/variables.".format(ni))
+                    logger.error("Unable to join prior distributions. Repeated name {} between parameters/constants/variables.".format(ni))
+                    raise ValueError("Unable to join prior distributions. Repeated name {} between parameters/constants/variables.".format(ni))
 
                 if ni in v_names:
 

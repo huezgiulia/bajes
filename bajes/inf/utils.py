@@ -20,7 +20,7 @@ def list_2_dict(x,keys):
 
 def autocorrelation(x):
     '''
-        Compute autocorrelation funcion for a for an 1-dim array of samples,
+        Compute autocorrelation function for a for an 1-dim array of samples,
         non partial method with numpy.fft
 
         Arguments:
@@ -82,7 +82,7 @@ def autocorr_integrated_time(x, axis=0, window=50, fast=True):
         - x         : The time series.
         - axis      : The time axis of ``x``. Assumed to be the first axis if not specified, (optional)
         - window    : The size of the window to use. (optional, default 50)
-        - fast      : If ``True``, only use the largest ``2^n`` entries for efficiency (default: False)
+        - fast      : If ``True``, only use the largest ``2^n`` entries for efficiency (default: True)
     """
     # Compute the autocorrelation function.
     f = autocorr_function(x, axis=axis, fast=fast)
@@ -98,7 +98,7 @@ def autocorr_integrated_time(x, axis=0, window=50, fast=True):
 
     return tau
 
-# thermodinamic evidence integration (ptmcmc)
+# thermodynamic evidence integration (ptmcmc)
 
 def thermodynamic_integration_log_evidence(betas, logls):
     """
@@ -205,15 +205,15 @@ def reflect_skyloc_3dets(ra,dec,refvec,refloc):
         arXiv:1409.7215v2 [gr-qc] (2015)
     """
     locnorm = np.sqrt(refloc[0]**2 + refloc[1]**2 + refloc[2]**2)
-    refloc /= locnorm
-
+    refloc  = refloc/locnorm 
+    
     x0          = np.array(sph2cart(1,np.pi/2-dec,ra))
     x1          = x0 - 2*refvec*(np.dot(refvec,x0-refloc))
     r, th, ph   = cart2sph(x1[0],x1[1],x1[2])
     dtshift     = np.real(locnorm * np.dot(refloc,x1-x0)) / 299792458.0
 
     # take into account Earth rotation,
-    # move time_shift in radiants and substract to right ascenscion
+    # move time_shift in radiants and subtract to right ascension
     # 86400 s = 24h = 2 pi
     ph  -= dtshift * 2*np.pi/86400.
 
@@ -237,7 +237,7 @@ def reflect_skyloc_2dets(ra,dec,refvec,refloc):
     dtshift     = np.dot(refloc,x1-x0) / 299792458.0
 
     # take into account Earth rotation,
-    # move time_shift in radiants and substract to right ascenscion
+    # move time_shift in radiants and subtract to right ascension
     # 86400 s = 24h = 2 pi
     ph  -= dtshift * 2*np.pi / 86400
 
@@ -246,10 +246,10 @@ def reflect_skyloc_2dets(ra,dec,refvec,refloc):
 def project_all_extrinsic(dets, ra, dec, iota, dist, psi, tshift, ra_new, dec_new, tshift_new, t_gps):
     """
         Compute projection of extrinsic parameters
-        given a new skylocation,
+        given a new sky location,
         as proposed in V. Raymond and W.M. Farr
         arXiv:1402.0053v1 [gr-qc] (2014)
-        This formulation ssumines that:
+        This formulation assumes that:
         F+(psi1) = F+(psi0) * cos(2 * psi1) - Fx(psi0) * sin(2 * psi1)
         Fx(psi1) = Fx(psi0) * cos(2 * psi1) + F+(psi0) * sin(2 * psi1)
     """
@@ -374,7 +374,7 @@ def get_parameter_distribution_from_string(name, type, min, max, kwargs):
 
     elif type == 'sinusoidal':
         if min < 0 or max > np.pi:
-            logger.warning("Cosinusoidal distribution is tuned to work within the range [0, pi]")
+            logger.warning("Sinusoidal distribution is tuned to work within the range [0, pi]")
         from . import SinusoidalProbability
         return SinusoidalProbability(min=min, max=max)
 
@@ -382,7 +382,7 @@ def get_parameter_distribution_from_string(name, type, min, max, kwargs):
         if 'tau' not in list(kwargs.keys()):
             raise AttributeError("Please include 'tau' in key-word arguments for exponential probability density ({} parameter).".format(name))
         if kwargs['tau'] <= 0:
-            raise AttributeError("Unable to set exponential distribution for {} parameter, decay time `tau` must be a real posivite value.".format(name))
+            raise AttributeError("Unable to set exponential distribution for {} parameter, decay time `tau` must be a real positive value.".format(name))
         from . import ExponentialProbability
         return ExponentialProbability(min=min, max=max, tau=kwargs['tau'])
 

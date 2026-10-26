@@ -20,7 +20,7 @@ class Likelihood(object):
     
     def log_like(self, x):
         
-        if self._func == None:
+        if self._func is None:
             logger.error("Log-likelihood method has been called without specifying the likelihood form. Please implement your Likelihood.")
             raise RuntimeError("Log-likelihood method has been called without specifying the likelihood form. Please implement your Likelihood.")
         else:

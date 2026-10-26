@@ -17,7 +17,7 @@ def Sampler(engine, model, **kwargs):
 
         Arguments:
         engine  : str, specify the kind of sampler
-                  mcmc, ptmcmc, nest, cpnest, dynest
+                  mcmc, ptmcmc, nest, cpnest, dynesty, ultranest
         model   : list or bajes.inf.likelihood.Posterior,
                   if list, should contain 2 elements,
                   [bajes.inf.prior.Prior, bajes.inf.likelihood.Likelihood]
@@ -200,7 +200,7 @@ class TriangularProbability:
         if x <= (self._mode-self._min)/(self._max-self._min):
             return self._min + np.sqrt(x*(self._max-self._min)*(self._mode-self._min))
         else:
-            return self._max - np.sqrt((x-1.)*(self._max-self._min)*(self._max-self._mode))
+            return self._max - np.sqrt((1.-x)*(self._max-self._min)*(self._max-self._mode))
 
 class LogUniformProbability:
     """
