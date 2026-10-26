@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 # #   * 'path':   string to method to be imported, e.g. bajes.obs.gw.approx.taylorf2.taylorf2_35pn_wrapper
 # #   * 'type':   define if the passed func is a function or a class, options: ['fnc', 'cls']
 
-__approx_dict__ = {                     'am_afterglow':                {'path': 'bajes.obs.am.approx.afterglowpy_model.afterglow_wrapper',
-                                                             'type': 'fnc'},
+__approx_dict__ = {'am_afterglow':              {'path': 'bajes.obs.am.approx.afterglowpy_model.afterglow_wrapper',
+                                                    'type': 'fnc'},
                   }
 
 def __get_lightcurve_generator__(approx, times, nu, **kwargs):
@@ -61,7 +61,7 @@ class AM_Lightcurve(object):
         self.approx     = approx
         logger.info("Setting {} lightcurve ...".format(self.approx))
 
-        # get waveform generator from string
+        # get lightcurve generator from string
         self.light_func = __get_lightcurve_generator__(self.approx, self.times, self.nu, **kwargs)
 
     def compute_centroid_motion(self, params): 

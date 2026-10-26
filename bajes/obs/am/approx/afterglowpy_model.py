@@ -18,14 +18,6 @@ def compute_centroid_afterglow(time, nu, params):
     moment[:] = grb.jet.MOM_X
     FnuX = grb.fluxDensity(time, nu, **params, moment=moment)
 
-    # compute moment 2 (integral of x_obs^2 * intensity)
-    moment[:] = grb.jet.MOM_XX
-    FnuXX = grb.fluxDensity(time, nu, **params, moment=moment)
-
-    # compute moment 2 (integral of y_obs^2 * intensity)
-    moment[:] = grb.jet.MOM_YY
-    FnuYY = grb.fluxDensity(time, nu, **params, moment=moment)
-
     # Get the intensity-weighted distance measures
     X_cm = FnuX / Fnu     # in cm
     dA = params['d_L'] / (1 + params['z'])**2
@@ -68,11 +60,7 @@ def afterglow_wrapper(t, nu, params):
     if 'specType' in params:
         grb_params['specType'] = params['specType']
 
-    try:
-        flux, xc        = compute_centroid_afterglow(t, nu, grb_params)
-    except Exception as e:
-        print(f"Afterglowpy error: {e}")
-        return -np.inf
+    flux, xc        = compute_centroid_afterglow(t, nu, grb_params)
     centroid_pos    = compute_centroid_position(params, xc, flux) 
 
     return centroid_pos

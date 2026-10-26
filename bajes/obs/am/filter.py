@@ -20,7 +20,7 @@ class Filter(object):
 
             # read data from given folder
             # obs. the data file names have to be identical to the nu
-            # obs. the data files should contain three columns, time, magnitudes and standard deviations
+            # obs. the data files should contain seven columns, time, magnitudes and standard deviations, RA and DEC and their standard deviations
             try:
                 t,m,sm,ra,sra,dec,sdec = np.genfromtxt(folder + '/{}.txt'.format(k), usecols=[0,1,2,3,4,5,6], unpack=True)
             except Exception as exc:

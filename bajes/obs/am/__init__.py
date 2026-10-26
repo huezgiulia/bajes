@@ -2,7 +2,6 @@
 from __future__ import unicode_literals, absolute_import
 
 from .lightcurve import AM_Lightcurve, __approx_dict__
-from ... import CLIGHT_SI
 
 __known_approxs__   = list(__approx_dict__.keys())
 
