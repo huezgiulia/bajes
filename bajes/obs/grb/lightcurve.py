@@ -62,11 +62,10 @@ class GRB_Lightcurve(object):
         self.approx     = approx
         logger.info("Setting {} lightcurve ...".format(self.approx))
 
-        # get waveform generator
+        # get lightcurve generator
         self.light_func = __get_lightcurve_generator__(self.approx, self.times, self.nu, **kwargs)
 
     def compute_mag(self, params): 
-        # include band information in params
         dict_mag = {}
         for n in self.nu.keys():
             flux        = self.light_func(self.times, self.nu[n], params)
