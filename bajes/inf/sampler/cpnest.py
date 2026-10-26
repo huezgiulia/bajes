@@ -190,7 +190,7 @@ def _WrapSamplerCPNest(engine, posterior, nlive, tolerance=0.1, maxmcmc=4096, po
         if os.path.exists(outdir+resume):
             check_container(outdir+resume)
         else:
-            # generate a fictictious pickle,
+            # generate a fictitious pickle,
             # containing only the tag (for a possible wrong resuming)
             store_inference(outdir+resume)
 

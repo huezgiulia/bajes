@@ -151,11 +151,11 @@ class BajesMCMCProposal(emcee.moves.red_blue.RedBlueMove):
         for split in range(self.nsplits):
             S1 = inds == split
 
-            # Select one subset of the ensamble
+            # Select one subset of the ensemble
             sets        = [state.coords[inds == j] for j in range(self.nsplits)]
             logp_sets   = [state.log_prob[inds == j] for j in range(self.nsplits)]
 
-            # Assign varibles for set and complementary
+            # Assign variables for set and complementary
             s       = sets[split]
             c       = sets[:split] + sets[split + 1 :]
             probs   = logp_sets[split]
@@ -326,7 +326,7 @@ class SamplerMCMC(SamplerBody):
             # Please report the error.
             acl = 1
             self.nburn = np.abs(self.sampler.backend.iteration)//2
-            logger.warning("Warning: NaN or Inf occurred in ACL computation. ACL will be set equal to 1 and nburn will be fixed to nstep//2. Try increasing the number of walkers for the MCMC exploration if you want to improve your sampling.")
+            logger.warning("NaN or Inf occurred in ACL computation. ACL will be set equal to 1 and nburn will be fixed to nstep//2. Try increasing the number of walkers for the MCMC exploration if you want to improve your sampling.")
 
         self.posterior_samples  = np.array(self.sampler.backend.get_chain(flat=True, discard=self.nburn, thin=acl))
         logP                    = np.array(self.sampler.backend.get_log_prob(flat=True, discard=self.nburn, thin=acl))

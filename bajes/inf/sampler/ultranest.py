@@ -74,7 +74,6 @@ class SamplerUltraNest(SamplerBody):
             nlive_cluster = nlive//10
 
         # if self.store_flag:
-        import os
         log_dir = os.path.join(self.outdir, 'ultranest')
 
         sampler_kwargs  = { 'log_dir':          log_dir,
@@ -157,7 +156,7 @@ class SamplerUltraNest(SamplerBody):
         # re-initialize serial probabilities
         else:
             if self.sampler.draw_multiple:
-                logger.warning("Inconsitency revealed between current settings and resumed object, turning off multiple draws.")
+                logger.warning("Inconsistency revealed between current settings and resumed object, turning off multiple draws.")
                 self.sampler.draw_multiple = False
 
             posterior   = kwargs['posterior']
@@ -216,7 +215,6 @@ class SamplerUltraNest(SamplerBody):
 
     def __run__(self):
 
-        # final store inference
         for result in self.sampler.run_iter(**self.run_kwargs):
             self.results = result
 
@@ -231,7 +229,7 @@ class SamplerUltraNest(SamplerBody):
             logger.info('Converged chain with correlation %(independent_iterations)s' % (self.results['insertion_order_MWW_test']))
         else:
             if not self.results['insertion_order_MWW_test']['converged']:
-                logger.warning('Sampler did not converged, consider to increase the number of mcmc iterations.')
+                logger.warning('Sampler did not converge, consider to increase the number of mcmc iterations.')
             if not np.isfinite(self.results['insertion_order_MWW_test']['independent_iterations']):
                 logger.warning('Samples are highly correlated, consider to increase the number of mcmc iterations.')
 
@@ -278,5 +276,5 @@ class SamplerUltraNest(SamplerBody):
             self.sampler.plot_trace()
 
         except Exception:
-            logger.info("Standard plots of ultranest are not procuded if checkpoint is disabled.")
+            logger.info("Standard plots of ultranest are not produced if checkpoint is disabled.")
             logger.warning("Unable to produce standard plots, check if matplotlib and corner are installed.")

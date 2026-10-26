@@ -149,7 +149,7 @@ def get_prior_samples_dynesty(nlive, ndim, like_fn, ptform_fn, pool=None):
 class SamplerDynesty(SamplerBody):
 
     def store_and_exit(self, signum=None, frame=None):
-        # exit function when signal is revealed
+        # exit function when signal is received
         import os
         logger.warning("Run interrupted by signal {}, checkpoint and exit.".format(signum))
         os._exit(signum)

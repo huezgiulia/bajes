@@ -369,7 +369,7 @@ class GWTargetProposal(object):
 
 class SliceProposal(object):
     """
-        Move class inpsired by Ensamble Slice Proposal,
+        Move class inspired by Ensemble Slice Proposal,
         M. Karamanis & F. Beutler,
         arXiv:2002.06212v1 [stat.ML] (2020)
     """

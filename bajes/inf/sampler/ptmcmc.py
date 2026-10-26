@@ -323,7 +323,7 @@ class _PTMCMC(object):
             accepts = accepts.flatten()
 
             # update samples
-            logger.debug("Updating ensamle...")
+            logger.debug("Updating ensemble...")
             pupdate.reshape((-1, self.dim))[accepts, :]     = qs.reshape((-1, self.dim))[accepts, :]
             logpost[:, jupdate::2].reshape((-1,))[accepts]  = qslogpost.reshape((-1,))[accepts]
             logl[:, jupdate::2].reshape((-1,))[accepts]     = qslogl.reshape((-1,))[accepts]
@@ -695,10 +695,10 @@ class SamplerPTMCMC(SamplerBody):
         self.nout           = nout
 
         if nwalk < 2*len(posterior.prior.names):
-            logger.warning("Requested number of walkers < 2 * Ndim. This may generate problems in the exploration of the parameters spaces.")
+            logger.warning("Requested number of walkers < 2 * Ndim. This may generate problems in the exploration of the parameters space.")
 
         if ntemps < 2*np.sqrt(len(posterior.prior.names)):
-            logger.warning("Requested number of temperature < 2 * sqrt(Ndim). This may generate problems in the exploration of the parameters spaces.")
+            logger.warning("Requested number of temperature < 2 * sqrt(Ndim). This may generate problems in the exploration of the parameters space.")
 
         # initialize proposals
         if proposals == None:
@@ -841,7 +841,7 @@ class SamplerPTMCMC(SamplerBody):
         post_file.write('#')
         for n in range(self.sampler.dim):
             post_file.write('{}\t'.format(self.names[n]))
-        post_file.write('logL\t logPrior\n')
+        post_file.write('logL\tlogPrior\n')
 
         for i in range(self.real_nout):
             for j in range(self.sampler.dim):
