@@ -371,7 +371,8 @@ def initialize_knprior(approx,
         logger.warning("Requested bounds for time_shift parameter is empty. Setting standard bound [-1.0,+1.0] day")
         time_shift_bounds  = [-86400.,+86400.]
 
-    dict['time_shift_kn']  = Parameter(name='time_shift_kn', min=time_shift_bounds[0], max=time_shift_bounds[1])
+    if 'Grossman' in approx:
+        dict['time_shift_kn']  = Parameter(name='time_shift_kn', min=time_shift_bounds[0], max=time_shift_bounds[1])
 
     # setting inclination
     if iota_flag:
