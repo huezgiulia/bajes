@@ -56,7 +56,10 @@ def get_design_sensitivity(ifo):
     elif ifo=='K1':
         filename = 'LIGO-T1600593-v1-KAGRA_Design.txt'
     elif 'ET' in ifo:
-        filename = 'ET-0001A-18_ETD.txt'
+        if 'Sar' in ifo or 'EMR' in ifo:
+            filename = 'ET-15km-HFLF-ET2026a.txt'
+        else:
+            filename = 'ET-10km-HFLF-ET2026a.txt'
     elif ifo=='CE':
         #TODO remove or rename this, since the `CE-T2000017-v5-40km.txt` is the official new main CE noise curve
         filename = 'LIGO-P1600143-v18-CE.txt'

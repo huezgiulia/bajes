@@ -133,6 +133,22 @@ def get_detector_information(ifo):
         yarm_azimuth    = 1.38636040342
         xarm_tilt       = 0.
         yarm_tilt       = 0.
+    elif ifo=='ET-EMR':
+        latitude        = 0.8853
+        longitude       = 0.1033
+        elevation       = 51.884
+        xarm_azimuth    = 3.6696
+        yarm_azimuth    = 5.2404
+        xarm_tilt       = 0.
+        yarm_tilt       = 0.
+    elif ifo=='ET-Sar':
+        latitude        = 0.7071
+        longitude       = 0.1644
+        elevation       = 59.735
+        xarm_azimuth    = 6.0696    # 45 degrees misalignment
+        yarm_azimuth    = 1.3572
+        xarm_tilt       = 0.
+        yarm_tilt       = 0.
     elif ifo=='CE':
         latitude        = 0.81079526383
         longitude       = -2.08405676917
@@ -160,7 +176,7 @@ def get_detector_information(ifo):
         xarm_tilt       = 0.
         yarm_tilt       = 0.
     else:
-        raise ValueError("Can't get information from input detector. Please check you use a correct name. Available options: ['H1', 'L1', 'V1', 'K1', 'G1', 'I1', 'ET1', 'ET2', 'ET3', 'CE'].")
+        raise ValueError("Can't get information from input detector. Please check you use a correct name. Available options: ['H1', 'L1', 'V1', 'K1', 'G1', 'I1', 'ET1', 'ET2', 'ET3', 'ET-Sar', 'ET-EMR', 'CE'].")
 
     return latitude, longitude, elevation, xarm_azimuth, yarm_azimuth, xarm_tilt, yarm_tilt
 
@@ -171,10 +187,12 @@ def arm_length(ifo):
             return 3000.
         elif ifo in ['ET1', 'ET2', 'ET3']:
             return 10000.
+        elif ifo in ['ET-Sar', 'ET-EMR']:
+            return 15000.
         elif ifo in ['CE', 'CE-North', 'CE-South']:
             return 40000.
         else:
-            raise ValueError("Can't get arm length from input detector. Please check you use a correct name. Available options: ['H1', 'L1', 'V1', 'K1', 'G1', 'I1', 'ET1', 'ET2', 'ET3', 'CE'].")
+            raise ValueError("Can't get arm length from input detector. Please check you use a correct name. Available options: ['H1', 'L1', 'V1', 'K1', 'G1', 'I1', 'ET1', 'ET2', 'ET3', 'ET-Sar', 'ET-EMR',  'CE'].")
 
 class Detector(object):
     """
