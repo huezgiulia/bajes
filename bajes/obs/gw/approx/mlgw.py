@@ -136,11 +136,46 @@ class mlgw_bns_wrapper():
     @property
     def model(self):
         return _get_mlgw_model('hom4',
-            lambda: Model.default_for_testing("default_hom_lambda12000",
-                                              modes=[Mode(2, 2), Mode(3, 3), Mode(4, 4), Mode(2, 1)]))
+            lambda: Model.default_for_testing())
 
     def __getstate__(self):
-        return {}    # do not pickle the model
+        return {}
+
+    def __call__(self, freqs, params):
+        bns_params = ParametersWithExtrinsic(**params_bajes_to_mlgwbns(params))
+        hp_i, hc_i = self.model.predict(freqs, bns_params)
+        return hp_i, hc_i
+
+class mlgw_bns_hm_wrapper():
+
+    def __init__(self, **kwargs):
+        pass    # the model is built lazily, per process
+
+    @property
+    def model(self):
+        return _get_mlgw_model('hom4',
+            lambda: Model.default_for_testing(modes=[Mode(2, 2), Mode(3, 3), Mode(4, 4), Mode(2, 1)]))
+
+    def __getstate__(self):
+        return {}
+
+    def __call__(self, freqs, params):
+        bns_params = ParametersWithExtrinsic(**params_bajes_to_mlgwbns(params))
+        hp_i, hc_i = self.model.predict(freqs, bns_params)
+        return hp_i, hc_i
+
+class mlgw_bns_hm_lambda_wrapper():
+
+    def __init__(self, **kwargs):
+        pass    # the model is built lazily, per process
+
+    @property
+    def model(self):
+        return _get_mlgw_model('hom4',
+            lambda: Model.default_for_testing("default_hom_lambda12000", modes=[Mode(2, 2), Mode(3, 3), Mode(4, 4), Mode(2, 1)]))
+
+    def __getstate__(self):
+        return {}
 
     def __call__(self, freqs, params):
         bns_params = ParametersWithExtrinsic(**params_bajes_to_mlgwbns(params))
